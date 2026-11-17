@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Board from './components/Board'
 import BattleScreen from './components/BattleScreen'
 import PetSelect from './components/PetSelect'
-import { ELEMENTS, ELEMENT_INFO } from './game/constants'
+import { BALANCE, ELEMENTS, ELEMENT_INFO } from './game/constants'
 import type { Pet } from './game/types'
 import { useGame } from './hooks/useGame'
 
@@ -18,6 +18,9 @@ function GameView({ pet, onChangePet }: { pet: Pet; onChangePet: () => void }) {
               {ELEMENT_INFO[e].glyph} {ELEMENT_INFO[e].effect}
             </span>
           ))}
+        </div>
+        <div className="text-[10px] text-yellow-300">
+          Ngọc {ELEMENT_INFO[pet.element].glyph} nạp +{BALANCE.ownRage} Nộ, ngọc khác +{BALANCE.otherRage}
         </div>
         <Board board={g.board} clearing={g.clearing} locked={g.busy || g.battle.status !== 'playing'} onSwap={g.trySwap} />
       </div>

@@ -73,7 +73,7 @@ export function applyGems(s: BattleState, rawGems: GemCounts, combo: number): Re
   const enemy = { ...s.enemy }
 
   const mu = matchup(s.pet.element, s.enemy.element)
-  const damage = Math.round(gems.kim * BALANCE.kimDamage * m * mu)
+  const damage = Math.round((gems.kim * BALANCE.kimDamage + gems.hoa * BALANCE.hoaDamage) * m * mu)
   if (damage > 0) {
     enemy.hp = clamp(enemy.hp - damage, 0, enemy.maxHp)
     events.push({ side: 'enemy', text: `-${damage}`, kind: 'damage' }, ...matchupEvent('enemy', mu))
@@ -83,7 +83,10 @@ export function applyGems(s: BattleState, rawGems: GemCounts, combo: number): Re
     player.hp = clamp(player.hp + heal, 0, player.maxHp)
     events.push({ side: 'player', text: `+${heal}`, kind: 'heal' })
   }
-  const rage = Math.round((gems.hoa * BALANCE.hoaRage + gems.moc * BALANCE.mocRage) * m)
+  // Nộ: ngọc cùng hệ với pet nạp nhiều, ngọc hệ khác nạp ít
+  const own = rawGems[s.pet.element]
+  const others = Object.values(rawGems).reduce((a, b) => a + b, 0) - own
+  const rage = Math.round((own * BALANCE.ownRage + others * BALANCE.otherRage) * m)
   if (rage > 0) {
     player.rage = clamp(player.rage + rage, 0, player.maxRage)
     events.push({ side: 'player', text: `+${rage} Nộ`, kind: 'rage' })

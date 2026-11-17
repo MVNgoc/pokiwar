@@ -32,4 +32,14 @@ assert.equal(kimEnemy.player.hp - enemyAttack(kimEnemy).state.player.hp, 7)
 const ready = { ...vsKim, player: { ...vsKim.player, rage: 100 }, enemy: { ...vsKim.enemy, hp: 500, maxHp: 500 } }
 assert.equal(ready.enemy.hp - useSkill(ready).state.enemy.hp, 90)
 
+// Nộ theo hệ pet: mỗi pet nạp 5/ngọc cùng hệ, 1/ngọc khác
+for (const pet of PETS) {
+  const b = createBattle(pet)
+  const own = { kim: 0, moc: 0, thuy: 0, hoa: 0, tho: 0, [pet.element]: 3 }
+  assert.equal(applyGems(b, own, 1).state.player.rage, 15, `${pet.name} nạp từ hệ mình`)
+  const other = ELEMENTS.find((e) => e !== pet.element)!
+  const mixed = { kim: 0, moc: 0, thuy: 0, hoa: 0, tho: 0, [other]: 3 }
+  assert.equal(applyGems(b, mixed, 1).state.player.rage, 3, `${pet.name} nạp từ hệ khác`)
+}
+
 console.log('combat tests OK')
