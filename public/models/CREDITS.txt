@@ -1,5 +1,11 @@
-Model 3D nhân vật: "Ultimate Animated Animal Pack" của Quaternius, giấy phép CC0 1.0 (public domain).
-https://quaternius.com/packs/ultimateanimatedanimals.html
-Dùng 10 con: Fox, Husky, Stag, Wolf, Horse (pet) và Deer, Donkey, Alpaca, Cow, Bull (kẻ địch).
-Bản gốc là .gltf nhúng buffer (~3 MB mỗi con); ở đây được gói lại thành .glb, chỉ giữ mesh, xương và 4 hoạt ảnh
-dùng trong game (Idle, Attack, Hit = Idle_HitReact1, Death). Không chỉnh sửa hình dạng hay màu sắc.
+Model 3D nhân vật (đều CC0 1.0, public domain) của Quaternius:
+
+1) "Ultimate Animated Animal Pack" - https://quaternius.com/packs/ultimateanimatedanimals.html
+   Dùng 9 con: Fox, Husky, Stag, Wolf, Horse (pet) và Deer, Donkey, Cow, Bull (kẻ địch). Giấy phép: LICENSE-Quaternius.txt.
+   Bản gốc là .gltf nhúng buffer (~3 MB/con); ở đây được gói lại thành .glb, chỉ giữ mesh, xương và 4 hoạt ảnh
+   dùng trong game (Idle, Attack, Hit = Idle_HitReact1, Death). Không chỉnh sửa hình dạng hay màu sắc.
+
+2) "5 low poly animals" - https://opengameart.org/content/5-low-poly-animals  (Whale -> thuy-kinh.fbx)
+   "Animal Pack Vol.2" - https://opengameart.org/content/animated-animales-low-poly  (Piranha -> ca-piranha.fbx)
+   Giữ nguyên file FBX gốc. Hai file này không lưu màu vật liệu (mặc định xám trắng) nên màu được gán trong code
+   (src/three/loadCharacter.ts, bảng FBX_MODELS) theo ảnh xem trước của tác giả.

@@ -24,6 +24,15 @@ export const PETS: Pet[] = [
     skill: { name: 'Suối Nguồn Sinh Mệnh', emoji: '💧', desc: 'Gây 30 sát thương, hồi 40% HP và +15 giáp', damage: 30, healPct: 0.4, shield: 15 },
   },
   {
+    id: 'thuy-kinh',
+    name: 'Thủy Kình',
+    emoji: '🐋',
+    element: 'thuy',
+    maxHp: 150,
+    desc: 'Cá voi xanh khổng lồ, chắn đòn và hồi máu.',
+    skill: { name: 'Sóng Thần Cuộn', emoji: '🌊', desc: 'Gây 35 sát thương, hồi 30% HP và +15 giáp', damage: 35, healPct: 0.3, shield: 15 },
+  },
+  {
     id: 'moc-loc',
     name: 'Mộc Lộc',
     emoji: '🦌',

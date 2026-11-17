@@ -42,9 +42,10 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
     root.traverse((o) => {
       const mesh = o as THREE.Mesh
       if (mesh.isMesh) {
-        mesh.material = (mesh.material as THREE.MeshToonMaterial).clone() // mỗi bản có màu loé riêng
-        const mat = mesh.material as THREE.MeshToonMaterial
-        materials.push({ mat, base: mat.emissive.clone() })
+        // mỗi bản có vật liệu riêng (màu loé riêng); mesh có thể dùng nhiều vật liệu
+        const cloned = (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).map((m) => (m as THREE.MeshToonMaterial).clone())
+        mesh.material = Array.isArray(mesh.material) ? cloned : cloned[0]
+        for (const mat of cloned) materials.push({ mat, base: mat.emissive.clone() })
       }
     })
     // Viền: bản sao mesh có xương, lật mặt và đẩy đỉnh ra theo pháp tuyến → đường viền đậm như tranh vẽ
@@ -75,11 +76,11 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
     }
     const mixer = new THREE.AnimationMixer(root)
     const find = (re: RegExp) => model.clips.find((c) => re.test(c.name))
-    const idleClip = find(/^Idle$/) ?? model.clips[0]
+    const idleClip = find(/^(Idle|Swimming)$/) ?? model.clips[0]
     const action = (clip?: THREE.AnimationClip) => (clip ? mixer.clipAction(clip) : undefined)
     const actions = {
       idle: action(idleClip),
-      attack: action(find(/^Attack/)),
+      attack: action(find(/^(Attack|Bite)/)),
       hit: action(find(/^Hit/)),
       death: action(find(/^Death$/)),
     }

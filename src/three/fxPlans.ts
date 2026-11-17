@@ -30,6 +30,13 @@ export const FX_PLANS: Record<string, FxPlan> = {
       { kind: 'burst', at: 150, on: 'self', color: '#c8ecff', up: true, count: 18 },
     ],
   },
+  'thuy-kinh': {
+    events: [
+      { kind: 'bubble', at: 0, on: 'self', color: '#6ab6ff' },
+      { kind: 'burst', at: 120, on: 'self', color: '#d6f0ff', up: true, count: 22 },
+      { kind: 'burst', at: 400, on: 'foe', color: '#9fd8ff', count: 20 },
+    ],
+  },
   'moc-loc': {
     projectile: { style: 'thorn', color: '#4fd05a', size: 0.3 },
     events: [
@@ -53,7 +60,7 @@ export const FX_PLANS: Record<string, FxPlan> = {
   // kẻ địch
   'huou-rung': { projectile: { style: 'thorn', color: '#b57cff', size: 0.28 }, events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#d9b8ff' }] },
   'lua-xam': { events: [{ kind: 'slash', at: 0, on: 'foe', color: '#a9b8ff' }, { kind: 'slash', at: 180, on: 'foe', color: '#a9b8ff' }] },
-  'alpaca': { projectile: { style: 'thorn', color: '#2de0bf', size: 0.3 }, events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#9ffbe8' }] },
+  'ca-piranha': { projectile: { style: 'thorn', color: '#2de0bf', size: 0.3 }, events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#9ffbe8' }] },
   'bo-nui': { events: [{ kind: 'dust', at: 150, on: 'foe', color: '#cfc7b0' }, { kind: 'dust', at: 350, on: 'foe', color: '#cfc7b0' }] },
   'bo-tot': { projectile: { style: 'fire', color: '#ffb300', size: 0.42 }, events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#ffe27a', count: 26 }] },
 }

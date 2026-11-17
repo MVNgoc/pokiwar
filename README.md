@@ -50,11 +50,12 @@ Yêu cầu Node.js 18+.
 |---|---|---|---|
 | 🦊 Hỏa Hồ | Hỏa | 150 | Hỏa Cầu Thiêu Đốt: 80 sát thương |
 | 🐕 Thủy Sương | Thủy | 150 | Suối Nguồn Sinh Mệnh: 30 sát thương, hồi 40% HP, +15 giáp |
+| 🐋 Thủy Kình | Thủy | 150 | Sóng Thần Cuộn: 35 sát thương, hồi 30% HP, +15 giáp |
 | 🦌 Mộc Lộc | Mộc | 130 | Dây Leo Trói Buộc: 25 sát thương, kẻ địch mất 1 lượt |
 | 🐺 Kim Lang | Kim | 145 | Liên Hoàn Trảo: 3 đòn × 28 sát thương |
 | 🐴 Thổ Mã | Thổ | 140 | Địa Chấn Thiết Giáp: 30 sát thương và +40 giáp |
 
-Kẻ địch theo thứ tự các màn: 🦌 Hươu Rừng (Mộc), 🫏 Lừa Xám (Kim), 🦙 Alpaca Suối (Thủy), 🐄 Bò Núi (Thổ), 🐂 Bò Tót Lửa (Hỏa, Boss).
+Kẻ địch theo thứ tự các màn: 🦌 Hươu Rừng (Mộc), 🫏 Lừa Xám (Kim), 🐟 Cá Piranha (Thủy), 🐄 Bò Núi (Thổ), 🐂 Bò Tót Lửa (Hỏa, Boss).
 
 ### Tương khắc ngũ hành
 
@@ -103,12 +104,12 @@ Mô phỏng chạy theo lượt: bot đóng vai người chơi, kẻ địch dù
 - **Cân bằng:** sửa `BALANCE` trong `src/game/constants.ts` (sát thương, hồi máu, Nộ, hệ số khắc chế, độ mạnh Boss).
 - **Thêm pet:** thêm một mục vào `PETS` trong `src/game/pets.ts`. Kỹ năng gồm `damage`, `hits`, `healPct`, `shield`, `stunMs`, kết hợp tùy ý.
 - **Thêm kẻ địch:** sửa `ENEMIES` trong `constants.ts`. Số màn đặt bằng `TOTAL_STAGES`.
-- **Nhân vật 3D:** nằm trong `public/models/` (`<id>.glb`). Thêm nhân vật mới: bỏ file vào đó và thêm mục tương ứng trong `pets.ts` / `ENEMIES`, rồi khai báo kịch bản hiệu ứng trong `src/three/fxPlans.ts`.
+- **Nhân vật 3D:** nằm trong `public/models/` (`<id>.glb`, hoặc `<id>.fbx` kèm bảng màu trong `FBX_MODELS`). Thêm nhân vật mới: bỏ file vào đó và thêm mục tương ứng trong `pets.ts` / `ENEMIES`, rồi khai báo kịch bản hiệu ứng trong `src/three/fxPlans.ts`.
 - **Âm thanh:** có nút 🔊/🔇 trong trận. Hiệu ứng âm thanh được tổng hợp trực tiếp (sửa ở `src/game/sfx.ts`), nhạc nền là file OGG trong `src/assets/music/` và được điều khiển bởi `src/game/music.ts`.
 
 ## Tài nguyên
 
-- **Nhân vật 3D (pet và kẻ địch):** [Ultimate Animated Animal Pack](https://quaternius.com/packs/ultimateanimatedanimals.html) của Quaternius, giấy phép CC0 (ghi trong `LICENSE-Quaternius.txt`). Dùng 10 con thú low-poly có xương và hoạt ảnh. Bản gốc là `.gltf` nhúng buffer (~3 MB/con); trong `public/models/` được gói lại thành `.glb` (~0,7 MB/con), chỉ giữ mesh, xương và 4 hoạt ảnh dùng trong game (Idle, Attack, Hit, Death). Xem `public/models/CREDITS.txt`.
+- **Nhân vật 3D (pet và kẻ địch):** model thú low-poly có xương và hoạt ảnh của Quaternius, giấy phép CC0: [Ultimate Animated Animal Pack](https://quaternius.com/packs/ultimateanimatedanimals.html) (9 con, gói lại thành `.glb` ~0,7 MB/con, chỉ giữ mesh, xương và 4 hoạt ảnh Idle/Attack/Hit/Death), cùng cá voi ([5 low poly animals](https://opengameart.org/content/5-low-poly-animals)) và cá piranha ([Animal Pack Vol.2](https://opengameart.org/content/animated-animales-low-poly)) ở dạng FBX gốc. Hai con cá không lưu màu vật liệu nên màu được gán trong code theo ảnh xem trước của tác giả. Xem `public/models/CREDITS.txt`.
 - **Ngọc 3D:** dựng bằng hình học three.js (không dùng model ngoài). Biểu tượng ngọc 2D ở phần chú thích và chọn pet: [Puzzle Pack II](https://opengameart.org/node/40563) của Kenney, CC0, trong `src/assets/gems/`.
 - **Nhạc nền:** [Chiptune Battle Music](https://opengameart.org/content/chiptune-battle-music) của pmiller (màn thường) và [8 bit battle loop](https://opengameart.org/content/8-bit-battle-loop) của Wolfgang_ (màn Boss), đều CC0, trong `src/assets/music/` (kèm `CREDITS.txt`). Nút 🔊/🔇 tắt cả nhạc lẫn hiệu ứng âm thanh. Nhạc dùng định dạng OGG Vorbis.
 - **Hiệu ứng kỹ năng:** dựng bằng hạt và hình học three.js (`src/three/Fx3D.tsx`).
