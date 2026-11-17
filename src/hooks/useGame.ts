@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { areAdjacent, collapse, countGems, createBoard, findMatches, hasPossibleMove, removeTiles, swapTiles } from '../game/board'
 import { applyGems, canUseSkill, createBattle, enemyAttack, nextStage, tickEnemyTimer, useSkill as castSkill, type Result } from '../game/combat'
+import { loadRecord, saveResult } from '../game/storage'
 import type { Board, FloatEvent, Pet, Position } from '../game/types'
 
 export interface FloatText extends FloatEvent {
@@ -28,6 +29,8 @@ export function useGame(pet: Pet) {
   const [attacker, setAttacker] = useState<'player' | 'enemy' | null>(null)
   const [cast, setCast] = useState<Cast | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const [best, setBest] = useState(() => loadRecord(pet.id))
+  const [newBest, setNewBest] = useState(false)
 
   const boardRef = useRef(board)
   const battleRef = useRef(battle)
@@ -60,9 +63,16 @@ export function useGame(pet: Pet) {
   /** Cập nhật trạng thái chiến đấu từ hàm thuần, đồng thời đẩy hiệu ứng chữ nổi. */
   const commit = useCallback(
     (res: Result) => {
+      const prevStatus = battleRef.current.status
       battleRef.current = res.state
       setBattle(res.state)
       pushFloats(res.events)
+      const end = res.state.status === 'lost' || res.state.status === 'won'
+      if (prevStatus === 'playing' && end) {
+        const out = saveResult(pet.id, res.state.score, res.state.status === 'won')
+        setBest(out.record)
+        setNewBest(out.isNewBest)
+      }
       if (res.state.status === 'stageClear') {
         setTimeout(() => {
           const n = nextStage(battleRef.current)
@@ -71,7 +81,7 @@ export function useGame(pet: Pet) {
         }, 1400)
       }
     },
-    [pushFloats],
+    [pushFloats, pet.id],
   )
 
   const trySwap = useCallback(
@@ -134,6 +144,7 @@ export function useGame(pet: Pet) {
     setBattle(fresh)
     setBoardSync(createBoard())
     setFloats([])
+    setNewBest(false)
   }, [pet])
 
   // Đồng hồ kẻ địch: dừng khi bàn cờ đang xử lý chuỗi combo.
@@ -152,5 +163,5 @@ export function useGame(pet: Pet) {
     return () => clearInterval(t)
   }, [commit, flashAttack])
 
-  return { board, battle, clearing, busy, floats, hitFlash, attacker, cast, notice, trySwap, useSkill, restart }
+  return { board, battle, clearing, busy, floats, hitFlash, attacker, cast, notice, best, newBest, trySwap, useSkill, restart }
 }

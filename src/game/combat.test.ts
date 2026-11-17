@@ -42,4 +42,18 @@ for (const pet of PETS) {
   assert.equal(applyGems(b, mixed, 1).state.player.rage, 3, `${pet.name} nạp từ hệ khác`)
 }
 
+// Boss + thắng ván
+import { nextStage } from './combat'
+import { TOTAL_STAGES } from './constants'
+let run = createBattle(hoaHo)
+for (let i = 1; i < TOTAL_STAGES; i++) run = nextStage(run)
+assert.equal(run.stage, TOTAL_STAGES)
+assert.ok(run.enemy.boss)
+assert.ok(run.enemy.maxHp > createBattle(hoaHo).enemy.maxHp * 2)
+const dying = { ...run, enemy: { ...run.enemy, hp: 1, element: 'tho' as const } }
+assert.equal(applyGems(dying, gems, 1).state.status, 'won')
+const midDying = { ...createBattle(hoaHo), enemy: { ...createBattle(hoaHo).enemy, hp: 1 } }
+assert.equal(applyGems(midDying, gems, 1).state.status, 'stageClear')
+assert.equal(createBattle(hoaHo).enemy.boss, false)
+
 console.log('combat tests OK')

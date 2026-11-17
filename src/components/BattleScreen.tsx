@@ -1,7 +1,8 @@
 import { canUseSkill } from '../game/combat'
+import type { PetRecord } from '../game/storage'
 import type { BattleState } from '../game/types'
 import type { Cast, FloatText } from '../hooks/useGame'
-import { ELEMENT_INFO } from '../game/constants'
+import { ELEMENT_INFO, TOTAL_STAGES } from '../game/constants'
 import StatusBars from './StatusBars'
 
 interface Props {
@@ -10,6 +11,8 @@ interface Props {
   hitFlash: 'player' | 'enemy' | null
   attacker: 'player' | 'enemy' | null
   cast: Cast | null
+  best: PetRecord
+  newBest: boolean
   onSkill: () => void
   onRestart: () => void
   onChangePet: () => void
@@ -55,15 +58,15 @@ function Fighter({ side, emoji, name, flash, attacking, floats, children }: {
   )
 }
 
-export default function BattleScreen({ battle, floats, hitFlash, attacker, cast, onSkill, onRestart, onChangePet }: Props) {
+export default function BattleScreen({ battle, floats, hitFlash, attacker, cast, best, newBest, onSkill, onRestart, onChangePet }: Props) {
   const { player, enemy, stage, score, status } = battle
   const ready = canUseSkill(battle)
   return (
     <div className="relative flex flex-1 flex-col bg-gradient-to-b from-sky-900 via-emerald-900 to-emerald-950 px-3 pt-2">
       <div className="flex justify-between text-xs font-bold text-amber-100">
-        <span>Màn {stage}</span>
+        <span>{enemy.boss ? '👑 BOSS' : `Màn ${stage}/${TOTAL_STAGES}`}</span>
         <span className="text-[10px] font-normal text-amber-100/70">Kim›Mộc›Thổ›Thủy›Hỏa›Kim</span>
-        <span>Điểm: {score}</span>
+        <span>Điểm: {score} · Kỷ lục: {Math.max(best.bestScore, score)}</span>
       </div>
 
       <div className="relative flex flex-1 items-end justify-around gap-2 pb-2">
@@ -94,19 +97,33 @@ export default function BattleScreen({ battle, floats, hitFlash, attacker, cast,
       </button>
 
       {status !== 'playing' && (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/60">
-          <div className="text-3xl font-black text-yellow-300">{status === 'lost' ? 'Thất bại!' : `Hạ gục ${enemy.name}!`}</div>
-          {status === 'lost' ? (
-            <div className="flex gap-2">
-              <button onClick={onRestart} className="rounded-lg bg-amber-500 px-5 py-2 font-bold text-black">
-                Chơi lại
-              </button>
-              <button onClick={onChangePet} className="rounded-lg bg-stone-200 px-5 py-2 font-bold text-black">
-                Đổi pet
-              </button>
-            </div>
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/60 text-center">
+          {status === 'stageClear' ? (
+            <>
+              <div className="text-3xl font-black text-yellow-300">Hạ gục {enemy.name}!</div>
+              <div className="text-amber-100">Hồi 30% HP, chuẩn bị màn tiếp theo…</div>
+            </>
           ) : (
-            <div className="text-amber-100">Chuẩn bị màn tiếp theo…</div>
+            <>
+              <div className={`text-3xl font-black ${status === 'won' ? 'text-yellow-300' : 'text-red-400'}`}>
+                {status === 'won' ? '🏆 Chiến thắng!' : 'Thất bại!'}
+              </div>
+              <div className="text-sm text-amber-100">
+                {status === 'won' ? `${player.name} đã hạ gục Boss!` : `Dừng chân ở màn ${stage}/${TOTAL_STAGES}`}
+              </div>
+              <div className="text-lg font-bold text-white">Điểm: {score}</div>
+              <div className="text-xs text-amber-200">
+                {newBest ? '🎉 Kỷ lục mới!' : `Kỷ lục: ${best.bestScore}`} · Thắng: {best.wins} lần
+              </div>
+              <div className="flex gap-2">
+                <button onClick={onRestart} className="rounded-lg bg-amber-500 px-5 py-2 font-bold text-black">
+                  Chơi lại
+                </button>
+                <button onClick={onChangePet} className="rounded-lg bg-stone-200 px-5 py-2 font-bold text-black">
+                  Đổi pet
+                </button>
+              </div>
+            </>
           )}
         </div>
       )}

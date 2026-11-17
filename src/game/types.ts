@@ -31,6 +31,7 @@ export interface PlayerState extends Fighter {
 }
 
 export interface EnemyState extends Fighter {
+  boss: boolean
   element: Element
   attack: number
   /** ms giữa 2 lần đánh */
@@ -39,7 +40,7 @@ export interface EnemyState extends Fighter {
   timer: number
 }
 
-export type Status = 'playing' | 'stageClear' | 'lost'
+export type Status = 'playing' | 'stageClear' | 'won' | 'lost'
 
 export interface BattleState {
   pet: Pet

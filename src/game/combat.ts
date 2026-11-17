@@ -1,4 +1,4 @@
-import { BALANCE, COUNTER, ENEMIES } from './constants'
+import { BALANCE, COUNTER, ENEMIES, TOTAL_STAGES } from './constants'
 import type { BattleState, Element, FloatEvent, GemCounts, Pet } from './types'
 
 export interface Result {
@@ -24,14 +24,18 @@ const matchupEvent = (side: 'player' | 'enemy', mult: number): FloatEvent[] =>
 
 export function createEnemy(stage: number) {
   const base = ENEMIES[(stage - 1) % ENEMIES.length]
-  const maxHp = 80 + (stage - 1) * 40
+  const boss = stage >= TOTAL_STAGES
+  const maxHp = Math.round((80 + (stage - 1) * 40) * (boss ? BALANCE.bossHp : 1))
+  const interval = Math.max(3500, 6500 - (stage - 1) * 400)
   return {
     ...base,
+    name: boss ? `${base.name} (Boss)` : base.name,
+    boss,
     hp: maxHp,
     maxHp,
-    attack: 10 + (stage - 1) * 3,
-    interval: Math.max(3500, 6500 - (stage - 1) * 400),
-    timer: Math.max(3500, 6500 - (stage - 1) * 400),
+    attack: Math.round((10 + (stage - 1) * 3) * (boss ? BALANCE.bossAttack : 1)),
+    interval,
+    timer: interval,
   }
 }
 
@@ -159,6 +163,6 @@ export function tickEnemyTimer(s: BattleState, ms: number): BattleState {
 function finalize(s: BattleState, events: FloatEvent[]): Result {
   let status = s.status
   if (s.player.hp <= 0) status = 'lost'
-  else if (s.enemy.hp <= 0) status = 'stageClear'
+  else if (s.enemy.hp <= 0) status = s.stage >= TOTAL_STAGES ? 'won' : 'stageClear'
   return { state: { ...s, status }, events }
 }
