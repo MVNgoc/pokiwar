@@ -20,11 +20,20 @@ export const ELEMENT_INFO: Record<
 
 /** Cân bằng chiến đấu (chỉnh tại đây) */
 export const BALANCE = {
+  // Kẻ địch: giá trị màn n = base + (n-1) * step
+  enemyHp: 160,
+  enemyHpStep: 80,
+  enemyAtk: 15,
+  enemyAtkStep: 4,
+  enemyInterval: 5500, // ms giữa 2 đòn đánh
+  enemyIntervalStep: 400,
+  enemyIntervalMin: 3500,
   kimDamage: 4,
   mocHeal: 2,
-  thuyHeal: 3,
-  hoaDamage: 2,
+  thuyHeal: 2,
+  hoaDamage: 4,
   thoShield: 3,
+  maxShield: 40, // giáp tối đa tích được
   ownRage: 5, // Nộ nhận được từ mỗi ngọc cùng hệ với pet
   otherRage: 1, // Nộ nhận được từ mỗi ngọc hệ khác
   comboStep: 0.25, // mỗi combo tăng thêm 25% hiệu quả

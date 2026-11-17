@@ -81,7 +81,7 @@ export default function BattleScreen({ battle, floats, hitFlash, attacker, cast,
           <StatusBars hp={player.hp} maxHp={player.maxHp} rage={player.rage} maxRage={player.maxRage} shield={player.shield} />
         </Fighter>
         <div className="mb-16 text-2xl font-black text-amber-200">VS</div>
-        <Fighter side="enemy" emoji={enemy.emoji} name={`${ELEMENT_INFO[enemy.element].glyph} ${enemy.name}`} flash={hitFlash === 'enemy'} attacking={attacker === 'enemy'} floats={floats.filter((f) => f.side === 'enemy')}>
+        <Fighter side="enemy" emoji={enemy.emoji} name={`${enemy.boss ? '無' : ELEMENT_INFO[enemy.element].glyph} ${enemy.name}`} flash={hitFlash === 'enemy'} attacking={attacker === 'enemy'} floats={floats.filter((f) => f.side === 'enemy')}>
           <StatusBars hp={enemy.hp} maxHp={enemy.maxHp} timerPct={Math.min(100, (enemy.timer / enemy.interval) * 100)} />
         </Fighter>
       </div>

@@ -25,15 +25,15 @@ const matchupEvent = (side: 'player' | 'enemy', mult: number): FloatEvent[] =>
 export function createEnemy(stage: number) {
   const base = ENEMIES[(stage - 1) % ENEMIES.length]
   const boss = stage >= TOTAL_STAGES
-  const maxHp = Math.round((80 + (stage - 1) * 40) * (boss ? BALANCE.bossHp : 1))
-  const interval = Math.max(3500, 6500 - (stage - 1) * 400)
+  const maxHp = Math.round((BALANCE.enemyHp + (stage - 1) * BALANCE.enemyHpStep) * (boss ? BALANCE.bossHp : 1))
+  const interval = Math.max(BALANCE.enemyIntervalMin, BALANCE.enemyInterval - (stage - 1) * BALANCE.enemyIntervalStep)
   return {
     ...base,
     name: boss ? `${base.name} (Boss)` : base.name,
     boss,
     hp: maxHp,
     maxHp,
-    attack: Math.round((10 + (stage - 1) * 3) * (boss ? BALANCE.bossAttack : 1)),
+    attack: Math.round((BALANCE.enemyAtk + (stage - 1) * BALANCE.enemyAtkStep) * (boss ? BALANCE.bossAttack : 1)),
     interval,
     timer: interval,
   }
@@ -76,7 +76,7 @@ export function applyGems(s: BattleState, rawGems: GemCounts, combo: number): Re
   const player = { ...s.player }
   const enemy = { ...s.enemy }
 
-  const mu = matchup(s.pet.element, s.enemy.element)
+  const mu = s.enemy.boss ? 1 : matchup(s.pet.element, s.enemy.element) // Boss vô hệ
   const damage = Math.round((gems.kim * BALANCE.kimDamage + gems.hoa * BALANCE.hoaDamage) * m * mu)
   if (damage > 0) {
     enemy.hp = clamp(enemy.hp - damage, 0, enemy.maxHp)
@@ -97,7 +97,7 @@ export function applyGems(s: BattleState, rawGems: GemCounts, combo: number): Re
   }
   const shield = Math.round(gems.tho * BALANCE.thoShield * m)
   if (shield > 0) {
-    player.shield += shield
+    player.shield = Math.min(BALANCE.maxShield, player.shield + shield)
     events.push({ side: 'player', text: `+${shield} Giáp`, kind: 'shield' })
   }
   if (combo >= 2) events.push({ side: 'player', text: `Combo x${combo}!`, kind: 'combo' })
@@ -117,7 +117,7 @@ export function useSkill(s: BattleState): Result {
   const player = { ...s.player, rage: 0 }
 
   if (k.damage) {
-    const mu = matchup(s.pet.element, s.enemy.element)
+    const mu = s.enemy.boss ? 1 : matchup(s.pet.element, s.enemy.element)
     const dmg = Math.round(k.damage * mu)
     for (let i = 0; i < (k.hits ?? 1); i++) {
       enemy.hp = Math.max(0, enemy.hp - dmg)
@@ -131,7 +131,7 @@ export function useSkill(s: BattleState): Result {
     events.push({ side: 'player', text: `+${heal}`, kind: 'heal' })
   }
   if (k.shield) {
-    player.shield += k.shield
+    player.shield = Math.min(BALANCE.maxShield, player.shield + k.shield)
     events.push({ side: 'player', text: `+${k.shield} Giáp`, kind: 'shield' })
   }
   if (k.stunMs) {
@@ -144,7 +144,7 @@ export function useSkill(s: BattleState): Result {
 /** Kẻ địch đánh: giáp hấp thụ trước, phần còn lại trừ HP. */
 export function enemyAttack(s: BattleState): Result {
   if (s.status !== 'playing') return { state: s, events: [] }
-  const mu = matchup(s.enemy.element, s.pet.element)
+  const mu = s.enemy.boss ? 1 : matchup(s.enemy.element, s.pet.element)
   const attack = Math.round(s.enemy.attack * mu)
   const absorbed = Math.min(s.player.shield, attack)
   const dmg = attack - absorbed

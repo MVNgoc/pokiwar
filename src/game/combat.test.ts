@@ -30,7 +30,7 @@ assert.equal(kimEnemy.player.hp - enemyAttack(kimEnemy).state.player.hp, 7)
 
 // kỹ năng cũng chịu tương khắc
 const ready = { ...vsKim, player: { ...vsKim.player, rage: 100 }, enemy: { ...vsKim.enemy, hp: 500, maxHp: 500 } }
-assert.equal(ready.enemy.hp - useSkill(ready).state.enemy.hp, 90)
+assert.equal(ready.enemy.hp - useSkill(ready).state.enemy.hp, 120) // 80 x 1.5
 
 // Nộ theo hệ pet: mỗi pet nạp 5/ngọc cùng hệ, 1/ngọc khác
 for (const pet of PETS) {
@@ -50,6 +50,9 @@ for (let i = 1; i < TOTAL_STAGES; i++) run = nextStage(run)
 assert.equal(run.stage, TOTAL_STAGES)
 assert.ok(run.enemy.boss)
 assert.ok(run.enemy.maxHp > createBattle(hoaHo).enemy.maxHp * 2)
+
+// Boss vô hệ: không bị ảnh hưởng bởi tương khắc
+assert.equal(applyGems({ ...run, enemy: { ...run.enemy, element: 'kim' } }, gems, 1).state.enemy.hp, run.enemy.maxHp - 12)
 const dying = { ...run, enemy: { ...run.enemy, hp: 1, element: 'tho' as const } }
 assert.equal(applyGems(dying, gems, 1).state.status, 'won')
 const midDying = { ...createBattle(hoaHo), enemy: { ...createBattle(hoaHo).enemy, hp: 1 } }

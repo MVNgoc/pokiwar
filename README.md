@@ -12,6 +12,7 @@ npm install
 npm run dev      # mở http://localhost:5173
 npm run build    # kiểm tra kiểu + build production
 npm test         # test logic game (board, combat, storage)
+npm run sim      # mô phỏng cân bằng: bot chơi hàng trăm ván, in tỉ lệ thắng từng pet
 ```
 
 Yêu cầu Node.js 18+.
@@ -21,7 +22,7 @@ Yêu cầu Node.js 18+.
 - **Hoán đổi ngọc:** kéo một ngọc sang ô bên cạnh, hoặc bấm chọn một ngọc rồi bấm ô liền kề. Nước đi không tạo được chuỗi 3+ sẽ tự trả lại.
 - **Combo:** ngọc rơi xuống tự tạo match tiếp thì tính combo. Mỗi bước dây chuyền tăng 25% hiệu quả.
 - **Kỹ năng:** khi thanh Nộ đầy, bấm nút kỹ năng của pet.
-- **Kẻ địch** tự tấn công theo đồng hồ đếm ngược (thanh tím). Đồng hồ tạm dừng khi bàn cờ đang xử lý. Giáp hấp thụ sát thương trước.
+- **Kẻ địch** tự tấn công theo đồng hồ đếm ngược (thanh tím). Đồng hồ tạm dừng khi bàn cờ đang xử lý. Giáp hấp thụ sát thương trước. Boss vô hệ, không bị ảnh hưởng bởi tương khắc.
 - **5 màn**, màn cuối là Boss. Hạ Boss để thắng. Điểm cao nhất và số lần thắng được lưu theo từng pet (`localStorage`).
 
 ### Ngọc và hiệu ứng
@@ -32,7 +33,7 @@ Yêu cầu Node.js 18+.
 | 木 Mộc | Hồi máu nhẹ |
 | 水 Thủy | Hồi máu |
 | 火 Hỏa | Gây sát thương nhẹ |
-| 土 Thổ | Tạo giáp |
+| 土 Thổ | Tạo giáp (tối đa 40) |
 
 **Nộ:** ngọc cùng hệ với pet nạp +5 Nộ, ngọc hệ khác nạp +1. Ngọc cùng hệ với pet còn có hiệu quả ×1.5.
 
@@ -46,10 +47,10 @@ Yêu cầu Node.js 18+.
 
 | Pet | Hệ | HP | Kỹ năng |
 |---|---|---|---|
-| 🦊 Hỏa Hồ | Hỏa | 120 | Hỏa Cầu Thiêu Đốt: 60 sát thương |
-| 🐢 Thủy Quy | Thủy | 150 | Suối Nguồn Sinh Mệnh: hồi 40% HP, +15 giáp |
+| 🦊 Hỏa Hồ | Hỏa | 150 | Hỏa Cầu Thiêu Đốt: 80 sát thương |
+| 🐢 Thủy Quy | Thủy | 140 | Suối Nguồn Sinh Mệnh: hồi 40% HP, +15 giáp |
 | 🦌 Mộc Lộc | Mộc | 130 | Dây Leo Trói Buộc: 25 sát thương, choáng 5 giây |
-| 🐯 Kim Hổ | Kim | 110 | Liên Hoàn Trảo: 3 đòn × 24 sát thương |
+| 🐯 Kim Hổ | Kim | 145 | Liên Hoàn Trảo: 3 đòn × 28 sát thương |
 | 🦏 Thổ Tê | Thổ | 140 | Địa Chấn Thiết Giáp: 30 sát thương, +40 giáp |
 
 ### Tương khắc ngũ hành
@@ -73,6 +74,16 @@ src/
 ```
 
 Quy tắc: logic game nằm trong `src/game` (hàm thuần, dễ test), component chỉ hiển thị, `useGame` điều phối thời gian và hoạt ảnh.
+
+## Cân bằng game
+
+`npm run sim [số ván] [ms nghĩ mỗi nước]` cho bot chơi nhiều ván với từng pet (bot "khá" chọn nước ăn nhiều nhất, bot "ngẫu nhiên" chọn nước hợp lệ bất kỳ). Có thể thử thông số mà không sửa code:
+
+```bash
+BAL='{"enemyHp":200,"enemyAtk":14}' SKILLS=greedy npm run sim -- 60
+```
+
+Mục tiêu hiện tại: bot khá thắng ~65–80%, bot ngẫu nhiên ~25–40%, các pet chênh nhau không quá ~15%. Mô phỏng chỉ là ước lượng (người thật nghĩ lâu hơn, ít tối ưu hơn bot), nên số liệu từ người chơi thật vẫn là chuẩn nhất.
 
 ## Tùy chỉnh
 

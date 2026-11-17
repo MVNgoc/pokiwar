@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
+    "sim": "tsx scripts/sim.ts",
     "test": "tsx src/game/board.test.ts && tsx src/game/combat.test.ts && tsx src/game/storage.test.ts"
   },
   "dependencies": {
