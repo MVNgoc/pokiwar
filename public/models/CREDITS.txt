@@ -1,4 +1,5 @@
-Model 3D nhân vật: "Cute Animated Monsters" (Aug 2020) của Quaternius, giấy phép CC0 1.0 (public domain).
-https://opengameart.org/content/textured-cute-monster-pack
-Dùng 10 model (Demon, Penguin, Deer, Panda, Cyclops, Mushroom, Bat, Cthulhu, Skull, YellowDragon).
-Texture được thu nhỏ về 512 px và đổi sang WebP. Model giữ nguyên định dạng FBX gốc.
+Model 3D nhân vật: "Ultimate Animated Animal Pack" của Quaternius, giấy phép CC0 1.0 (public domain).
+https://quaternius.com/packs/ultimateanimatedanimals.html
+Dùng 10 con: Fox, Husky, Stag, Wolf, Horse (pet) và Deer, Donkey, Alpaca, Cow, Bull (kẻ địch).
+Bản gốc là .gltf nhúng buffer (~3 MB mỗi con); ở đây được gói lại thành .glb, chỉ giữ mesh, xương và 4 hoạt ảnh
+dùng trong game (Idle, Attack, Hit = Idle_HitReact1, Death). Không chỉnh sửa hình dạng hay màu sắc.

@@ -20,10 +20,10 @@ export interface CreatureProps {
   spin?: boolean
 }
 
-/** độ sáng nền của màu sơn (xem loadCharacter) */
-const BASE_GLOW = 0.22
 /** độ dày đường viền (đơn vị thế giới) */
 const OUTLINE_WORLD = 0.02
+/** hướng nhìn: thú quay mặt về phía đối thủ, hơi nghiêng về camera để thấy cả thân lẫn mặt */
+const FACE = Math.PI / 2 - 0.5
 const ATTACK_S = 0.55
 const HURT_S = 0.45
 const ENTER_S = 0.75
@@ -38,12 +38,13 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
 
   const inst = useMemo(() => {
     const root = clone(model.holder) as THREE.Group
-    const materials: THREE.MeshToonMaterial[] = []
+    const materials: { mat: THREE.MeshToonMaterial; base: THREE.Color }[] = []
     root.traverse((o) => {
       const mesh = o as THREE.Mesh
       if (mesh.isMesh) {
         mesh.material = (mesh.material as THREE.MeshToonMaterial).clone() // mỗi bản có màu loé riêng
-        materials.push(mesh.material as THREE.MeshToonMaterial)
+        const mat = mesh.material as THREE.MeshToonMaterial
+        materials.push({ mat, base: mat.emissive.clone() })
       }
     })
     // Viền: bản sao mesh có xương, lật mặt và đẩy đỉnh ra theo pháp tuyến → đường viền đậm như tranh vẽ
@@ -74,13 +75,13 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
     }
     const mixer = new THREE.AnimationMixer(root)
     const find = (re: RegExp) => model.clips.find((c) => re.test(c.name))
-    const idleClip = find(/\|Idle$/) ?? find(/\|Flying$/) ?? model.clips[0]
+    const idleClip = find(/^Idle$/) ?? model.clips[0]
     const action = (clip?: THREE.AnimationClip) => (clip ? mixer.clipAction(clip) : undefined)
     const actions = {
       idle: action(idleClip),
-      attack: action(find(/\|Bite_Front$/) ?? find(/\|Bite_InPlace$/)),
-      hit: action(find(/HitRecieve$/)),
-      death: action(find(/\|Death$/)),
+      attack: action(find(/^Attack/)),
+      hit: action(find(/^Hit/)),
+      death: action(find(/^Death$/)),
     }
     actions.idle?.play()
     return { root, materials, outlineMaterials, mixer, actions }
@@ -205,10 +206,10 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
     g.scale.set(sx, sy, sx)
     g.rotation.z = rz
     if (spin) g.rotation.y = Math.sin(time * 0.9) * 0.75 // lắc qua lại, luôn thấy mặt
-    for (const m of inst.materials) {
-      m.emissive.setRGB(BASE_GLOW + flash, BASE_GLOW + flash * 0.1, BASE_GLOW + flash * 0.1)
-      m.transparent = alpha < 1
-      m.opacity = alpha
+    for (const { mat, base } of inst.materials) {
+      mat.emissive.setRGB(base.r + flash, base.g + flash * 0.1, base.b + flash * 0.1)
+      mat.transparent = alpha < 1
+      mat.opacity = alpha
     }
     for (const m of inst.outlineMaterials) {
       m.transparent = alpha < 1
@@ -222,7 +223,7 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
   })
 
   return (
-    <group position={position} rotation={[0, dir * 0.32, 0]}>
+    <group position={position} rotation={[0, dir * FACE, 0]}>
       <mesh ref={shadow} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} renderOrder={-1}>
         <circleGeometry args={[0.85, 24]} />
         <meshBasicMaterial color="#000" transparent opacity={0.42} depthWrite={false} />

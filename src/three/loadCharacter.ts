@@ -1,12 +1,14 @@
 import * as THREE from 'three'
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
-/** Chiều cao chuẩn của mọi nhân vật trong cảnh (đơn vị thế giới). */
-export const CHARACTER_HEIGHT = 1.9
+/** Kích thước chuẩn hóa: cao tối đa / dài tối đa (đơn vị thế giới). Thú đứng nghiêng nên chiều dài là kích thước chính. */
+const TARGET_HEIGHT = 2.0
+const TARGET_LENGTH = 2.2
 
 export interface CharacterModel {
-  /** nhóm đã chuẩn hóa kích thước, chân chạm y = 0 (nhân bản bằng SkeletonUtils.clone) */
+  /** nhóm đã chuẩn hóa kích thước, chân chạm y = 0, tâm ở gốc (nhân bản bằng SkeletonUtils.clone) */
   holder: THREE.Group
+  /** các hoạt ảnh đã đổi tên gọn: Idle, Attack, Hit, Death */
   clips: THREE.AnimationClip[]
 }
 
@@ -20,44 +22,40 @@ const TOON_RAMP = (() => {
   return tex
 })()
 
-const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
 const cache = new Map<string, Promise<CharacterModel>>()
 
 async function load(id: string): Promise<CharacterModel> {
   const base = import.meta.env.BASE_URL
-  const [buffer, texture] = await Promise.all([
-    fetch(`${base}models/${id}.fbx`).then((r) => {
-      if (!r.ok) throw new Error(`Không tải được model ${id}`)
-      return r.arrayBuffer()
-    }),
-    new THREE.TextureLoader().loadAsync(`${base}models/${id}.webp`),
-  ])
-  texture.colorSpace = THREE.SRGBColorSpace
-
-  // File FBX trỏ tới texture bằng đường dẫn gốc: chặn lại để dùng bản WebP đã nén của mình.
-  const manager = new THREE.LoadingManager()
-  manager.setURLModifier(() => BLANK)
-  const model = new FBXLoader(manager).parse(buffer, '')
+  const buffer = await fetch(`${base}models/${id}.glb`).then((r) => {
+    if (!r.ok) throw new Error(`Không tải được model ${id}`)
+    return r.arrayBuffer()
+  })
+  const gltf = await new GLTFLoader().parseAsync(buffer, '')
+  const model = gltf.scene
 
   model.traverse((o) => {
     const mesh = o as THREE.Mesh
     if (!mesh.isMesh) return
-    // Tô bóng hoạt hình; emissiveMap = chính texture để phần tối không bị xỉn (Creature đặt cường độ phát sáng nền)
-    mesh.material = new THREE.MeshToonMaterial({ map: texture, gradientMap: TOON_RAMP, emissiveMap: texture, emissive: new THREE.Color(0.22, 0.22, 0.22) })
+    const old = mesh.material as THREE.MeshStandardMaterial
+    // Tô bóng hoạt hình, giữ màu gốc; phát sáng nền = màu x 0.28 để phần tối không bị xỉn
+    mesh.material = new THREE.MeshToonMaterial({
+      color: old.color,
+      map: old.map ?? null,
+      gradientMap: TOON_RAMP,
+      emissive: old.color.clone().multiplyScalar(0.28),
+    })
     mesh.frustumCulled = false // mesh có xương: bounding box bind-pose không đúng khi hoạt ảnh
   })
 
   const box = new THREE.Box3().setFromObject(model)
   const size = box.getSize(new THREE.Vector3())
-  const scale = CHARACTER_HEIGHT / size.y
+  const scale = Math.min(TARGET_HEIGHT / size.y, TARGET_LENGTH / Math.max(size.x, size.z))
   model.scale.multiplyScalar(scale)
-  model.position.y -= box.min.y * scale
-  model.position.x -= ((box.min.x + box.max.x) / 2) * scale
-  model.position.z -= ((box.min.z + box.max.z) / 2) * scale
+  model.position.set(-((box.min.x + box.max.x) / 2) * scale, -box.min.y * scale, -((box.min.z + box.max.z) / 2) * scale)
 
   const holder = new THREE.Group()
   holder.add(model)
-  return { holder, clips: model.animations }
+  return { holder, clips: gltf.animations }
 }
 
 /** Tải (và lưu cache) model nhân vật. Gọi trước để tải sẵn khi biết sắp dùng. */
