@@ -4,6 +4,7 @@ import type { BattleState } from '../game/types'
 import type { Cast, FloatText } from '../hooks/useGame'
 import { ENEMY_IMAGES, PET_IMAGES } from '../assets/creatures'
 import { ELEMENT_INFO, TOTAL_STAGES } from '../game/constants'
+import SkillFx from './SkillFx'
 import StatusBars from './StatusBars'
 
 interface Props {
@@ -73,11 +74,7 @@ export default function BattleScreen({ battle, floats, hitFlash, attacker, cast,
       </div>
 
       <div className="relative flex flex-1 items-end justify-around gap-2 pb-2">
-        {cast && (
-          <span key={cast.id} className={`pointer-events-none absolute bottom-1/3 z-20 text-5xl ${cast.offensive ? 'animate-fly' : 'animate-aura left-[8%]'}`}>
-            {cast.emoji}
-          </span>
-        )}
+        {cast && <SkillFx key={cast.id} cast={cast} />}
         <Fighter side="player" image={PET_IMAGES[battle.pet.id]} name={`${ELEMENT_INFO[battle.pet.element].glyph} ${player.name}`} flash={hitFlash === 'player'} attacking={attacker === 'player'} floats={floats.filter((f) => f.side === 'player')}>
           <StatusBars hp={player.hp} maxHp={player.maxHp} rage={player.rage} maxRage={player.maxRage} shield={player.shield} />
         </Fighter>

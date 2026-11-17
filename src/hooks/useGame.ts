@@ -15,8 +15,8 @@ const TICK = 100
 
 export interface Cast {
   id: number
-  emoji: string
-  /** true = đòn tấn công bay sang kẻ địch; false = hiệu ứng hào quang quanh pet */
+  petId: string
+  /** true = kỹ năng gây sát thương (pet lao tới, trúng sau thời gian bay) */
   offensive: boolean
 }
 
@@ -144,10 +144,10 @@ export function useGame(pet: Pet) {
     const k = cur.pet.skill
     const offensive = !!k.damage
     const id = floatId.current++
-    setCast({ id, emoji: k.emoji, offensive })
+    setCast({ id, petId: cur.pet.id, offensive })
     play('skill')
     if (offensive) flashAttack('player')
-    setTimeout(() => setCast((c) => (c?.id === id ? null : c)), 800)
+    setTimeout(() => setCast((c) => (c?.id === id ? null : c)), 1500)
     // đòn đánh trúng sau khi hiệu ứng bay tới nơi
     setTimeout(() => commit(castSkill(battleRef.current)), offensive ? 450 : 150)
   }, [commit, flashAttack])
