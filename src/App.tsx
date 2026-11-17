@@ -4,13 +4,19 @@ import BattleScreen from './components/BattleScreen'
 import PetSelect from './components/PetSelect'
 import { BALANCE, ELEMENTS, ELEMENT_INFO } from './game/constants'
 import type { Pet } from './game/types'
+import { isMuted, setMuted } from './game/sfx'
 import { useGame } from './hooks/useGame'
 
 function GameView({ pet, onChangePet }: { pet: Pet; onChangePet: () => void }) {
   const g = useGame(pet)
+  const [muted, setMutedState] = useState(isMuted)
+  const toggleMute = () => {
+    setMuted(!muted)
+    setMutedState(!muted)
+  }
   return (
     <div className="mx-auto flex h-dvh max-w-xl flex-col bg-stone-950 text-white">
-      <BattleScreen battle={g.battle} floats={g.floats} hitFlash={g.hitFlash} attacker={g.attacker} cast={g.cast} best={g.best} newBest={g.newBest} onSkill={g.useSkill} onRestart={g.restart} onChangePet={onChangePet} />
+      <BattleScreen battle={g.battle} floats={g.floats} hitFlash={g.hitFlash} attacker={g.attacker} cast={g.cast} best={g.best} newBest={g.newBest} onSkill={g.useSkill} onRestart={g.restart} onChangePet={onChangePet} muted={muted} onToggleMute={toggleMute} />
       <div className="flex flex-col items-center gap-1.5 border-t-4 border-amber-900 bg-gradient-to-b from-amber-950 to-stone-950 p-2">
         <div className="flex flex-wrap justify-center gap-x-3 text-[10px] text-amber-100/80">
           {ELEMENTS.map((e) => (

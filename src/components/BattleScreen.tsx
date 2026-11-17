@@ -16,6 +16,8 @@ interface Props {
   onSkill: () => void
   onRestart: () => void
   onChangePet: () => void
+  muted: boolean
+  onToggleMute: () => void
 }
 
 const FLOAT_COLOR: Record<FloatText['kind'], string> = {
@@ -58,7 +60,7 @@ function Fighter({ side, emoji, name, flash, attacking, floats, children }: {
   )
 }
 
-export default function BattleScreen({ battle, floats, hitFlash, attacker, cast, best, newBest, onSkill, onRestart, onChangePet }: Props) {
+export default function BattleScreen({ battle, floats, hitFlash, attacker, cast, best, newBest, onSkill, onRestart, onChangePet, muted, onToggleMute }: Props) {
   const { player, enemy, stage, score, status } = battle
   const ready = canUseSkill(battle)
   return (
@@ -94,6 +96,14 @@ export default function BattleScreen({ battle, floats, hitFlash, attacker, cast,
         }`}
       >
         {battle.pet.skill.emoji} {battle.pet.skill.name}
+      </button>
+
+      <button
+        onClick={onToggleMute}
+        aria-label={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}
+        className="absolute bottom-2 right-3 z-20 rounded-full bg-black/40 px-2 py-1 text-lg"
+      >
+        {muted ? '🔇' : '🔊'}
       </button>
 
       {status !== 'playing' && (

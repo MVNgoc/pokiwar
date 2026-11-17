@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { applyResolution, areAdjacent, collapse, createBoard, findMatches, hasPossibleMove, resolveMatches, swapTiles } from '../game/board'
 import { applyGems, canUseSkill, createBattle, enemyAttack, nextStage, tickEnemyTimer, useSkill as castSkill, type Result } from '../game/combat'
+import { play } from '../game/sfx'
 import { loadRecord, saveResult } from '../game/storage'
 import type { Board, FloatEvent, Pet, Position } from '../game/types'
 
@@ -67,6 +68,12 @@ export function useGame(pet: Pet) {
       battleRef.current = res.state
       setBattle(res.state)
       pushFloats(res.events)
+      if (res.events.some((e) => e.kind === 'heal')) play('heal')
+      if (prevStatus === 'playing') {
+        if (res.state.status === 'stageClear') play('stageClear')
+        else if (res.state.status === 'won') play('win')
+        else if (res.state.status === 'lost') play('lose')
+      }
       const end = res.state.status === 'lost' || res.state.status === 'won'
       if (prevStatus === 'playing' && end) {
         const out = saveResult(pet.id, res.state.score, res.state.status === 'won')
@@ -89,12 +96,14 @@ export function useGame(pet: Pet) {
       if (busyRef.current || battleRef.current.status !== 'playing' || !areAdjacent(a, b)) return
       busyRef.current = true
       setBusy(true)
+      play('swap')
       const original = boardRef.current
       let cur = swapTiles(original, a, b)
       setBoardSync(cur)
       await sleep(220)
 
       if (findMatches(cur).length === 0) {
+        play('invalid')
         setBoardSync(original) // nước đi không hợp lệ → trả lại
         await sleep(220)
       } else {
@@ -106,6 +115,9 @@ export function useGame(pet: Pet) {
           preferred = []
           combo++
           setClearing(new Set(res.cleared.map(({ r, c }) => cur[r][c]!.id)))
+          play('match', combo)
+          if (res.cleared.some(({ r, c }) => cur[r][c]!.special)) play('boom')
+          if (res.spawns.length) play('special')
           await sleep(260)
           setClearing(new Set())
           commit(applyGems(battleRef.current, res.gems, combo))
@@ -133,6 +145,7 @@ export function useGame(pet: Pet) {
     const offensive = !!k.damage
     const id = floatId.current++
     setCast({ id, emoji: k.emoji, offensive })
+    play('skill')
     if (offensive) flashAttack('player')
     setTimeout(() => setCast((c) => (c?.id === id ? null : c)), 800)
     // đòn đánh trúng sau khi hiệu ứng bay tới nơi
@@ -155,6 +168,7 @@ export function useGame(pet: Pet) {
       let s = tickEnemyTimer(battleRef.current, TICK)
       if (s.status === 'playing' && s.enemy.timer <= 0) {
         flashAttack('enemy')
+        play('hit')
         commit(enemyAttack(s))
         return
       }
