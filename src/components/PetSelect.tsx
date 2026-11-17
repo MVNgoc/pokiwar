@@ -1,3 +1,4 @@
+import { PET_IMAGES } from '../assets/creatures'
 import { ELEMENT_INFO } from '../game/constants'
 import { PETS } from '../game/pets'
 import type { Pet } from '../game/types'
@@ -16,7 +17,7 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
             onClick={() => onPick(pet)}
             className="flex items-center gap-3 rounded-xl border-2 border-amber-900 bg-stone-900/80 p-3 text-left transition hover:border-amber-400 active:scale-[.98]"
           >
-            <span className="text-5xl">{pet.emoji}</span>
+            <img src={PET_IMAGES[pet.id]} alt={pet.name} draggable={false} className="h-14 w-14 [image-rendering:pixelated]" />
             <span className="flex-1">
               <span className="flex items-center gap-2 font-bold">
                 {pet.name}

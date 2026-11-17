@@ -35,6 +35,7 @@ export interface PlayerState extends Fighter {
 }
 
 export interface EnemyState extends Fighter {
+  id: string
   boss: boolean
   element: Element
   attack: number

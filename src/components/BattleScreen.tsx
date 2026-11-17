@@ -2,6 +2,7 @@ import { canUseSkill } from '../game/combat'
 import type { PetRecord } from '../game/storage'
 import type { BattleState } from '../game/types'
 import type { Cast, FloatText } from '../hooks/useGame'
+import { ENEMY_IMAGES, PET_IMAGES } from '../assets/creatures'
 import { ELEMENT_INFO, TOTAL_STAGES } from '../game/constants'
 import StatusBars from './StatusBars'
 
@@ -29,9 +30,9 @@ const FLOAT_COLOR: Record<FloatText['kind'], string> = {
   combo: 'text-fuchsia-300',
 }
 
-function Fighter({ side, emoji, name, flash, attacking, floats, children }: {
+function Fighter({ side, image, name, flash, attacking, floats, children }: {
   side: 'player' | 'enemy'
-  emoji: string
+  image: string
   name: string
   flash: boolean
   attacking: boolean
@@ -41,8 +42,8 @@ function Fighter({ side, emoji, name, flash, attacking, floats, children }: {
   return (
     <div className="relative flex w-1/2 max-w-[220px] flex-col items-center gap-1">
       <div className="text-xs font-bold text-amber-100">{name}</div>
-      <div className={`relative text-[clamp(56px,16dvh,110px)] leading-none transition-transform ${attacking ? (side === 'player' ? 'animate-lunge-r' : 'animate-lunge-l') : flash ? 'translate-x-1 scale-95 brightness-150' : 'animate-bob'} ${side === 'enemy' ? '[transform:scaleX(-1)]' : ''}`}>
-        {emoji}
+      <div className={`relative leading-none transition-transform ${attacking ? (side === 'player' ? 'animate-lunge-r' : 'animate-lunge-l') : flash ? 'translate-x-1 scale-95 brightness-150' : 'animate-bob'} ${side === 'enemy' ? '[transform:scaleX(-1)]' : ''}`}>
+        <img src={image} alt={name} draggable={false} className="h-[clamp(64px,17dvh,120px)] w-auto [image-rendering:pixelated]" />
       </div>
       <div className="relative w-full">
         {children}
@@ -77,11 +78,11 @@ export default function BattleScreen({ battle, floats, hitFlash, attacker, cast,
             {cast.emoji}
           </span>
         )}
-        <Fighter side="player" emoji={player.emoji} name={`${ELEMENT_INFO[battle.pet.element].glyph} ${player.name}`} flash={hitFlash === 'player'} attacking={attacker === 'player'} floats={floats.filter((f) => f.side === 'player')}>
+        <Fighter side="player" image={PET_IMAGES[battle.pet.id]} name={`${ELEMENT_INFO[battle.pet.element].glyph} ${player.name}`} flash={hitFlash === 'player'} attacking={attacker === 'player'} floats={floats.filter((f) => f.side === 'player')}>
           <StatusBars hp={player.hp} maxHp={player.maxHp} rage={player.rage} maxRage={player.maxRage} shield={player.shield} />
         </Fighter>
         <div className="mb-16 text-2xl font-black text-amber-200">VS</div>
-        <Fighter side="enemy" emoji={enemy.emoji} name={`${enemy.boss ? '無' : ELEMENT_INFO[enemy.element].glyph} ${enemy.name}`} flash={hitFlash === 'enemy'} attacking={attacker === 'enemy'} floats={floats.filter((f) => f.side === 'enemy')}>
+        <Fighter side="enemy" image={ENEMY_IMAGES[enemy.id]} name={`${enemy.boss ? '無' : ELEMENT_INFO[enemy.element].glyph} ${enemy.name}`} flash={hitFlash === 'enemy'} attacking={attacker === 'enemy'} floats={floats.filter((f) => f.side === 'enemy')}>
           <StatusBars hp={enemy.hp} maxHp={enemy.maxHp} timerPct={Math.min(100, (enemy.timer / enemy.interval) * 100)} />
         </Fighter>
       </div>

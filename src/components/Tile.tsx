@@ -25,11 +25,11 @@ function TileView({ tile, row, col, size, selected, clearing }: Props) {
 
   return (
     <div
-      className="absolute p-[4%] transition-[top,left] duration-300 ease-in"
+      className="absolute transition-[top,left] duration-300 ease-in"
       style={{ width: `${100 / size}%`, height: `${100 / size}%`, top: `${(shownRow * 100) / size}%`, left: `${(col * 100) / size}%` }}
     >
       <div
-        className={`relative h-full w-full select-none transition-all duration-200
+        className={`absolute inset-[7%] select-none transition-all duration-200
         ${tile.special ? 'animate-pulse drop-shadow-[0_0_5px_#fff]' : 'drop-shadow-[0_2px_2px_rgba(0,0,0,.55)]'}
         ${clearing ? 'scale-0 rotate-45 opacity-0' : ''} ${selected ? 'scale-110 drop-shadow-[0_0_8px_#fde047]' : ''}`}
       >

@@ -95,7 +95,8 @@ Mục tiêu hiện tại: bot khá thắng ~65–80%, bot ngẫu nhiên ~25–40
 ## Tài nguyên
 
 - **Ngọc nguyên tố:** [Puzzle Pack II](https://opengameart.org/node/40563) của Kenney (www.kenney.nl), giấy phép CC0 (public domain). File gốc đã được cắt, đổi sang WebP 96×96 và đặt trong `src/assets/gems/` (kèm file giấy phép). Mỗi hệ có màu và hình khác nhau: Kim là bát giác xám, Mộc là ngọc cắt xanh lá, Thủy là tròn xanh dương, Hỏa là tam giác đỏ, Thổ là vuông vàng.
-- Pet, kẻ địch và hiệu ứng kỹ năng hiện vẫn dùng emoji.
+- **Pet và kẻ địch:** [Tiny Creatures](https://opengameart.org/content/tiny-creatures) của Clint Bellanger (clintbellanger.net), giấy phép CC0. Ảnh gốc 16×16 pixel được phóng 8 lần theo kiểu nguyên khối (nearest-neighbor), lưu WebP không mất dữ liệu trong `src/assets/creatures/` (kèm file giấy phép).
+- Hiệu ứng kỹ năng hiện vẫn dùng emoji.
 
 ## Hướng phát triển
 
