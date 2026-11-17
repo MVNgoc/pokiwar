@@ -3,7 +3,10 @@ import { Canvas, useThree } from '@react-three/fiber'
 import type { BattleState, Side } from '../game/types'
 import type { Cast } from '../hooks/useGame'
 import { ENEMIES } from '../game/constants'
+import { GEM_COLOR } from './gems'
 import Creature from './Creature'
+import { CharacterLights, Platform } from './SceneLights'
+import Motes from './Motes'
 import FxLayer from './Fx3D'
 import { loadCharacter } from './loadCharacter'
 
@@ -28,6 +31,9 @@ function Stage({ battle, hitFlash, attacker, cast }: Props) {
 
   return (
     <>
+      <Motes />
+      <Platform position={[-x, 0, 0]} color={GEM_COLOR[battle.pet.element]} />
+      <Platform position={[x, 0, 0]} color={GEM_COLOR[enemy.element]} />
       <Creature
         key={battle.pet.id}
         id={battle.pet.id}
@@ -65,9 +71,7 @@ export default function ArenaScene(props: Props) {
       camera={{ fov: 34, position: [0, 1.5, 8.2] }}
       onCreated={({ camera }) => camera.lookAt(0, 0.85, 0)}
     >
-      <ambientLight intensity={1.7} />
-      <directionalLight position={[3, 6, 6]} intensity={2.4} />
-      <directionalLight position={[-4, 2, 3]} intensity={0.8} color="#9fc4ff" />
+      <CharacterLights />
       <Suspense fallback={null}>
         <Stage {...props} />
       </Suspense>

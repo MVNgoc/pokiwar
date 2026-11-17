@@ -5,6 +5,8 @@ import { ELEMENT_INFO } from '../game/constants'
 import { PETS } from '../game/pets'
 import type { Pet } from '../game/types'
 import Creature from '../three/Creature'
+import { CharacterLights, Platform } from '../three/SceneLights'
+import { GEM_COLOR } from '../three/gems'
 import { loadCharacter } from '../three/loadCharacter'
 
 export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
@@ -21,9 +23,8 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
 
       <div className="relative h-[34dvh] min-h-[190px] shrink-0 overflow-hidden rounded-xl border-2 border-amber-900 bg-gradient-to-b from-sky-900 to-emerald-900">
         <Canvas className="!absolute inset-0" dpr={[1, 1.5]} flat gl={{ alpha: true, antialias: true }} camera={{ fov: 32, position: [0, 1.25, 5.2] }} onCreated={({ camera }) => camera.lookAt(0, 0.9, 0)}>
-          <ambientLight intensity={1.7} />
-          <directionalLight position={[3, 6, 6]} intensity={2.4} />
-          <directionalLight position={[-4, 2, 3]} intensity={0.8} color="#9fc4ff" />
+          <CharacterLights />
+          <Platform position={[0, 0, 0]} color={GEM_COLOR[sel.element]} />
           <Suspense fallback={null}>
             <Creature key={sel.id} id={sel.id} position={[0, 0, 0]} dir={1} spin enterKey={sel.id} />
           </Suspense>

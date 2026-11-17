@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
 import { areAdjacent } from '../game/board'
 import type { Board, Position } from '../game/types'
+import { Env } from './SceneLights'
 import Tile3D, { BOARD_N, cellX, cellY } from './Tile3D'
 
 interface Props {
@@ -115,8 +116,9 @@ export default function BoardScene(props: Props) {
       gl={{ antialias: true, alpha: true }}
       camera={{ fov: 32, position: [0, 0, 15.8] }}
     >
-      <ambientLight intensity={1.5} />
-      <directionalLight position={[2, 4, 9]} intensity={2.6} />
+      <Env intensity={0.45} />
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[2, 4, 9]} intensity={2.2} />
       <pointLight position={[-4, -4, 6]} intensity={30} color="#ffb86b" />
       <Scene {...props} />
     </Canvas>

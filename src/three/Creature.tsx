@@ -20,6 +20,10 @@ export interface CreatureProps {
   spin?: boolean
 }
 
+/** độ sáng nền của màu sơn (xem loadCharacter) */
+const BASE_GLOW = 0.22
+/** độ dày đường viền (đơn vị thế giới) */
+const OUTLINE_WORLD = 0.02
 const ATTACK_S = 0.55
 const HURT_S = 0.45
 const ENTER_S = 0.75
@@ -34,14 +38,40 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
 
   const inst = useMemo(() => {
     const root = clone(model.holder) as THREE.Group
-    const materials: THREE.MeshStandardMaterial[] = []
+    const materials: THREE.MeshToonMaterial[] = []
     root.traverse((o) => {
       const mesh = o as THREE.Mesh
       if (mesh.isMesh) {
-        mesh.material = (mesh.material as THREE.MeshStandardMaterial).clone() // mỗi bản có màu loé riêng
-        materials.push(mesh.material as THREE.MeshStandardMaterial)
+        mesh.material = (mesh.material as THREE.MeshToonMaterial).clone() // mỗi bản có màu loé riêng
+        materials.push(mesh.material as THREE.MeshToonMaterial)
       }
     })
+    // Viền: bản sao mesh có xương, lật mặt và đẩy đỉnh ra theo pháp tuyến → đường viền đậm như tranh vẽ
+    const outlineMaterials: THREE.MeshBasicMaterial[] = []
+    const skinned: THREE.SkinnedMesh[] = []
+    root.traverse((o) => {
+      if ((o as THREE.SkinnedMesh).isSkinnedMesh) skinned.push(o as THREE.SkinnedMesh)
+    })
+    root.updateWorldMatrix(true, true)
+    for (const m of skinned) {
+      // độ dày viền tính theo đơn vị thế giới → đổi sang đơn vị hình học của riêng mesh này (mesh có thể bị scale)
+      const ws = new THREE.Vector3()
+      m.getWorldScale(ws)
+      const width = OUTLINE_WORLD / ws.x
+      const mat = new THREE.MeshBasicMaterial({ color: '#1b1020', side: THREE.BackSide })
+      mat.onBeforeCompile = (shader) => {
+        shader.uniforms.uWidth = { value: width }
+        shader.vertexShader = `uniform float uWidth;\n${shader.vertexShader}`.replace('#include <begin_vertex>', '#include <begin_vertex>\n  transformed += normalize(normal) * uWidth;')
+      }
+      const line = new THREE.SkinnedMesh(m.geometry, mat)
+      line.bind(m.skeleton, m.bindMatrix)
+      line.position.copy(m.position)
+      line.quaternion.copy(m.quaternion)
+      line.scale.copy(m.scale)
+      line.frustumCulled = false
+      m.parent?.add(line)
+      outlineMaterials.push(mat)
+    }
     const mixer = new THREE.AnimationMixer(root)
     const find = (re: RegExp) => model.clips.find((c) => re.test(c.name))
     const idleClip = find(/\|Idle$/) ?? find(/\|Flying$/) ?? model.clips[0]
@@ -53,7 +83,7 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
       death: action(find(/\|Death$/)),
     }
     actions.idle?.play()
-    return { root, materials, mixer, actions }
+    return { root, materials, outlineMaterials, mixer, actions }
   }, [model])
 
   useEffect(
@@ -174,9 +204,13 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
     g.position.set(ox, oy, 0)
     g.scale.set(sx, sy, sx)
     g.rotation.z = rz
-    if (spin) g.rotation.y += dt * 0.9
+    if (spin) g.rotation.y = Math.sin(time * 0.9) * 0.75 // lắc qua lại, luôn thấy mặt
     for (const m of inst.materials) {
-      m.emissive.setRGB(flash, flash * 0.15, flash * 0.15)
+      m.emissive.setRGB(BASE_GLOW + flash, BASE_GLOW + flash * 0.1, BASE_GLOW + flash * 0.1)
+      m.transparent = alpha < 1
+      m.opacity = alpha
+    }
+    for (const m of inst.outlineMaterials) {
       m.transparent = alpha < 1
       m.opacity = alpha
     }
@@ -188,7 +222,7 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
   })
 
   return (
-    <group position={position} rotation={[0, dir * 0.45, 0]}>
+    <group position={position} rotation={[0, dir * 0.32, 0]}>
       <mesh ref={shadow} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} renderOrder={-1}>
         <circleGeometry args={[0.85, 24]} />
         <meshBasicMaterial color="#000" transparent opacity={0.42} depthWrite={false} />

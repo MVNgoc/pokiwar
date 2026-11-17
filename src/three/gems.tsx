@@ -14,8 +14,8 @@ export function makeGemMaterial(type: Element) {
   const color = new THREE.Color(GEM_COLOR[type])
   return new THREE.MeshStandardMaterial({
     color,
-    emissive: color.clone().multiplyScalar(0.22),
-    roughness: type === 'thuy' ? 0.12 : 0.3,
+    emissive: color.clone().multiplyScalar(0.1),
+    roughness: type === 'thuy' ? 0.15 : 0.35,
     metalness: type === 'kim' ? 0.45 : 0.08,
     flatShading: type !== 'thuy', // mặt cắt rõ cho ngọc, tròn mịn cho Thủy
   })
