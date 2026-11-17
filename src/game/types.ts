@@ -21,28 +21,37 @@ export interface Position {
 
 export type GemCounts = Record<Element, number>
 
-export interface Fighter {
+export type Side = 'player' | 'enemy'
+
+/** Hai bên dùng chung một cơ chế: xếp ngọc → sát thương / hồi máu / Nộ / giáp. */
+export interface Combatant {
   name: string
   emoji: string
+  element: Element
   hp: number
   maxHp: number
-}
-
-export interface PlayerState extends Fighter {
   rage: number
   maxRage: number
   shield: number
+  /** hệ số sức mạnh nhân vào sát thương (pet = 1, kẻ địch tăng theo màn) */
+  power: number
 }
 
-export interface EnemyState extends Fighter {
+export type PlayerState = Combatant
+
+export interface EnemySkill {
+  name: string
+  damage: number
+}
+
+export interface EnemyState extends Combatant {
   id: string
   boss: boolean
-  element: Element
-  attack: number
-  /** ms giữa 2 lần đánh */
-  interval: number
-  /** ms còn lại tới đòn đánh kế tiếp */
-  timer: number
+  skill: EnemySkill
+  /** bị choáng: mất lượt kế tiếp */
+  stunned: boolean
+  /** xác suất đi nước ngẫu nhiên thay vì nước tốt nhất (AI càng về sau càng ít sai) */
+  mistake: number
 }
 
 export type Status = 'playing' | 'stageClear' | 'won' | 'lost'
@@ -52,6 +61,12 @@ export interface BattleState {
   stage: number
   status: Status
   score: number
+  /** bên đang có lượt */
+  turn: Side
+  /** thời gian còn lại của lượt (ms) */
+  turnLeft: number
+  /** đếm số lượt đã qua (dùng làm khóa hoạt ảnh) */
+  turnNo: number
   player: PlayerState
   enemy: EnemyState
 }
@@ -72,8 +87,8 @@ export interface Skill {
   /** hồi máu theo % HP tối đa */
   healPct?: number
   shield?: number
-  /** làm kẻ địch choáng (hoãn đòn đánh) */
-  stunMs?: number
+  /** làm kẻ địch choáng: mất lượt kế tiếp */
+  stun?: boolean
 }
 
 export interface Pet {

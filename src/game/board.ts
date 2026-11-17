@@ -169,6 +169,19 @@ export function isValidSwap(board: Board, a: Position, b: Position): boolean {
   return areAdjacent(a, b) && findMatches(swapTiles(board, a, b)).length > 0
 }
 
+/** Mọi nước đi hợp lệ (hoán đổi 2 ô liền kề tạo được match). */
+export function listMoves(board: Board): [Position, Position][] {
+  const out: [Position, Position][] = []
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const here = { r, c }
+      if (c + 1 < BOARD_SIZE && isValidSwap(board, here, { r, c: c + 1 })) out.push([here, { r, c: c + 1 }])
+      if (r + 1 < BOARD_SIZE && isValidSwap(board, here, { r: r + 1, c })) out.push([here, { r: r + 1, c }])
+    }
+  }
+  return out
+}
+
 export function hasPossibleMove(board: Board): boolean {
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {

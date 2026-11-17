@@ -3,7 +3,7 @@ import type { PetRecord } from '../game/storage'
 import type { BattleState } from '../game/types'
 import type { Cast, FloatText } from '../hooks/useGame'
 import { ENEMY_IMAGES, PET_IMAGES } from '../assets/creatures'
-import { ELEMENT_INFO, TOTAL_STAGES } from '../game/constants'
+import { BALANCE, ELEMENT_INFO, TOTAL_STAGES } from '../game/constants'
 import SkillFx from './SkillFx'
 import StatusBars from './StatusBars'
 
@@ -11,10 +11,12 @@ interface Props {
   battle: BattleState
   floats: FloatText[]
   hitFlash: 'player' | 'enemy' | null
+  shaking: boolean
   attacker: 'player' | 'enemy' | null
   cast: Cast | null
   best: PetRecord
   newBest: boolean
+  busy: boolean
   onSkill: () => void
   onRestart: () => void
   onChangePet: () => void
@@ -31,20 +33,48 @@ const FLOAT_COLOR: Record<FloatText['kind'], string> = {
   combo: 'text-fuchsia-300',
 }
 
-function Fighter({ side, image, name, flash, attacking, floats, children }: {
+interface FighterProps {
   side: 'player' | 'enemy'
   image: string
   name: string
-  flash: boolean
+  hurt: boolean
   attacking: boolean
+  /** đang có lượt */
+  active: boolean
+  defeated: boolean
+  /** đổi giá trị này để phát lại hoạt ảnh xuất hiện */
+  enterKey: string
   floats: FloatText[]
   children: React.ReactNode
-}) {
+}
+
+function Fighter({ side, image, name, hurt, attacking, active, defeated, enterKey, floats, children }: FighterProps) {
+  const isPlayer = side === 'player'
+  // Ưu tiên: bị hạ > tấn công > bị đánh. Hoạt ảnh thở chạy ở lớp trong cùng.
+  const state = defeated
+    ? 'animate-defeat'
+    : attacking
+      ? isPlayer ? 'animate-lunge-r' : 'animate-lunge-l'
+      : hurt
+        ? isPlayer ? 'animate-hurt-l' : 'animate-hurt-r'
+        : ''
   return (
-    <div className="relative flex w-1/2 max-w-[220px] flex-col items-center gap-1">
-      <div className="text-xs font-bold text-amber-100">{name}</div>
-      <div className={`relative leading-none transition-transform ${attacking ? (side === 'player' ? 'animate-lunge-r' : 'animate-lunge-l') : flash ? 'translate-x-1 scale-95 brightness-150' : 'animate-bob'} ${side === 'enemy' ? '[transform:scaleX(-1)]' : ''}`}>
-        <img src={image} alt={name} draggable={false} className="h-[clamp(64px,17dvh,120px)] w-auto [image-rendering:pixelated]" />
+    <div className={`relative flex w-1/2 max-w-[220px] flex-col items-center gap-1 transition-[opacity,filter] duration-300 ${active ? '' : 'opacity-70 saturate-50'}`}>
+      <div className={`text-xs font-bold ${active ? 'text-yellow-300' : 'text-amber-100'}`}>{active ? '▶ ' : ''}{name}</div>
+      <div className="relative">
+        <div className={`absolute -bottom-1 left-1/2 h-2.5 w-3/4 -translate-x-1/2 rounded-full bg-black/45 blur-[3px] ${defeated ? 'opacity-0 transition-opacity duration-500' : 'animate-shadow'}`} />
+        <div key={enterKey} className={isPlayer ? 'animate-enter-l' : 'animate-enter-r'}>
+          <div className={state} style={{ '--rot': isPlayer ? '-70deg' : '70deg' } as React.CSSProperties}>
+            <div className={`origin-bottom ${defeated ? '' : 'animate-breathe'}`} style={{ animationDelay: isPlayer ? '0s' : '-0.9s' }}>
+              <img
+                src={image}
+                alt={name}
+                draggable={false}
+                className={`h-[clamp(64px,17dvh,120px)] w-auto [image-rendering:pixelated] ${isPlayer ? '' : '[transform:scaleX(-1)]'}`}
+              />
+            </div>
+          </div>
+        </div>
       </div>
       <div className="relative w-full">
         {children}
@@ -52,7 +82,7 @@ function Fighter({ side, image, name, flash, attacking, floats, children }: {
           <span
             key={f.id}
             className={`float-up pointer-events-none absolute bottom-full text-xl font-black [text-shadow:0_2px_2px_#000] ${FLOAT_COLOR[f.kind]}`}
-            style={{ left: `${f.x}%` }}
+            style={{ left: `${f.x}%`, '--dx': `${(f.x - 50) * 0.8}px` } as React.CSSProperties}
           >
             {f.text}
           </span>
@@ -62,9 +92,10 @@ function Fighter({ side, image, name, flash, attacking, floats, children }: {
   )
 }
 
-export default function BattleScreen({ battle, floats, hitFlash, attacker, cast, best, newBest, onSkill, onRestart, onChangePet, muted, onToggleMute }: Props) {
+export default function BattleScreen({ battle, floats, hitFlash, shaking, attacker, cast, best, newBest, busy, onSkill, onRestart, onChangePet, muted, onToggleMute }: Props) {
   const { player, enemy, stage, score, status } = battle
-  const ready = canUseSkill(battle)
+  const ready = canUseSkill(battle) && !busy
+  const turnInfo = { pct: (battle.turnLeft / BALANCE.turnMs) * 100, secs: Math.ceil(battle.turnLeft / 1000) }
   return (
     <div className="relative flex flex-1 flex-col bg-gradient-to-b from-sky-900 via-emerald-900 to-emerald-950 px-3 pt-2">
       <div className="flex justify-between text-xs font-bold text-amber-100">
@@ -73,14 +104,21 @@ export default function BattleScreen({ battle, floats, hitFlash, attacker, cast,
         <span>Điểm: {score} · Kỷ lục: {Math.max(best.bestScore, score)}</span>
       </div>
 
-      <div className="relative flex flex-1 items-end justify-around gap-2 pb-2">
+      <div className={`relative flex flex-1 items-end justify-around gap-2 pb-2 ${shaking ? 'animate-shake' : ''}`}>
         {cast && <SkillFx key={cast.id} cast={cast} />}
-        <Fighter side="player" image={PET_IMAGES[battle.pet.id]} name={`${ELEMENT_INFO[battle.pet.element].glyph} ${player.name}`} flash={hitFlash === 'player'} attacking={attacker === 'player'} floats={floats.filter((f) => f.side === 'player')}>
-          <StatusBars hp={player.hp} maxHp={player.maxHp} rage={player.rage} maxRage={player.maxRage} shield={player.shield} />
+        {status === 'playing' && (
+          <div key={battle.turnNo} className="turn-banner pointer-events-none absolute inset-x-0 top-[18%] z-30 flex justify-center">
+            <span className={`rounded-full px-4 py-1 text-sm font-black shadow-lg ${battle.turn === 'player' ? 'bg-emerald-400 text-black' : 'bg-red-500 text-white'}`}>
+              {battle.turn === 'player' ? '⚔ LƯỢT CỦA BẠN' : '💢 LƯỢT KẺ ĐỊCH'}
+            </span>
+          </div>
+        )}
+        <Fighter side="player" image={PET_IMAGES[battle.pet.id]} name={`${ELEMENT_INFO[battle.pet.element].glyph} ${player.name}`} hurt={hitFlash === 'player'} attacking={attacker === 'player'} active={status === 'playing' && battle.turn === 'player'} defeated={player.hp <= 0} enterKey={battle.pet.id} floats={floats.filter((f) => f.side === 'player')}>
+          <StatusBars hp={player.hp} maxHp={player.maxHp} rage={player.rage} maxRage={player.maxRage} shield={player.shield} turn={status === 'playing' && battle.turn === 'player' ? turnInfo : null} />
         </Fighter>
         <div className="mb-16 text-2xl font-black text-amber-200">VS</div>
-        <Fighter side="enemy" image={ENEMY_IMAGES[enemy.id]} name={`${enemy.boss ? '無' : ELEMENT_INFO[enemy.element].glyph} ${enemy.name}`} flash={hitFlash === 'enemy'} attacking={attacker === 'enemy'} floats={floats.filter((f) => f.side === 'enemy')}>
-          <StatusBars hp={enemy.hp} maxHp={enemy.maxHp} timerPct={Math.min(100, (enemy.timer / enemy.interval) * 100)} />
+        <Fighter side="enemy" image={ENEMY_IMAGES[enemy.id]} name={`${enemy.boss ? '無' : ELEMENT_INFO[enemy.element].glyph} ${enemy.name}${enemy.stunned ? ' 💫' : ''}`} hurt={hitFlash === 'enemy'} attacking={attacker === 'enemy'} active={status === 'playing' && battle.turn === 'enemy'} defeated={enemy.hp <= 0} enterKey={`${enemy.id}-${stage}`} floats={floats.filter((f) => f.side === 'enemy')}>
+          <StatusBars hp={enemy.hp} maxHp={enemy.maxHp} rage={enemy.rage} maxRage={enemy.maxRage} shield={enemy.shield} turn={status === 'playing' && battle.turn === 'enemy' ? turnInfo : null} />
         </Fighter>
       </div>
 
@@ -89,7 +127,7 @@ export default function BattleScreen({ battle, floats, hitFlash, attacker, cast,
         disabled={!ready}
         className={`mx-auto mb-2 rounded-full border-2 px-5 py-1.5 text-sm font-black transition ${
           ready
-            ? 'animate-pulse border-yellow-200 bg-gradient-to-b from-orange-400 to-red-600 text-white shadow-[0_0_16px_#fb923c]'
+            ? 'animate-ready border-yellow-200 bg-gradient-to-b from-orange-400 to-red-600 text-white shadow-[0_0_16px_#fb923c]'
             : 'border-stone-600 bg-stone-700 text-stone-400'
         }`}
       >

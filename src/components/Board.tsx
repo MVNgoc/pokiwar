@@ -9,12 +9,16 @@ interface Props {
   clearing: Set<number>
   locked: boolean
   notice?: string | null
+  /** hai ô kẻ địch sắp đổi (nhá cho người chơi thấy) */
+  hint?: [Position, Position] | null
+  /** lượt kẻ địch: làm tối bàn cờ */
+  dim?: boolean
   onSwap: (a: Position, b: Position) => void
 }
 
 const DRAG_THRESHOLD = 18
 
-export default function Board({ board, clearing, locked, notice, onSwap }: Props) {
+export default function Board({ board, clearing, locked, notice, hint, dim, onSwap }: Props) {
   const [selected, setSelected] = useState<Position | null>(null)
   const drag = useRef<{ pos: Position; x: number; y: number } | null>(null)
   const ref = useRef<HTMLDivElement>(null)
@@ -63,7 +67,7 @@ export default function Board({ board, clearing, locked, notice, onSwap }: Props
   return (
     <div
       ref={ref}
-      className="relative aspect-square touch-none overflow-hidden rounded-2xl border-4 border-amber-900 bg-stone-900/80 shadow-xl"
+      className={`relative aspect-square touch-none overflow-hidden rounded-2xl border-4 bg-stone-900/80 shadow-xl transition-[filter,border-color] duration-300 ${dim ? 'border-red-900 brightness-75 saturate-75' : 'border-amber-900'}`}
       style={{ width: 'min(calc(100vw - 16px), 52dvh)' }}
       onPointerDown={down}
       onPointerMove={move}
@@ -79,7 +83,7 @@ export default function Board({ board, clearing, locked, notice, onSwap }: Props
               row={r}
               col={c}
               size={BOARD_SIZE}
-              selected={selected?.r === r && selected?.c === c}
+              selected={(selected?.r === r && selected?.c === c) || !!hint?.some((p) => p.r === r && p.c === c)}
               clearing={clearing.has(tile.id)}
             />
           ) : null,

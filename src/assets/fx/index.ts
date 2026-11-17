@@ -24,7 +24,10 @@ export const FX: Record<FxId, { src: string; frames: number }> = {
   vine: { src: vine, frames: 6 },
 }
 
-/** Kịch bản hiệu ứng cho từng pet (thời gian tính bằng ms từ lúc bấm kỹ năng). */
+/**
+ * Kịch bản hiệu ứng cho từng pet và kẻ địch (thời gian tính bằng ms từ lúc tung kỹ năng).
+ * `onEnemy` = tại mục tiêu của đòn; `onSelf` = quanh người tung. Với kẻ địch tung chiêu thì hai bên đảo lại.
+ */
 export interface SkillFxPlan {
   /** đạn bay từ pet sang kẻ địch (mất `FLIGHT_MS`) */
   projectile?: FxId
@@ -45,4 +48,10 @@ export const SKILL_FX: Record<string, SkillFxPlan> = {
   },
   'kim-ho': { onEnemy: [{ id: 'slash', at: 0 }, { id: 'slash', at: 150 }, { id: 'slash', at: 300 }] },
   'tho-te': { onSelf: [{ id: 'shield', at: 0 }], onEnemy: [{ id: 'dust', at: 200 }] },
+  // kẻ địch
+  'nam-rung': { projectile: 'vine', onEnemy: [{ id: 'spark', at: FLIGHT_MS }] },
+  'soi-xam': { onEnemy: [{ id: 'slash', at: 0 }, { id: 'slash', at: 180 }] },
+  'bo-cap': { projectile: 'vine', onEnemy: [{ id: 'stun', at: FLIGHT_MS, loop: true }] },
+  'quy-da': { onEnemy: [{ id: 'dust', at: 150 }, { id: 'dust', at: 350 }] },
+  'rong-bong-toi': { projectile: 'fireball', onEnemy: [{ id: 'spark', at: FLIGHT_MS }] },
 }

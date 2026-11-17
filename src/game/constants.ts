@@ -20,17 +20,21 @@ export const ELEMENT_INFO: Record<
 
 /** Cân bằng chiến đấu (chỉnh tại đây) */
 export const BALANCE = {
+  // Lượt chơi
+  turnMs: 12000, // thời gian mỗi lượt; hết giờ là mất lượt
   // Kẻ địch: giá trị màn n = base + (n-1) * step
-  enemyHp: 160,
-  enemyHpStep: 80,
-  enemyAtk: 15,
-  enemyAtkStep: 4,
-  enemyInterval: 5500, // ms giữa 2 đòn đánh
-  enemyIntervalStep: 400,
-  enemyIntervalMin: 3500,
+  enemyHp: 110,
+  enemyHpStep: 55,
+  enemyPower: 0.28, // hệ số sát thương/hiệu quả ngọc so với pet
+  enemyPowerStep: 0.055,
+  enemySkillDamage: 14, // sát thương kỹ năng kẻ địch (đầy Nộ)
+  enemySkillStep: 3.5,
+  enemyMistake: 0.5, // xác suất đi nước ngẫu nhiên ở màn 1
+  enemyMistakeStep: 0.1,
+  enemyMistakeMin: 0.1,
   kimDamage: 4,
   mocHeal: 2,
-  thuyHeal: 2,
+  thuyHeal: 1.5,
   hoaDamage: 4,
   thoShield: 3,
   maxShield: 40, // giáp tối đa tích được
@@ -39,7 +43,7 @@ export const BALANCE = {
   comboStep: 0.25, // mỗi combo tăng thêm 25% hiệu quả
   maxRage: 100,
   bossHp: 1.6, // Boss máu x1.6
-  bossAttack: 1.3, // Boss đánh mạnh x1.3
+  bossPower: 1.2, // Boss mạnh x1.2 (cả đòn thường lẫn kỹ năng)
   advantage: 1.5, // khắc chế: sát thương gây ra x1.5
   disadvantage: 0.7, // bị khắc: sát thương gây ra x0.7
   affinity: 1.5, // ngọc cùng hệ với pet
@@ -54,12 +58,10 @@ export const COUNTER: Record<Element, Element> = {
   hoa: 'kim',
 }
 
-export const ENEMIES: { id: string; name: string; emoji: string; element: Element }[] = [
-  { id: 'nam-rung', name: 'Nấm Rừng', emoji: '🍄', element: 'moc' },
-  { id: 'soi-xam', name: 'Sói Xám', emoji: '🐺', element: 'kim' },
-  { id: 'bo-cap', name: 'Bọ Cạp Độc', emoji: '🦂', element: 'thuy' },
-  { id: 'quy-da', name: 'Quỷ Đá', emoji: '👹', element: 'tho' },
-  { id: 'rong-bong-toi', name: 'Rồng Bóng Tối', emoji: '🐉', element: 'hoa' },
+export const ENEMIES: { id: string; name: string; emoji: string; element: Element; skill: string }[] = [
+  { id: 'nam-rung', name: 'Nấm Rừng', emoji: '🍄', element: 'moc', skill: 'Bào Tử Độc' },
+  { id: 'soi-xam', name: 'Sói Xám', emoji: '🐺', element: 'kim', skill: 'Vuốt Xé' },
+  { id: 'bo-cap', name: 'Bọ Cạp Độc', emoji: '🦂', element: 'thuy', skill: 'Nọc Độc' },
+  { id: 'quy-da', name: 'Quỷ Đá', emoji: '👹', element: 'tho', skill: 'Đập Đất' },
+  { id: 'rong-bong-toi', name: 'Rồng Bóng Tối', emoji: '🐉', element: 'hoa', skill: 'Hơi Thở Bóng Tối' },
 ]
-
-

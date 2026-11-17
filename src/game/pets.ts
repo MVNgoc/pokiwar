@@ -19,9 +19,9 @@ export const PETS: Pet[] = [
     name: 'Thủy Quy',
     emoji: '🐢',
     element: 'thuy',
-    maxHp: 140,
+    maxHp: 150,
     desc: 'Rùa nước trâu bò, trụ vững nhờ hồi máu.',
-    skill: { name: 'Suối Nguồn Sinh Mệnh', emoji: '💧', desc: 'Hồi 40% HP và +15 giáp', healPct: 0.4, shield: 15 },
+    skill: { name: 'Suối Nguồn Sinh Mệnh', emoji: '💧', desc: 'Gây 30 sát thương, hồi 40% HP và +15 giáp', damage: 30, healPct: 0.4, shield: 15 },
   },
   {
     id: 'moc-loc',
@@ -30,7 +30,7 @@ export const PETS: Pet[] = [
     element: 'moc',
     maxHp: 130,
     desc: 'Hươu rừng thiêng, khống chế kẻ địch.',
-    skill: { name: 'Dây Leo Trói Buộc', emoji: '🌿', desc: 'Gây 25 sát thương, kẻ địch bị choáng 5 giây', damage: 25, stunMs: 5000 },
+    skill: { name: 'Dây Leo Trói Buộc', emoji: '🌿', desc: 'Gây 25 sát thương, kẻ địch mất 1 lượt', damage: 25, stun: true },
   },
   {
     id: 'kim-ho',
