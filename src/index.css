@@ -11,83 +11,6 @@ html, body, #root { height: 100%; margin: 0; background: #0c0a09; overscroll-beh
 }
 .float-up { animation: float-up 1.1s cubic-bezier(.2, .8, .3, 1) forwards; }
 
-/* ---- Pet (dùng translate/scale/rotate riêng, không đụng `transform` lật hình) ---- */
-
-/* thở: phồng lên một chút rồi xẹp, chân luôn bám đất */
-@keyframes breathe {
-  0%, 100% { scale: 1 1; translate: 0 0; }
-  50% { scale: 0.97 1.05; translate: 0 -2px; }
-}
-.animate-breathe { animation: breathe 2.2s ease-in-out infinite; }
-@keyframes shadow-breathe { 0%, 100% { scale: 1 1; opacity: .45; } 50% { scale: 0.88 1; opacity: .32; } }
-.animate-shadow { animation: shadow-breathe 2.2s ease-in-out infinite; }
-
-/* lao tới: lấy đà (cúi, lùi) → vọt (kéo giãn) → chạm (bẹp) → về có nảy */
-@keyframes lunge-r {
-  0% { translate: 0 0; scale: 1 1; }
-  22% { translate: -14px 2px; scale: 1.08 0.9; animation-timing-function: cubic-bezier(.2, 0, .1, 1); }
-  45% { translate: 66px -8px; scale: 0.9 1.1; }
-  55% { translate: 70px 0; scale: 1.12 0.88; animation-timing-function: ease-out; }
-  80% { translate: -5px 0; scale: 0.98 1.03; }
-  100% { translate: 0 0; scale: 1 1; }
-}
-@keyframes lunge-l {
-  0% { translate: 0 0; scale: 1 1; }
-  22% { translate: 14px 2px; scale: 1.08 0.9; animation-timing-function: cubic-bezier(.2, 0, .1, 1); }
-  45% { translate: -66px -8px; scale: 0.9 1.1; }
-  55% { translate: -70px 0; scale: 1.12 0.88; animation-timing-function: ease-out; }
-  80% { translate: 5px 0; scale: 0.98 1.03; }
-  100% { translate: 0 0; scale: 1 1; }
-}
-.animate-lunge-r { animation: lunge-r 0.55s linear; }
-.animate-lunge-l { animation: lunge-l 0.55s linear; }
-
-/* bị đánh: loé trắng-đỏ, bật lùi, rung tắt dần */
-@keyframes hurt-l {
-  0% { translate: 0 0; rotate: 0deg; filter: brightness(2.4) sepia(1) saturate(5) hue-rotate(-35deg); }
-  14% { translate: -16px -4px; rotate: -6deg; filter: brightness(1.8) sepia(1) saturate(5) hue-rotate(-35deg); }
-  30% { translate: -9px 0; rotate: -3deg; filter: none; }
-  46% { translate: -13px 0; rotate: -4deg; }
-  62% { translate: -5px 0; rotate: -1deg; }
-  80% { translate: -7px 0; rotate: -2deg; }
-  100% { translate: 0 0; rotate: 0deg; filter: none; }
-}
-@keyframes hurt-r {
-  0% { translate: 0 0; rotate: 0deg; filter: brightness(2.4) sepia(1) saturate(5) hue-rotate(-35deg); }
-  14% { translate: 16px -4px; rotate: 6deg; filter: brightness(1.8) sepia(1) saturate(5) hue-rotate(-35deg); }
-  30% { translate: 9px 0; rotate: 3deg; filter: none; }
-  46% { translate: 13px 0; rotate: 4deg; }
-  62% { translate: 5px 0; rotate: 1deg; }
-  80% { translate: 7px 0; rotate: 2deg; }
-  100% { translate: 0 0; rotate: 0deg; filter: none; }
-}
-.animate-hurt-l { animation: hurt-l 0.45s ease-out; }
-.animate-hurt-r { animation: hurt-r 0.45s ease-out; }
-
-/* xuất hiện: trượt vào, vượt quá một chút rồi vào vị trí */
-@keyframes enter-l {
-  0% { translate: -90px 0; scale: 0.6; opacity: 0; }
-  60% { translate: 8px -10px; scale: 1.08; opacity: 1; }
-  80% { translate: 0 0; scale: 0.97 1.04; }
-  100% { translate: 0 0; scale: 1; opacity: 1; }
-}
-@keyframes enter-r {
-  0% { translate: 90px 0; scale: 0.6; opacity: 0; }
-  60% { translate: -8px -10px; scale: 1.08; opacity: 1; }
-  80% { translate: 0 0; scale: 0.97 1.04; }
-  100% { translate: 0 0; scale: 1; opacity: 1; }
-}
-.animate-enter-l { animation: enter-l 0.7s cubic-bezier(.25, .8, .3, 1) both; }
-.animate-enter-r { animation: enter-r 0.7s cubic-bezier(.25, .8, .3, 1) both; }
-
-/* bị hạ: loé sáng, nảy lên rồi ngã xoay và mờ dần */
-@keyframes defeat {
-  0% { translate: 0 0; rotate: 0deg; scale: 1; opacity: 1; filter: brightness(3); }
-  25% { translate: 0 -14px; rotate: calc(var(--rot, 40deg) * 0.2); scale: 1.1; opacity: 1; filter: brightness(1.6); }
-  100% { translate: 0 26px; rotate: var(--rot, 40deg); scale: 0.55; opacity: 0; filter: brightness(1); }
-}
-.animate-defeat { animation: defeat 0.9s cubic-bezier(.5, 0, .8, .6) forwards; }
-
 /* rung màn hình khi trúng đòn mạnh */
 @keyframes shake {
   0%, 100% { translate: 0 0; }
@@ -102,54 +25,6 @@ html, body, #root { height: 100%; margin: 0; background: #0c0a09; overscroll-beh
 /* nút kỹ năng sẵn sàng: nảy nhẹ */
 @keyframes ready { 0%, 100% { scale: 1; } 50% { scale: 1.07; } }
 .animate-ready { animation: ready 0.9s ease-in-out infinite; }
-
-/* ---- Ngọc ---- */
-
-/* tiếp đất: bẹp rồi bật lại (chân bám đáy ô) */
-@keyframes gem-land {
-  0% { scale: 1.14 0.8; }
-  40% { scale: 0.95 1.08; }
-  70% { scale: 1.02 0.98; }
-  100% { scale: 1 1; }
-}
-.animate-gem-land { animation: gem-land 0.28s ease-out; }
-
-/* bị phá: phồng lên và loé sáng rồi thu nhỏ xoay biến mất */
-@keyframes gem-pop {
-  0% { scale: 1; rotate: 0deg; opacity: 1; filter: brightness(1); }
-  35% { scale: 1.3; rotate: -6deg; opacity: 1; filter: brightness(2.2); }
-  100% { scale: 0; rotate: 40deg; opacity: 0; filter: brightness(1.5); }
-}
-.animate-gem-pop { animation: gem-pop 0.28s ease-in forwards; }
-
-/* tia sáng bắn ra khi ngọc nổ */
-@keyframes spark-out {
-  0% { translate: 0 0; scale: 1; opacity: 1; }
-  100% { translate: calc(cos(var(--a)) * 26px) calc(sin(var(--a)) * 26px); scale: 0.2; opacity: 0; }
-}
-
-/* đang chọn: nảy như thạch */
-@keyframes gem-select {
-  0%, 100% { scale: 1.08 1.08; }
-  25% { scale: 1.18 0.98; }
-  50% { scale: 1.02 1.16; }
-  75% { scale: 1.14 1.02; }
-}
-.animate-gem-select { animation: gem-select 0.7s ease-in-out infinite; filter: drop-shadow(0 0 8px #fde047); }
-
-/* ngọc đặc biệt: nhịp thở có ánh sáng */
-@keyframes gem-special {
-  0%, 100% { scale: 1; filter: drop-shadow(0 0 3px #fff); }
-  50% { scale: 1.1; filter: drop-shadow(0 0 9px #fff); }
-}
-.animate-gem-special { animation: gem-special 1s ease-in-out infinite; }
-
-/* Hiệu ứng kỹ năng (sprite sheet phát bằng steps()) */
-@keyframes fx-play { from { background-position: 0 0; } to { background-position: 100% 0; } }
-@keyframes fx-show { from { opacity: 0; } to { opacity: 1; } }
-@keyframes fx-hide { to { opacity: 0; } }
-@keyframes fx-fly { from { left: 22%; } to { left: 78%; } }
-@keyframes fx-fly-rev { from { left: 78%; } to { left: 22%; } }
 
 @keyframes notice-pop { from { opacity: 0; } to { opacity: 1; } }
 .notice-pop { animation: notice-pop 0.25s ease-out; }

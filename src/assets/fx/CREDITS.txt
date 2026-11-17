@@ -1,3 +1,0 @@
-Hiệu ứng kỹ năng: "Pixel Art Spells" của DevWizard (OpenGameArt)
-https://opengameart.org/content/pixel-art-spells
-Giấy phép: CC0 1.0 (public domain). Các GIF gốc 16x16 được gộp thành sprite sheet WebP.

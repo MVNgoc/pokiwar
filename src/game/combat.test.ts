@@ -8,7 +8,7 @@ import type { BattleState } from './types'
 
 const zero = { kim: 0, moc: 0, thuy: 0, hoa: 0, tho: 0 }
 const gems = (o: Partial<typeof zero>) => ({ ...zero, ...o })
-const hoaHo = PETS.find((p) => p.id === 'hoa-ho')! // Hỏa khắc Kim
+const hoaHo = PETS.find((p) => p.id === 'hoa-ma')! // Hỏa khắc Kim
 const withEnemy = (s: BattleState, e: Partial<BattleState['enemy']>): BattleState => ({ ...s, enemy: { ...s.enemy, ...e } })
 const withPlayer = (s: BattleState, p: Partial<BattleState['player']>): BattleState => ({ ...s, player: { ...s.player, ...p } })
 const base = createBattle(hoaHo)

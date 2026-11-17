@@ -14,6 +14,7 @@ import {
   type Result,
 } from '../game/combat'
 import { play } from '../game/sfx'
+import { FLIGHT_MS } from '../three/fxPlans'
 import { loadRecord, saveResult } from '../game/storage'
 import type { Board, FloatEvent, Pet, Position, Side } from '../game/types'
 
@@ -203,7 +204,7 @@ export function useGame(pet: Pet) {
       flashAttack('enemy')
       pushFloats([{ side: 'enemy', text: cur.enemy.skill.name, kind: 'combo' }])
       setTimeout(() => setCast((c) => (c?.id === id ? null : c)), 1500)
-      await sleep(450)
+      await sleep(FLIGHT_MS)
       if (stale(e)) return
       commit(enemyCastSkill(battleRef.current))
       await sleep(700)
@@ -248,7 +249,7 @@ export function useGame(pet: Pet) {
     play('skill')
     if (offensive) flashAttack('player')
     setTimeout(() => setCast((c) => (c?.id === id ? null : c)), 1500)
-    await sleep(offensive ? 450 : 150) // đòn trúng sau khi hiệu ứng bay tới nơi
+    await sleep(offensive ? FLIGHT_MS : 150) // đòn trúng sau khi hiệu ứng bay tới nơi
     if (stale(e)) return
     commit(castSkill(battleRef.current))
     await sleep(600)

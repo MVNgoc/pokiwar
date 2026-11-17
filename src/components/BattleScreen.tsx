@@ -1,18 +1,17 @@
 import { canUseSkill } from '../game/combat'
-import type { PetRecord } from '../game/storage'
-import type { BattleState } from '../game/types'
-import type { Cast, FloatText } from '../hooks/useGame'
-import { ENEMY_IMAGES, PET_IMAGES } from '../assets/creatures'
 import { BALANCE, ELEMENT_INFO, TOTAL_STAGES } from '../game/constants'
-import SkillFx from './SkillFx'
+import type { PetRecord } from '../game/storage'
+import type { BattleState, Side } from '../game/types'
+import type { Cast, FloatText } from '../hooks/useGame'
+import ArenaScene from '../three/ArenaScene'
 import StatusBars from './StatusBars'
 
 interface Props {
   battle: BattleState
   floats: FloatText[]
-  hitFlash: 'player' | 'enemy' | null
+  hitFlash: Side | null
   shaking: boolean
-  attacker: 'player' | 'enemy' | null
+  attacker: Side | null
   cast: Cast | null
   best: PetRecord
   newBest: boolean
@@ -34,48 +33,23 @@ const FLOAT_COLOR: Record<FloatText['kind'], string> = {
 }
 
 interface FighterProps {
-  side: 'player' | 'enemy'
-  image: string
   name: string
-  hurt: boolean
-  attacking: boolean
   /** đang có lượt */
   active: boolean
-  defeated: boolean
-  /** đổi giá trị này để phát lại hoạt ảnh xuất hiện */
-  enterKey: string
   floats: FloatText[]
   children: React.ReactNode
 }
 
-function Fighter({ side, image, name, hurt, attacking, active, defeated, enterKey, floats, children }: FighterProps) {
-  const isPlayer = side === 'player'
-  // Ưu tiên: bị hạ > tấn công > bị đánh. Hoạt ảnh thở chạy ở lớp trong cùng.
-  const state = defeated
-    ? 'animate-defeat'
-    : attacking
-      ? isPlayer ? 'animate-lunge-r' : 'animate-lunge-l'
-      : hurt
-        ? isPlayer ? 'animate-hurt-l' : 'animate-hurt-r'
-        : ''
+/** Phần giao diện (HTML) của mỗi bên: tên, thanh máu/Nộ/đồng hồ và chữ sát thương nổi. Nhân vật 3D vẽ ở lớp phía sau. */
+function Fighter({ name, active, floats, children }: FighterProps) {
   return (
-    <div className={`relative flex w-1/2 max-w-[220px] flex-col items-center gap-1 transition-[opacity,filter] duration-300 ${active ? '' : 'opacity-70 saturate-50'}`}>
-      <div className={`text-xs font-bold ${active ? 'text-yellow-300' : 'text-amber-100'}`}>{active ? '▶ ' : ''}{name}</div>
-      <div className="relative">
-        <div className={`absolute -bottom-1 left-1/2 h-2.5 w-3/4 -translate-x-1/2 rounded-full bg-black/45 blur-[3px] ${defeated ? 'opacity-0 transition-opacity duration-500' : 'animate-shadow'}`} />
-        <div key={enterKey} className={isPlayer ? 'animate-enter-l' : 'animate-enter-r'}>
-          <div className={state} style={{ '--rot': isPlayer ? '-70deg' : '70deg' } as React.CSSProperties}>
-            <div className={`origin-bottom ${defeated ? '' : 'animate-breathe'}`} style={{ animationDelay: isPlayer ? '0s' : '-0.9s' }}>
-              <img
-                src={image}
-                alt={name}
-                draggable={false}
-                className={`h-[clamp(64px,17dvh,120px)] w-auto [image-rendering:pixelated] ${isPlayer ? '' : '[transform:scaleX(-1)]'}`}
-              />
-            </div>
-          </div>
-        </div>
+    <div className={`relative flex w-1/2 max-w-[220px] flex-col items-center gap-1 transition-[opacity,filter] duration-300 ${active ? '' : 'opacity-75 saturate-50'}`}>
+      <div className={`rounded-full bg-black/35 px-2 text-xs font-bold ${active ? 'text-yellow-300' : 'text-amber-100'}`}>
+        {active ? '▶ ' : ''}
+        {name}
       </div>
+      {/* chỗ trống để nhân vật 3D hiện ra phía sau */}
+      <div className="h-[clamp(80px,19dvh,140px)] w-full" />
       <div className="relative w-full">
         {children}
         {floats.map((f) => (
@@ -96,36 +70,44 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
   const { player, enemy, stage, score, status } = battle
   const ready = canUseSkill(battle) && !busy
   const turnInfo = { pct: (battle.turnLeft / BALANCE.turnMs) * 100, secs: Math.ceil(battle.turnLeft / 1000) }
+  const playing = status === 'playing'
   return (
-    <div className="relative flex flex-1 flex-col bg-gradient-to-b from-sky-900 via-emerald-900 to-emerald-950 px-3 pt-2">
-      <div className="flex justify-between text-xs font-bold text-amber-100">
+    <div className={`relative flex flex-1 flex-col overflow-hidden bg-gradient-to-b from-sky-900 via-emerald-900 to-emerald-950 px-3 pt-2 ${shaking ? 'animate-shake' : ''}`}>
+      <ArenaScene battle={battle} hitFlash={hitFlash} attacker={attacker} cast={cast} />
+
+      <div className="relative z-10 flex justify-between text-xs font-bold text-amber-100">
         <span>{enemy.boss ? '👑 BOSS' : `Màn ${stage}/${TOTAL_STAGES}`}</span>
         <span className="text-[10px] font-normal text-amber-100/70">Kim›Mộc›Thổ›Thủy›Hỏa›Kim</span>
-        <span>Điểm: {score} · Kỷ lục: {Math.max(best.bestScore, score)}</span>
+        <span>
+          Điểm: {score} · Kỷ lục: {Math.max(best.bestScore, score)}
+        </span>
       </div>
 
-      <div className={`relative flex flex-1 items-end justify-around gap-2 pb-2 ${shaking ? 'animate-shake' : ''}`}>
-        {cast && <SkillFx key={cast.id} cast={cast} />}
-        {status === 'playing' && (
-          <div key={battle.turnNo} className="turn-banner pointer-events-none absolute inset-x-0 top-[18%] z-30 flex justify-center">
+      <div className="relative z-10 flex flex-1 items-end justify-around gap-2 pb-2">
+        {playing && (
+          <div key={battle.turnNo} className="turn-banner pointer-events-none absolute inset-x-0 top-[8%] z-30 flex justify-center">
             <span className={`rounded-full px-4 py-1 text-sm font-black shadow-lg ${battle.turn === 'player' ? 'bg-emerald-400 text-black' : 'bg-red-500 text-white'}`}>
               {battle.turn === 'player' ? '⚔ LƯỢT CỦA BẠN' : '💢 LƯỢT KẺ ĐỊCH'}
             </span>
           </div>
         )}
-        <Fighter side="player" image={PET_IMAGES[battle.pet.id]} name={`${ELEMENT_INFO[battle.pet.element].glyph} ${player.name}`} hurt={hitFlash === 'player'} attacking={attacker === 'player'} active={status === 'playing' && battle.turn === 'player'} defeated={player.hp <= 0} enterKey={battle.pet.id} floats={floats.filter((f) => f.side === 'player')}>
-          <StatusBars hp={player.hp} maxHp={player.maxHp} rage={player.rage} maxRage={player.maxRage} shield={player.shield} turn={status === 'playing' && battle.turn === 'player' ? turnInfo : null} />
+        <Fighter name={`${ELEMENT_INFO[battle.pet.element].glyph} ${player.name}`} active={playing && battle.turn === 'player'} floats={floats.filter((f) => f.side === 'player')}>
+          <StatusBars hp={player.hp} maxHp={player.maxHp} rage={player.rage} maxRage={player.maxRage} shield={player.shield} turn={playing && battle.turn === 'player' ? turnInfo : null} />
         </Fighter>
-        <div className="mb-16 text-2xl font-black text-amber-200">VS</div>
-        <Fighter side="enemy" image={ENEMY_IMAGES[enemy.id]} name={`${enemy.boss ? '無' : ELEMENT_INFO[enemy.element].glyph} ${enemy.name}${enemy.stunned ? ' 💫' : ''}`} hurt={hitFlash === 'enemy'} attacking={attacker === 'enemy'} active={status === 'playing' && battle.turn === 'enemy'} defeated={enemy.hp <= 0} enterKey={`${enemy.id}-${stage}`} floats={floats.filter((f) => f.side === 'enemy')}>
-          <StatusBars hp={enemy.hp} maxHp={enemy.maxHp} rage={enemy.rage} maxRage={enemy.maxRage} shield={enemy.shield} turn={status === 'playing' && battle.turn === 'enemy' ? turnInfo : null} />
+        <div className="mb-16 text-2xl font-black text-amber-200 [text-shadow:0_2px_4px_#000]">VS</div>
+        <Fighter
+          name={`${enemy.boss ? '無' : ELEMENT_INFO[enemy.element].glyph} ${enemy.name}${enemy.stunned ? ' 💫' : ''}`}
+          active={playing && battle.turn === 'enemy'}
+          floats={floats.filter((f) => f.side === 'enemy')}
+        >
+          <StatusBars hp={enemy.hp} maxHp={enemy.maxHp} rage={enemy.rage} maxRage={enemy.maxRage} shield={enemy.shield} turn={playing && battle.turn === 'enemy' ? turnInfo : null} />
         </Fighter>
       </div>
 
       <button
         onClick={onSkill}
         disabled={!ready}
-        className={`mx-auto mb-2 rounded-full border-2 px-5 py-1.5 text-sm font-black transition ${
+        className={`relative z-10 mx-auto mb-2 rounded-full border-2 px-5 py-1.5 text-sm font-black transition ${
           ready
             ? 'animate-ready border-yellow-200 bg-gradient-to-b from-orange-400 to-red-600 text-white shadow-[0_0_16px_#fb923c]'
             : 'border-stone-600 bg-stone-700 text-stone-400'
@@ -143,7 +125,7 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
       </button>
 
       {status !== 'playing' && (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/60 text-center">
+        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-3 bg-black/60 text-center">
           {status === 'stageClear' ? (
             <>
               <div className="text-3xl font-black text-yellow-300">Hạ gục {enemy.name}!</div>
@@ -151,12 +133,8 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
             </>
           ) : (
             <>
-              <div className={`text-3xl font-black ${status === 'won' ? 'text-yellow-300' : 'text-red-400'}`}>
-                {status === 'won' ? '🏆 Chiến thắng!' : 'Thất bại!'}
-              </div>
-              <div className="text-sm text-amber-100">
-                {status === 'won' ? `${player.name} đã hạ gục Boss!` : `Dừng chân ở màn ${stage}/${TOTAL_STAGES}`}
-              </div>
+              <div className={`text-3xl font-black ${status === 'won' ? 'text-yellow-300' : 'text-red-400'}`}>{status === 'won' ? '🏆 Chiến thắng!' : 'Thất bại!'}</div>
+              <div className="text-sm text-amber-100">{status === 'won' ? `${player.name} đã hạ gục Boss!` : `Dừng chân ở màn ${stage}/${TOTAL_STAGES}`}</div>
               <div className="text-lg font-bold text-white">Điểm: {score}</div>
               <div className="text-xs text-amber-200">
                 {newBest ? '🎉 Kỷ lục mới!' : `Kỷ lục: ${best.bestScore}`} · Thắng: {best.wins} lần
