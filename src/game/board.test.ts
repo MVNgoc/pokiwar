@@ -35,4 +35,35 @@ const col = collapse(cleared)
 assert.ok(col.every((row) => row.every(Boolean)))
 assert.equal(col[7][0]?.id, w[5][0]?.id)
 
+// 6. Ngọc đặc biệt
+import { resolveMatches } from './board'
+const LETTERS = 'KMTHO'
+const base = () => mk(Array.from({ length: 8 }, (_, r) => Array.from({ length: 8 }, (_, c) => LETTERS[(c + 2 * r) % 5]).join('')))
+assert.equal(findMatches(base()).length, 0)
+const setType = (bd: Board, r: number, cs: number[], t: Element) => cs.forEach((c) => (bd[r][c] = { ...bd[r][c]!, type: t }))
+
+// match 4 → bomb tại ô người chơi đổi
+const b4 = base()
+setType(b4, 0, [0, 1, 2, 3], 'kim')
+const r4 = resolveMatches(b4, [{ r: 0, c: 1 }])
+assert.deepEqual(r4.spawns, [{ pos: { r: 0, c: 1 }, special: 'bomb' }])
+assert.equal(r4.cleared.length, 3)
+
+// match 5 → lightning
+const b5 = base()
+setType(b5, 0, [0, 1, 2, 3, 4], 'kim')
+assert.equal(resolveMatches(b5, [{ r: 0, c: 2 }]).spawns[0].special, 'lightning')
+
+// bomb bị phá → nổ 3x3
+const bb = base()
+setType(bb, 3, [2, 3, 4], 'kim')
+bb[3][3] = { ...bb[3][3]!, special: 'bomb' }
+assert.equal(resolveMatches(bb).cleared.length, 9)
+
+// lightning bị phá → xoá cả hàng + cột (8 + 8 - 1)
+const bl = base()
+setType(bl, 3, [2, 3, 4], 'kim')
+bl[3][3] = { ...bl[3][3]!, special: 'lightning' }
+assert.equal(resolveMatches(bl).cleared.length, 15)
+
 console.log('board tests OK')

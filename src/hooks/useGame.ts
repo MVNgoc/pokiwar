@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { areAdjacent, collapse, countGems, createBoard, findMatches, hasPossibleMove, removeTiles, swapTiles } from '../game/board'
+import { applyResolution, areAdjacent, collapse, createBoard, findMatches, hasPossibleMove, resolveMatches, swapTiles } from '../game/board'
 import { applyGems, canUseSkill, createBattle, enemyAttack, nextStage, tickEnemyTimer, useSkill as castSkill, type Result } from '../game/combat'
 import { loadRecord, saveResult } from '../game/storage'
 import type { Board, FloatEvent, Pet, Position } from '../game/types'
@@ -99,16 +99,17 @@ export function useGame(pet: Pet) {
         await sleep(220)
       } else {
         let combo = 0
+        let preferred = [a, b] // ngọc đặc biệt ưu tiên sinh ra ở ô người chơi vừa đổi
         for (;;) {
-          const matches = findMatches(cur)
-          if (!matches.length) break
+          const res = resolveMatches(cur, preferred)
+          if (!res.cleared.length) break
+          preferred = []
           combo++
-          const gems = countGems(cur, matches)
-          setClearing(new Set(matches.map(({ r, c }) => cur[r][c]!.id)))
+          setClearing(new Set(res.cleared.map(({ r, c }) => cur[r][c]!.id)))
           await sleep(260)
           setClearing(new Set())
-          commit(applyGems(battleRef.current, gems, combo))
-          cur = collapse(removeTiles(cur, matches))
+          commit(applyGems(battleRef.current, res.gems, combo))
+          cur = collapse(applyResolution(cur, res))
           setBoardSync(cur)
           await sleep(320)
         }

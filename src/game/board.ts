@@ -1,5 +1,5 @@
 import { BOARD_SIZE, ELEMENTS, MIN_MATCH } from './constants'
-import type { Board, Element, GemCounts, Position, Tile } from './types'
+import type { Board, Element, GemCounts, Position, Special, Tile } from './types'
 
 let nextId = 1
 const newTile = (type: Element): Tile => ({ id: nextId++, type })
@@ -33,38 +33,127 @@ export function createBoard(): Board {
   }
 }
 
+interface Run {
+  cells: Position[]
+  dir: 'h' | 'v'
+}
+
+/** Mọi chuỗi liên tiếp ≥3 ngọc cùng hệ (ngang hoặc dọc). */
+export function findRuns(board: Board): Run[] {
+  const runs: Run[] = []
+  const scan = (dir: 'h' | 'v') => {
+    for (let a = 0; a < BOARD_SIZE; a++) {
+      let start = 0
+      for (let b = 1; b <= BOARD_SIZE; b++) {
+        const at = (k: number) => (dir === 'h' ? board[a][k] : board[k][a])
+        const prev = at(b - 1)
+        const cur = b < BOARD_SIZE ? at(b) : null
+        if (!(cur && prev && cur.type === prev.type)) {
+          if (b - start >= MIN_MATCH) {
+            const cells: Position[] = []
+            for (let k = start; k < b; k++) cells.push(dir === 'h' ? { r: a, c: k } : { r: k, c: a })
+            runs.push({ cells, dir })
+          }
+          start = b
+        }
+      }
+    }
+  }
+  scan('h')
+  scan('v')
+  return runs
+}
+
 /** Tìm mọi ô thuộc chuỗi ≥3 ngọc giống nhau (ngang hoặc dọc). */
 export function findMatches(board: Board): Position[] {
   const found = new Map<string, Position>()
-  const mark = (r: number, c: number) => found.set(`${r},${c}`, { r, c })
-
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    let run = 1
-    for (let c = 1; c <= BOARD_SIZE; c++) {
-      const prev = board[r][c - 1]
-      const cur = c < BOARD_SIZE ? board[r][c] : null
-      if (cur && prev && cur.type === prev.type) {
-        run++
-      } else {
-        if (run >= MIN_MATCH) for (let k = 1; k <= run; k++) mark(r, c - k)
-        run = 1
-      }
-    }
-  }
-  for (let c = 0; c < BOARD_SIZE; c++) {
-    let run = 1
-    for (let r = 1; r <= BOARD_SIZE; r++) {
-      const prev = board[r - 1][c]
-      const cur = r < BOARD_SIZE ? board[r][c] : null
-      if (cur && prev && cur.type === prev.type) {
-        run++
-      } else {
-        if (run >= MIN_MATCH) for (let k = 1; k <= run; k++) mark(r - k, c)
-        run = 1
-      }
-    }
-  }
+  for (const run of findRuns(board)) for (const p of run.cells) found.set(posKey(p), p)
   return [...found.values()]
+}
+
+export interface Resolution {
+  /** Các ô bị xoá (gồm cả ô bị ngọc đặc biệt kích hoạt, trừ ô sinh ra ngọc đặc biệt mới) */
+  cleared: Position[]
+  /** Ngọc đặc biệt mới sinh ra: ô giữ lại và nâng cấp thay vì bị xoá */
+  spawns: { pos: Position; special: Special }[]
+  gems: GemCounts
+}
+
+/** Vùng ảnh hưởng của ngọc đặc biệt tại `at`. */
+function blastArea(special: Special, at: Position): Position[] {
+  const out: Position[] = []
+  if (special === 'bomb') {
+    for (let r = at.r - 1; r <= at.r + 1; r++)
+      for (let c = at.c - 1; c <= at.c + 1; c++) if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) out.push({ r, c })
+  } else {
+    for (let k = 0; k < BOARD_SIZE; k++) out.push({ r: at.r, c: k }, { r: k, c: at.c })
+  }
+  return out
+}
+
+/**
+ * Xử lý 1 bước match: tìm chuỗi, quyết định ngọc đặc biệt sinh ra (4 → bomb, 5+ → lightning,
+ * chữ L/T → bomb), rồi lan truyền kích hoạt các ngọc đặc biệt bị phá.
+ * `preferred`: ô người chơi vừa hoán đổi — ngọc đặc biệt ưu tiên sinh ra ở đó.
+ */
+export function resolveMatches(board: Board, preferred: Position[] = []): Resolution {
+  const runs = findRuns(board)
+  const gems = countGems(board, [])
+  if (!runs.length) return { cleared: [], spawns: [], gems }
+
+  const matched = new Map<string, Position>()
+  const inH = new Set<string>()
+  const inV = new Set<string>()
+  for (const run of runs)
+    for (const p of run.cells) {
+      matched.set(posKey(p), p)
+      ;(run.dir === 'h' ? inH : inV).add(posKey(p))
+    }
+
+  const spawnMap = new Map<string, { pos: Position; special: Special }>()
+  const addSpawn = (pos: Position, special: Special) => {
+    const k = posKey(pos)
+    if (board[pos.r][pos.c]?.special) return // ô đã là ngọc đặc biệt: sẽ kích hoạt, không nâng cấp
+    if (special === 'bomb' && spawnMap.has(k)) return
+    spawnMap.set(k, { pos, special })
+  }
+  for (const run of runs) {
+    if (run.cells.length < 4) continue
+    const pick = preferred.find((p) => run.cells.some((c) => c.r === p.r && c.c === p.c))
+    addSpawn(pick ?? run.cells[Math.floor(run.cells.length / 2)], run.cells.length >= 5 ? 'lightning' : 'bomb')
+  }
+  for (const k of inH) if (inV.has(k)) addSpawn(matched.get(k)!, 'bomb') // chữ L / T / +
+
+  // Kích hoạt dây chuyền các ngọc đặc biệt nằm trong vùng bị phá
+  const cleared = new Map(matched)
+  const queue = [...matched.values()]
+  while (queue.length) {
+    const p = queue.pop()!
+    const special = board[p.r][p.c]?.special
+    if (!special) continue
+    for (const q of blastArea(special, p)) {
+      if (!cleared.has(posKey(q))) {
+        cleared.set(posKey(q), q)
+        queue.push(q)
+      }
+    }
+  }
+
+  const spawns = [...spawnMap.values()].filter((s) => cleared.has(posKey(s.pos)))
+  const spawnKeys = new Set(spawns.map((s) => posKey(s.pos)))
+  const counted = [...cleared.values()]
+  for (const k of spawnKeys) cleared.delete(k)
+  return { cleared: [...cleared.values()], spawns, gems: countGems(board, counted) }
+}
+
+/** Xoá các ô đã resolve và nâng cấp ô sinh ngọc đặc biệt. */
+export function applyResolution(board: Board, res: Resolution): Board {
+  const next = removeTiles(board, res.cleared)
+  for (const { pos, special } of res.spawns) {
+    const t = next[pos.r][pos.c]
+    if (t) next[pos.r][pos.c] = { ...t, special }
+  }
+  return next
 }
 
 export function swapTiles(board: Board, a: Position, b: Position): Board {

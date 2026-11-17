@@ -19,6 +19,7 @@ function GameView({ pet, onChangePet }: { pet: Pet; onChangePet: () => void }) {
             </span>
           ))}
         </div>
+        <div className="text-[10px] text-amber-100/80">Match 4 hoặc chữ L/T → 💣 nổ 3x3 · Match 5 → ⚡ quét cả hàng và cột</div>
         <div className="text-[10px] text-yellow-300">
           Ngọc {ELEMENT_INFO[pet.element].glyph} nạp +{BALANCE.ownRage} Nộ, ngọc khác +{BALANCE.otherRage}
         </div>

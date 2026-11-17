@@ -1,8 +1,12 @@
 export type Element = 'kim' | 'moc' | 'thuy' | 'hoa' | 'tho'
 
+/** bomb: nổ 3x3 (match 4 / chữ L, T) · lightning: quét cả hàng và cột (match 5+) */
+export type Special = 'bomb' | 'lightning'
+
 export interface Tile {
   id: number
   type: Element
+  special?: Special
   /** Ngọc mới sinh: hàng (âm = phía trên bàn cờ) nơi nó bắt đầu rơi xuống. Chỉ phục vụ hoạt ảnh. */
   spawnRow?: number
 }
