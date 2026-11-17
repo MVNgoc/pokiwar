@@ -2,9 +2,6 @@
 
 html, body, #root { height: 100%; margin: 0; background: #0c0a09; overscroll-behavior: none; }
 
-@keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
-.tile-pop { animation: pop 0.25s ease-out; }
-
 @keyframes float-up {
   0% { transform: translateY(0) scale(0.6); opacity: 0; }
   20% { transform: translateY(-10px) scale(1.2); opacity: 1; }
@@ -14,3 +11,28 @@ html, body, #root { height: 100%; margin: 0; background: #0c0a09; overscroll-beh
 
 @keyframes bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
 .animate-bob { animation: bob 1.6s ease-in-out infinite; }
+
+/* Pet lao tới khi tấn công (dùng thuộc tính `translate` để không đụng `transform` lật hình) */
+@keyframes lunge-r { 0%, 100% { translate: 0 0; } 40% { translate: 60px -8px; } }
+@keyframes lunge-l { 0%, 100% { translate: 0 0; } 40% { translate: -60px -8px; } }
+.animate-lunge-r { animation: lunge-r 0.45s ease-out; }
+.animate-lunge-l { animation: lunge-l 0.45s ease-out; }
+
+/* Chiêu thức bay từ pet sang kẻ địch */
+@keyframes fly {
+  0% { left: 18%; scale: 0.4; opacity: 0; rotate: 0deg; }
+  15% { opacity: 1; scale: 1.2; }
+  100% { left: 72%; scale: 1.6; opacity: 0.2; rotate: 540deg; }
+}
+.animate-fly { animation: fly 0.5s ease-in forwards; }
+
+/* Hào quang hồi máu / giáp quanh pet */
+@keyframes aura {
+  0% { scale: 0.3; opacity: 0; translate: 0 20px; }
+  40% { scale: 1.8; opacity: 1; }
+  100% { scale: 2.4; opacity: 0; translate: 0 -30px; }
+}
+.animate-aura { animation: aura 0.8s ease-out forwards; }
+
+@keyframes notice-pop { from { opacity: 0; } to { opacity: 1; } }
+.notice-pop { animation: notice-pop 0.25s ease-out; }

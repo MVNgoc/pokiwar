@@ -8,12 +8,13 @@ interface Props {
   board: BoardData
   clearing: Set<number>
   locked: boolean
+  notice?: string | null
   onSwap: (a: Position, b: Position) => void
 }
 
 const DRAG_THRESHOLD = 18
 
-export default function Board({ board, clearing, locked, onSwap }: Props) {
+export default function Board({ board, clearing, locked, notice, onSwap }: Props) {
   const [selected, setSelected] = useState<Position | null>(null)
   const drag = useRef<{ pos: Position; x: number; y: number } | null>(null)
   const ref = useRef<HTMLDivElement>(null)
@@ -62,7 +63,7 @@ export default function Board({ board, clearing, locked, onSwap }: Props) {
   return (
     <div
       ref={ref}
-      className="relative aspect-square touch-none rounded-2xl border-4 border-amber-900 bg-stone-900/80 shadow-xl"
+      className="relative aspect-square touch-none overflow-hidden rounded-2xl border-4 border-amber-900 bg-stone-900/80 shadow-xl"
       style={{ width: 'min(calc(100vw - 16px), 52dvh)' }}
       onPointerDown={down}
       onPointerMove={move}
@@ -83,6 +84,11 @@ export default function Board({ board, clearing, locked, onSwap }: Props) {
             />
           ) : null,
         ),
+      )}
+      {notice && (
+        <div className="notice-pop absolute inset-0 z-10 flex items-center justify-center bg-black/55">
+          <span className="rounded-lg bg-amber-400 px-4 py-2 text-sm font-black text-black shadow-lg">{notice}</span>
+        </div>
       )}
     </div>
   )

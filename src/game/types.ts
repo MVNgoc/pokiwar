@@ -3,6 +3,8 @@ export type Element = 'kim' | 'moc' | 'thuy' | 'hoa' | 'tho'
 export interface Tile {
   id: number
   type: Element
+  /** Ngọc mới sinh: hàng (âm = phía trên bàn cờ) nơi nó bắt đầu rơi xuống. Chỉ phục vụ hoạt ảnh. */
+  spawnRow?: number
 }
 
 /** null = ô trống (đang bị xoá, chờ rơi ngọc xuống) */

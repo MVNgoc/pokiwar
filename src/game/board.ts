@@ -106,7 +106,11 @@ export function collapse(board: Board): Board {
       const t = board[r][c]
       if (t) next[write--][c] = t
     }
-    while (write >= 0) next[write--][c] = newTile(randomElement())
+    const missing = write + 1
+    while (write >= 0) {
+      next[write][c] = { ...newTile(randomElement()), spawnRow: write - missing }
+      write--
+    }
   }
   return next
 }

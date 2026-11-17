@@ -1,6 +1,6 @@
 import { canUseSkill } from '../game/combat'
 import type { BattleState } from '../game/types'
-import type { FloatText } from '../hooks/useGame'
+import type { Cast, FloatText } from '../hooks/useGame'
 import { ELEMENT_INFO } from '../game/constants'
 import StatusBars from './StatusBars'
 
@@ -8,6 +8,8 @@ interface Props {
   battle: BattleState
   floats: FloatText[]
   hitFlash: 'player' | 'enemy' | null
+  attacker: 'player' | 'enemy' | null
+  cast: Cast | null
   onSkill: () => void
   onRestart: () => void
   onChangePet: () => void
@@ -22,18 +24,19 @@ const FLOAT_COLOR: Record<FloatText['kind'], string> = {
   combo: 'text-fuchsia-300',
 }
 
-function Fighter({ side, emoji, name, flash, floats, children }: {
+function Fighter({ side, emoji, name, flash, attacking, floats, children }: {
   side: 'player' | 'enemy'
   emoji: string
   name: string
   flash: boolean
+  attacking: boolean
   floats: FloatText[]
   children: React.ReactNode
 }) {
   return (
     <div className="relative flex w-1/2 max-w-[220px] flex-col items-center gap-1">
       <div className="text-xs font-bold text-amber-100">{name}</div>
-      <div className={`relative text-[clamp(56px,16dvh,110px)] leading-none transition-transform ${flash ? 'translate-x-1 scale-95 brightness-150' : 'animate-bob'} ${side === 'enemy' ? '[transform:scaleX(-1)]' : ''}`}>
+      <div className={`relative text-[clamp(56px,16dvh,110px)] leading-none transition-transform ${attacking ? (side === 'player' ? 'animate-lunge-r' : 'animate-lunge-l') : flash ? 'translate-x-1 scale-95 brightness-150' : 'animate-bob'} ${side === 'enemy' ? '[transform:scaleX(-1)]' : ''}`}>
         {emoji}
       </div>
       <div className="relative w-full">
@@ -52,7 +55,7 @@ function Fighter({ side, emoji, name, flash, floats, children }: {
   )
 }
 
-export default function BattleScreen({ battle, floats, hitFlash, onSkill, onRestart, onChangePet }: Props) {
+export default function BattleScreen({ battle, floats, hitFlash, attacker, cast, onSkill, onRestart, onChangePet }: Props) {
   const { player, enemy, stage, score, status } = battle
   const ready = canUseSkill(battle)
   return (
@@ -63,12 +66,17 @@ export default function BattleScreen({ battle, floats, hitFlash, onSkill, onRest
         <span>Điểm: {score}</span>
       </div>
 
-      <div className="flex flex-1 items-end justify-around gap-2 pb-2">
-        <Fighter side="player" emoji={player.emoji} name={`${ELEMENT_INFO[battle.pet.element].glyph} ${player.name}`} flash={hitFlash === 'player'} floats={floats.filter((f) => f.side === 'player')}>
+      <div className="relative flex flex-1 items-end justify-around gap-2 pb-2">
+        {cast && (
+          <span key={cast.id} className={`pointer-events-none absolute bottom-1/3 z-20 text-5xl ${cast.offensive ? 'animate-fly' : 'animate-aura left-[8%]'}`}>
+            {cast.emoji}
+          </span>
+        )}
+        <Fighter side="player" emoji={player.emoji} name={`${ELEMENT_INFO[battle.pet.element].glyph} ${player.name}`} flash={hitFlash === 'player'} attacking={attacker === 'player'} floats={floats.filter((f) => f.side === 'player')}>
           <StatusBars hp={player.hp} maxHp={player.maxHp} rage={player.rage} maxRage={player.maxRage} shield={player.shield} />
         </Fighter>
         <div className="mb-16 text-2xl font-black text-amber-200">VS</div>
-        <Fighter side="enemy" emoji={enemy.emoji} name={`${ELEMENT_INFO[enemy.element].glyph} ${enemy.name}`} flash={hitFlash === 'enemy'} floats={floats.filter((f) => f.side === 'enemy')}>
+        <Fighter side="enemy" emoji={enemy.emoji} name={`${ELEMENT_INFO[enemy.element].glyph} ${enemy.name}`} flash={hitFlash === 'enemy'} attacking={attacker === 'enemy'} floats={floats.filter((f) => f.side === 'enemy')}>
           <StatusBars hp={enemy.hp} maxHp={enemy.maxHp} timerPct={Math.min(100, (enemy.timer / enemy.interval) * 100)} />
         </Fighter>
       </div>

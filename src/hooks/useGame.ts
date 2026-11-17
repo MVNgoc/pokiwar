@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { areAdjacent, collapse, countGems, createBoard, findMatches, hasPossibleMove, removeTiles, swapTiles } from '../game/board'
-import { applyGems, createBattle, enemyAttack, nextStage, tickEnemyTimer, useSkill as castSkill, type Result } from '../game/combat'
+import { applyGems, canUseSkill, createBattle, enemyAttack, nextStage, tickEnemyTimer, useSkill as castSkill, type Result } from '../game/combat'
 import type { Board, FloatEvent, Pet, Position } from '../game/types'
 
 export interface FloatText extends FloatEvent {
@@ -11,6 +11,13 @@ export interface FloatText extends FloatEvent {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 const TICK = 100
 
+export interface Cast {
+  id: number
+  emoji: string
+  /** true = đòn tấn công bay sang kẻ địch; false = hiệu ứng hào quang quanh pet */
+  offensive: boolean
+}
+
 export function useGame(pet: Pet) {
   const [board, setBoard] = useState<Board>(createBoard)
   const [battle, setBattle] = useState(() => createBattle(pet))
@@ -18,11 +25,19 @@ export function useGame(pet: Pet) {
   const [busy, setBusy] = useState(false)
   const [floats, setFloats] = useState<FloatText[]>([])
   const [hitFlash, setHitFlash] = useState<'player' | 'enemy' | null>(null)
+  const [attacker, setAttacker] = useState<'player' | 'enemy' | null>(null)
+  const [cast, setCast] = useState<Cast | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
 
   const boardRef = useRef(board)
   const battleRef = useRef(battle)
   const busyRef = useRef(false)
   const floatId = useRef(0)
+
+  const flashAttack = useCallback((side: 'player' | 'enemy') => {
+    setAttacker(side)
+    setTimeout(() => setAttacker(null), 450)
+  }, [])
 
   const setBoardSync = (b: Board) => {
     boardRef.current = b
@@ -87,7 +102,12 @@ export function useGame(pet: Pet) {
           setBoardSync(cur)
           await sleep(320)
         }
-        if (!hasPossibleMove(cur)) setBoardSync(createBoard())
+        if (!hasPossibleMove(cur)) {
+          setNotice('Hết nước đi! Đang đổi bàn…')
+          await sleep(1100)
+          setBoardSync(createBoard())
+          setNotice(null)
+        }
       }
       busyRef.current = false
       setBusy(false)
@@ -95,7 +115,18 @@ export function useGame(pet: Pet) {
     [commit],
   )
 
-  const useSkill = useCallback(() => commit(castSkill(battleRef.current)), [commit])
+  const useSkill = useCallback(() => {
+    const cur = battleRef.current
+    if (!canUseSkill(cur)) return
+    const k = cur.pet.skill
+    const offensive = !!k.damage
+    const id = floatId.current++
+    setCast({ id, emoji: k.emoji, offensive })
+    if (offensive) flashAttack('player')
+    setTimeout(() => setCast((c) => (c?.id === id ? null : c)), 800)
+    // đòn đánh trúng sau khi hiệu ứng bay tới nơi
+    setTimeout(() => commit(castSkill(battleRef.current)), offensive ? 450 : 150)
+  }, [commit, flashAttack])
 
   const restart = useCallback(() => {
     const fresh = createBattle(pet)
@@ -111,6 +142,7 @@ export function useGame(pet: Pet) {
       if (busyRef.current) return
       let s = tickEnemyTimer(battleRef.current, TICK)
       if (s.status === 'playing' && s.enemy.timer <= 0) {
+        flashAttack('enemy')
         commit(enemyAttack(s))
         return
       }
@@ -118,7 +150,7 @@ export function useGame(pet: Pet) {
       setBattle(s)
     }, TICK)
     return () => clearInterval(t)
-  }, [commit])
+  }, [commit, flashAttack])
 
-  return { board, battle, clearing, busy, floats, hitFlash, trySwap, useSkill, restart }
+  return { board, battle, clearing, busy, floats, hitFlash, attacker, cast, notice, trySwap, useSkill, restart }
 }
