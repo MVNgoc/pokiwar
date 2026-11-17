@@ -7,6 +7,7 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
     <div className="mx-auto flex h-dvh max-w-xl flex-col gap-3 overflow-y-auto bg-gradient-to-b from-emerald-950 to-stone-950 p-4 text-white">
       <h1 className="text-center text-2xl font-black text-amber-300">Linh Thú Xếp Ngọc</h1>
       <p className="text-center text-sm text-amber-100/80">Chọn pet đồng hành của bạn</p>
+      <p className="text-center text-xs text-amber-200">Tương khắc: Kim 金 › Mộc 木 › Thổ 土 › Thủy 水 › Hỏa 火 › Kim 金<br />Khắc chế gây x1.5 sát thương, bị khắc chỉ x0.7</p>
       {PETS.map((pet) => {
         const el = ELEMENT_INFO[pet.element]
         return (

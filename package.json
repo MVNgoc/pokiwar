@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "tsx src/game/board.test.ts"
+    "test": "tsx src/game/board.test.ts && tsx src/game/combat.test.ts"
   },
   "dependencies": {
     "react": "^19.3.1",

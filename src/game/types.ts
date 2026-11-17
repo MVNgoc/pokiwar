@@ -29,6 +29,7 @@ export interface PlayerState extends Fighter {
 }
 
 export interface EnemyState extends Fighter {
+  element: Element
   attack: number
   /** ms giữa 2 lần đánh */
   interval: number

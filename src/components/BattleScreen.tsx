@@ -1,6 +1,7 @@
 import { canUseSkill } from '../game/combat'
 import type { BattleState } from '../game/types'
 import type { FloatText } from '../hooks/useGame'
+import { ELEMENT_INFO } from '../game/constants'
 import StatusBars from './StatusBars'
 
 interface Props {
@@ -58,15 +59,16 @@ export default function BattleScreen({ battle, floats, hitFlash, onSkill, onRest
     <div className="relative flex flex-1 flex-col bg-gradient-to-b from-sky-900 via-emerald-900 to-emerald-950 px-3 pt-2">
       <div className="flex justify-between text-xs font-bold text-amber-100">
         <span>Màn {stage}</span>
+        <span className="text-[10px] font-normal text-amber-100/70">Kim›Mộc›Thổ›Thủy›Hỏa›Kim</span>
         <span>Điểm: {score}</span>
       </div>
 
       <div className="flex flex-1 items-end justify-around gap-2 pb-2">
-        <Fighter side="player" emoji={player.emoji} name={player.name} flash={hitFlash === 'player'} floats={floats.filter((f) => f.side === 'player')}>
+        <Fighter side="player" emoji={player.emoji} name={`${ELEMENT_INFO[battle.pet.element].glyph} ${player.name}`} flash={hitFlash === 'player'} floats={floats.filter((f) => f.side === 'player')}>
           <StatusBars hp={player.hp} maxHp={player.maxHp} rage={player.rage} maxRage={player.maxRage} shield={player.shield} />
         </Fighter>
         <div className="mb-16 text-2xl font-black text-amber-200">VS</div>
-        <Fighter side="enemy" emoji={enemy.emoji} name={enemy.name} flash={hitFlash === 'enemy'} floats={floats.filter((f) => f.side === 'enemy')}>
+        <Fighter side="enemy" emoji={enemy.emoji} name={`${ELEMENT_INFO[enemy.element].glyph} ${enemy.name}`} flash={hitFlash === 'enemy'} floats={floats.filter((f) => f.side === 'enemy')}>
           <StatusBars hp={enemy.hp} maxHp={enemy.maxHp} timerPct={Math.min(100, (enemy.timer / enemy.interval) * 100)} />
         </Fighter>
       </div>

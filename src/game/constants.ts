@@ -26,14 +26,25 @@ export const BALANCE = {
   thoShield: 3,
   comboStep: 0.25, // mỗi combo tăng thêm 25% hiệu quả
   maxRage: 100,
+  advantage: 1.5, // khắc chế: sát thương gây ra x1.5
+  disadvantage: 0.7, // bị khắc: sát thương gây ra x0.7
   affinity: 1.5, // ngọc cùng hệ với pet
 }
 
-export const ENEMIES = [
-  { name: 'Sâu Rừng', emoji: '🐛' },
-  { name: 'Sói Xám', emoji: '🐺' },
-  { name: 'Nhện Độc', emoji: '🕷️' },
-  { name: 'Quỷ Đá', emoji: '👹' },
-  { name: 'Rồng Bóng Tối', emoji: '🐉' },
+/** Ngũ hành tương khắc: khóa khắc giá trị (Kim → Mộc → Thổ → Thủy → Hỏa → Kim) */
+export const COUNTER: Record<Element, Element> = {
+  kim: 'moc',
+  moc: 'tho',
+  tho: 'thuy',
+  thuy: 'hoa',
+  hoa: 'kim',
+}
+
+export const ENEMIES: { name: string; emoji: string; element: Element }[] = [
+  { name: 'Sâu Rừng', emoji: '🐛', element: 'moc' },
+  { name: 'Sói Xám', emoji: '🐺', element: 'kim' },
+  { name: 'Nhện Độc', emoji: '🕷️', element: 'thuy' },
+  { name: 'Quỷ Đá', emoji: '👹', element: 'tho' },
+  { name: 'Rồng Bóng Tối', emoji: '🐉', element: 'hoa' },
 ]
 

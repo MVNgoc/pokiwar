@@ -1,5 +1,5 @@
-import { BALANCE, ENEMIES } from './constants'
-import type { BattleState, FloatEvent, GemCounts, Pet } from './types'
+import { BALANCE, COUNTER, ENEMIES } from './constants'
+import type { BattleState, Element, FloatEvent, GemCounts, Pet } from './types'
 
 export interface Result {
   state: BattleState
@@ -7,6 +7,20 @@ export interface Result {
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v))
+
+/** Hệ số sát thương khi `attacker` đánh `defender` (tương khắc ngũ hành). */
+export function matchup(attacker: Element, defender: Element): number {
+  if (COUNTER[attacker] === defender) return BALANCE.advantage
+  if (COUNTER[defender] === attacker) return BALANCE.disadvantage
+  return 1
+}
+
+const matchupEvent = (side: 'player' | 'enemy', mult: number): FloatEvent[] =>
+  mult > 1
+    ? [{ side, text: 'Khắc chế!', kind: 'combo' }]
+    : mult < 1
+      ? [{ side, text: 'Bị kháng', kind: 'shield' }]
+      : []
 
 export function createEnemy(stage: number) {
   const base = ENEMIES[(stage - 1) % ENEMIES.length]
@@ -58,10 +72,11 @@ export function applyGems(s: BattleState, rawGems: GemCounts, combo: number): Re
   const player = { ...s.player }
   const enemy = { ...s.enemy }
 
-  const damage = Math.round(gems.kim * BALANCE.kimDamage * m)
+  const mu = matchup(s.pet.element, s.enemy.element)
+  const damage = Math.round(gems.kim * BALANCE.kimDamage * m * mu)
   if (damage > 0) {
     enemy.hp = clamp(enemy.hp - damage, 0, enemy.maxHp)
-    events.push({ side: 'enemy', text: `-${damage}`, kind: 'damage' })
+    events.push({ side: 'enemy', text: `-${damage}`, kind: 'damage' }, ...matchupEvent('enemy', mu))
   }
   const heal = Math.round((gems.thuy * BALANCE.thuyHeal + gems.moc * BALANCE.mocHeal) * m)
   if (heal > 0) {
@@ -95,10 +110,13 @@ export function useSkill(s: BattleState): Result {
   const player = { ...s.player, rage: 0 }
 
   if (k.damage) {
+    const mu = matchup(s.pet.element, s.enemy.element)
+    const dmg = Math.round(k.damage * mu)
     for (let i = 0; i < (k.hits ?? 1); i++) {
-      enemy.hp = Math.max(0, enemy.hp - k.damage)
-      events.push({ side: 'enemy', text: `-${k.damage}`, kind: 'skill' })
+      enemy.hp = Math.max(0, enemy.hp - dmg)
+      events.push({ side: 'enemy', text: `-${dmg}`, kind: 'skill' })
     }
+    events.push(...matchupEvent('enemy', mu))
   }
   if (k.healPct) {
     const heal = Math.round(player.maxHp * k.healPct)
@@ -119,11 +137,13 @@ export function useSkill(s: BattleState): Result {
 /** Kẻ địch đánh: giáp hấp thụ trước, phần còn lại trừ HP. */
 export function enemyAttack(s: BattleState): Result {
   if (s.status !== 'playing') return { state: s, events: [] }
-  const absorbed = Math.min(s.player.shield, s.enemy.attack)
-  const dmg = s.enemy.attack - absorbed
+  const mu = matchup(s.enemy.element, s.pet.element)
+  const attack = Math.round(s.enemy.attack * mu)
+  const absorbed = Math.min(s.player.shield, attack)
+  const dmg = attack - absorbed
   const player = { ...s.player, shield: s.player.shield - absorbed, hp: Math.max(0, s.player.hp - dmg) }
   const enemy = { ...s.enemy, timer: s.enemy.interval }
-  const events: FloatEvent[] = [{ side: 'player', text: `-${dmg}`, kind: 'damage' }]
+  const events: FloatEvent[] = [{ side: 'player', text: `-${dmg}`, kind: 'damage' }, ...matchupEvent('player', mu === 1 ? 1 : 1 / mu)]
   if (absorbed > 0) events.push({ side: 'player', text: `Chặn ${absorbed}`, kind: 'shield' })
   return finalize({ ...s, player, enemy }, events)
 }
