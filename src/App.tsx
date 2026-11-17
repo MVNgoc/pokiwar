@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Board from './components/Board'
 import BattleScreen from './components/BattleScreen'
 import PetSelect from './components/PetSelect'
 import { GEM_IMAGES } from './assets/gems'
 import { BALANCE, ELEMENTS, ELEMENT_INFO } from './game/constants'
 import type { Pet } from './game/types'
+import { playMusic, stopMusic, syncMusicMute } from './game/music'
 import { isMuted, setMuted } from './game/sfx'
 import { useGame } from './hooks/useGame'
 
@@ -14,7 +15,17 @@ function GameView({ pet, onChangePet }: { pet: Pet; onChangePet: () => void }) {
   const toggleMute = () => {
     setMuted(!muted)
     setMutedState(!muted)
+    syncMusicMute()
   }
+
+  // Nhạc nền: đổi bài khi vào màn Boss, tắt dần khi ván kết thúc hoặc đổi pet
+  const { status } = g.battle
+  const boss = g.battle.enemy.boss
+  useEffect(() => {
+    if (status === 'won' || status === 'lost') stopMusic()
+    else playMusic(boss ? 'boss' : 'battle')
+  }, [status, boss])
+  useEffect(() => () => stopMusic(), [])
   return (
     <div className="mx-auto flex h-dvh max-w-xl flex-col bg-stone-950 text-white">
       <BattleScreen battle={g.battle} floats={g.floats} hitFlash={g.hitFlash} attacker={g.attacker} cast={g.cast} best={g.best} newBest={g.newBest} onSkill={g.useSkill} onRestart={g.restart} onChangePet={onChangePet} muted={muted} onToggleMute={toggleMute} />

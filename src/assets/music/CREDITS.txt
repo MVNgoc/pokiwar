@@ -1,0 +1,8 @@
+Nhạc nền (đều CC0 1.0, public domain), nguồn OpenGameArt:
+
+battle.ogg  "Chiptune Battle Music" (battle_music_01-loop.ogg) của pmiller
+            https://opengameart.org/content/chiptune-battle-music
+            Lần phát đầu chạy từ 0:00, các lần lặp bắt đầu từ ~0:07.5.
+
+boss.ogg    "8 bit battle loop" (8BitBattleLoop.ogg) của Wolfgang_
+            https://opengameart.org/content/8-bit-battle-loop

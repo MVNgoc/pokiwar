@@ -90,17 +90,17 @@ Mục tiêu hiện tại: bot khá thắng ~65–80%, bot ngẫu nhiên ~25–40
 - **Cân bằng:** sửa `BALANCE` trong `src/game/constants.ts` (sát thương, hồi máu, Nộ, hệ số khắc chế, độ mạnh Boss).
 - **Thêm pet:** thêm một mục vào `PETS` trong `src/game/pets.ts`. Kỹ năng gồm `damage`, `hits`, `healPct`, `shield`, `stunMs`, kết hợp tùy ý.
 - **Thêm kẻ địch:** sửa `ENEMIES` trong `constants.ts`. Số màn đặt bằng `TOTAL_STAGES`.
-- **Âm thanh:** có nút 🔊/🔇 trong trận. Âm thanh được tổng hợp trực tiếp nên không có file âm thanh nào, muốn đổi thì sửa `src/game/sfx.ts`.
+- **Âm thanh:** có nút 🔊/🔇 trong trận. Hiệu ứng âm thanh được tổng hợp trực tiếp (sửa ở `src/game/sfx.ts`), nhạc nền là file OGG trong `src/assets/music/` và được điều khiển bởi `src/game/music.ts`.
 
 ## Tài nguyên
 
 - **Ngọc nguyên tố:** [Puzzle Pack II](https://opengameart.org/node/40563) của Kenney (www.kenney.nl), giấy phép CC0 (public domain). File gốc đã được cắt, đổi sang WebP 96×96 và đặt trong `src/assets/gems/` (kèm file giấy phép). Mỗi hệ có màu và hình khác nhau: Kim là bát giác xám, Mộc là ngọc cắt xanh lá, Thủy là tròn xanh dương, Hỏa là tam giác đỏ, Thổ là vuông vàng.
 - **Pet và kẻ địch:** [Tiny Creatures](https://opengameart.org/content/tiny-creatures) của Clint Bellanger (clintbellanger.net), giấy phép CC0. Ảnh gốc 16×16 pixel được phóng 8 lần theo kiểu nguyên khối (nearest-neighbor), lưu WebP không mất dữ liệu trong `src/assets/creatures/` (kèm file giấy phép).
+- **Nhạc nền:** [Chiptune Battle Music](https://opengameart.org/content/chiptune-battle-music) của pmiller (màn thường) và [8 bit battle loop](https://opengameart.org/content/8-bit-battle-loop) của Wolfgang_ (màn Boss), đều CC0, trong `src/assets/music/` (kèm `CREDITS.txt`). Nút 🔊/🔇 tắt cả nhạc lẫn hiệu ứng âm thanh. Nhạc dùng định dạng OGG Vorbis.
 - **Hiệu ứng kỹ năng:** [Pixel Art Spells](https://opengameart.org/content/pixel-art-spells) của DevWizard, giấy phép CC0. Các GIF 16×16 được gộp thành sprite sheet WebP trong `src/assets/fx/` (kèm `CREDITS.txt`) và phát bằng CSS `steps()`. Kịch bản hiệu ứng từng pet nằm trong `src/assets/fx/index.ts`.
 
 ## Hướng phát triển
 
 - Kỹ năng riêng cho Boss và kẻ địch
-- Nhạc nền
 - Thêm pet, cấp độ và tiến hóa pet
 - Gợi ý nước đi
