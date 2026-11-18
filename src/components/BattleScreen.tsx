@@ -49,7 +49,7 @@ interface FighterProps {
 /** Phần giao diện (HTML) của mỗi bên: tên, thanh máu/Nộ/đồng hồ và chữ sát thương nổi. Nhân vật 3D vẽ ở lớp phía sau. */
 function Fighter({ name, side, active, floats, children }: FighterProps) {
   return (
-    <div className={`relative flex w-[44%] max-w-[220px] flex-col items-center gap-1 transition-[opacity,filter] duration-300 lg:max-w-[300px] ${side === 'left' ? 'ml-[calc(18%-min(22%,var(--half)))]' : 'mr-[calc(18%-min(22%,var(--half)))]'} ${active ? '' : 'opacity-75 saturate-50'}`}>
+    <div className={`relative flex w-[36%] max-w-[220px] flex-col items-center gap-1 transition-[opacity,filter] duration-300 lg:max-w-[300px] ${side === 'left' ? 'ml-[max(8px,calc(14%-min(18%,var(--half))))]' : 'mr-[max(8px,calc(14%-min(18%,var(--half))))]'} ${active ? '' : 'opacity-75 saturate-50'}`}>
       <div className={`rounded-full bg-black/45 px-2 text-xs font-bold lg:px-3 lg:py-0.5 lg:text-base ${active ? 'text-yellow-300' : 'text-amber-100'}`}>
         {active ? '▶ ' : ''}
         {name}
@@ -125,7 +125,6 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
           active={playing && battle.turn === 'player'} floats={floats.filter((f) => f.side === 'player')}>
           <StatusBars hp={player.hp} maxHp={player.maxHp} rage={player.rage} maxRage={player.maxRage} shield={player.shield} turn={playing && battle.turn === 'player' ? turnInfo : null} />
         </Fighter>
-        <div className="mb-16 text-2xl font-black text-amber-200 [text-shadow:0_2px_4px_#000]">VS</div>
         <Fighter
           side="right"
           name={

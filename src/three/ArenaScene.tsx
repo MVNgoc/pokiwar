@@ -20,7 +20,7 @@ interface Props {
 }
 
 /** khoảng cách mỗi bên so với tâm, theo tỉ lệ chiều rộng khung (HUD ở BattleScreen căn theo cùng số này) */
-const SPREAD = 0.32
+const SPREAD = 0.36
 const FOV = 34
 const CAM_DIST = 8.2
 /** Chiều rộng cảnh tối thiểu hiển thị tại mặt phẳng nhân vật (đơn vị thế giới) */
@@ -46,7 +46,7 @@ function CameraRig() {
 
 function Stage({ battle, hitFlash, attacker, cast }: Props) {
   const viewport = useThree((s) => s.viewport)
-  // hai bên đứng cách tâm 32% chiều rộng (pet ở 18%, kẻ địch ở 82%), bất kể tỉ lệ khung hình
+  // hai bên đứng cách tâm 32% chiều rộng (pet ở 14%, kẻ địch ở 86%), bất kể tỉ lệ khung hình
   const x = viewport.width * SPREAD
   const { player, enemy, stage } = battle
 
