@@ -26,7 +26,7 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
     <Backdrop theme={THEMES[0]} />
     <div className="relative z-10 mx-auto flex h-full max-w-xl flex-col gap-2 p-3 lg:max-w-6xl lg:gap-10 lg:p-8">
       <div className="relative">
-        <h1 className="text-center text-2xl font-black text-amber-300 [text-shadow:0_3px_6px_rgba(0,0,0,.55)] lg:text-4xl">Ngọc Linh Đại Chiến</h1>
+        <h1 className="text-center text-2xl font-black text-amber-300 [text-shadow:0_3px_6px_rgba(0,0,0,.55)] lg:text-4xl">PokéGem</h1>
         <HelpButton onClick={() => setHelp(true)} className="absolute right-0 top-1/2 -translate-y-1/2" />
       </div>
 
