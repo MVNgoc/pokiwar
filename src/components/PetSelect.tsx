@@ -31,7 +31,9 @@ function statsOf(pet: Pet): Stat[] {
   const sk = pet.skill
   const dmg = (sk.damage ?? 0) * (sk.hits ?? 1)
   return [
-    { label: 'Máu', pct: pet.maxHp / 160, text: `${pet.maxHp}`, color: 'bg-red-500' },
+    { label: 'Máu', pct: pet.maxHp / 170, text: `${pet.maxHp}`, color: 'bg-red-500' },
+    { label: 'Sức mạnh ngọc', pct: (pet.power - 0.7) / 0.5, text: `x${pet.power.toFixed(2)}`, color: 'bg-amber-400' },
+    { label: 'Tốc độ nạp Nộ', pct: (pet.rageMul - 0.7) / 0.6, text: `x${pet.rageMul.toFixed(2)}`, color: 'bg-yellow-300' },
     { label: 'Sát thương chiêu', pct: dmg / 85, text: `${dmg}`, color: 'bg-orange-500' },
     { label: 'Hồi máu', pct: (sk.healPct ?? 0) / 0.5, text: sk.healPct ? `${Math.round(sk.healPct * 100)}%` : '–', color: 'bg-emerald-500' },
     { label: 'Giáp', pct: (sk.shield ?? 0) / 40, text: sk.shield ? `+${sk.shield}` : '–', color: 'bg-sky-500' },
@@ -124,8 +126,8 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
           ))}
         </div>
         <div className="mt-auto rounded-xl bg-black/30 p-2 text-xs text-yellow-300">
-          <div className="font-bold">
-            {sel.skill.emoji} {sel.skill.name}
+          <div className="flex items-center gap-1.5 font-bold">
+            <ElementDot element={sel.element} size={16} /> {sel.skill.name}
           </div>
           <div className="text-yellow-100/80">{sel.skill.desc}</div>
         </div>

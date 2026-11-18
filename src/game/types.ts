@@ -33,6 +33,8 @@ export interface Combatant {
   rage: number
   maxRage: number
   shield: number
+  /** hệ số nạp Nộ (mặc định 1; riêng từng pokemon) */
+  rageMul?: number
   /** hệ số sức mạnh nhân vào sát thương (pet = 1, kẻ địch tăng theo màn) */
   power: number
 }
@@ -99,6 +101,10 @@ export interface Pet {
   element: Element
   /** thế hệ (chỉ để nhóm khi chọn pet) */
   gen: number
+  /** sức mạnh ngọc (nhân sát thương, hồi máu, giáp từ ngọc) */
+  power: number
+  /** tốc độ nạp Nộ */
+  rageMul: number
   maxHp: number
   desc: string
   skill: Skill

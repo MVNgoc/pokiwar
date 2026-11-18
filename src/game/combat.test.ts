@@ -48,9 +48,9 @@ assert.ok(applyGems(hurtFoe, 'enemy', gems({ tho: 3 }), 1).state.enemy.shield > 
 // --- ngọc của pet cộng Nộ theo hệ, mỗi pet đúng công thức cũ ---
 for (const pet of PETS) {
   const b = createBattle(pet)
-  assert.equal(applyGems(b, 'player', { ...zero, [pet.element]: 3 }, 1).state.player.rage, 15)
+  assert.equal(applyGems(b, 'player', { ...zero, [pet.element]: 3 }, 1).state.player.rage, Math.round(15 * pet.rageMul))
   const other = ELEMENTS.find((e) => e !== pet.element)!
-  assert.equal(applyGems(b, 'player', { ...zero, [other]: 3 }, 1).state.player.rage, 3)
+  assert.equal(applyGems(b, 'player', { ...zero, [other]: 3 }, 1).state.player.rage, Math.round(3 * pet.rageMul))
 }
 
 // --- kỹ năng: chỉ dùng trong lượt của mình ---

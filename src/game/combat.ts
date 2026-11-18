@@ -66,7 +66,8 @@ export function createBattle(pet: Pet): BattleState {
       rage: 0,
       maxRage: BALANCE.maxRage,
       shield: 0,
-      power: 1,
+      power: pet.power,
+      rageMul: pet.rageMul,
     },
     enemy: createEnemy(1),
   }
@@ -130,7 +131,7 @@ export function applyGems(s: BattleState, side: Side, rawGems: GemCounts, combo:
   // Nộ: ngọc cùng hệ nạp nhiều, ngọc hệ khác nạp ít
   const own = rawGems[me.element]
   const others = Object.values(rawGems).reduce((a, b) => a + b, 0) - own
-  const rage = Math.round((own * BALANCE.ownRage + others * BALANCE.otherRage) * m)
+  const rage = Math.round((own * BALANCE.ownRage + others * BALANCE.otherRage) * m * (me.rageMul ?? 1))
   if (rage > 0) {
     me.rage = clamp(me.rage + rage, 0, me.maxRage)
     events.push({ side, text: `+${rage} Nộ`, kind: 'rage' })

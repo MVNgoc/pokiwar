@@ -131,7 +131,7 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
             : 'border-stone-600 bg-stone-700 text-stone-400'
         }`}
       >
-        {battle.pet.skill.emoji} {battle.pet.skill.name}
+        <ElementDot element={battle.pet.element} size={16} /> {battle.pet.skill.name}
       </button>
 
       <HelpButton onClick={onHelp} className="absolute bottom-2 left-3 z-20" />

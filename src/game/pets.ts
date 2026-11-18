@@ -33,8 +33,33 @@ const STARTERS: [string, string, 'moc' | 'hoa' | 'thuy', string][][] = [
   [['snivy', 'Snivy', 'moc', 'Lốc Lá'], ['tepig', 'Tepig', 'hoa', 'Đại Bác Lửa'], ['oshawott', 'Oshawott', 'thuy', 'Vỏ Sò Chém']],
 ]
 
+/** Chỉ số riêng từng pokemon: [máu, sức mạnh ngọc, tốc độ nạp Nộ, hệ số sát thương chiêu]. Cùng hệ thì tổng thể cân bằng nhau. */
+const STATS: Record<string, [number, number, number, number]> = {
+  bulbasaur: [135, 1.0, 1.0, 1.0],
+  chikorita: [145, 0.95, 0.95, 0.95],
+  treecko: [120, 1.05, 1.15, 1.0],
+  turtwig: [150, 0.95, 0.9, 1.1],
+  snivy: [120, 1.1, 1.05, 1.05],
+  charmander: [150, 1.0, 1.0, 1.0],
+  cyndaquil: [140, 1.05, 1.1, 1.0],
+  torchic: [130, 1.1, 1.2, 0.9],
+  chimchar: [135, 1.05, 1.05, 1.05],
+  tepig: [170, 0.95, 0.9, 1.0],
+  squirtle: [155, 1.0, 1.0, 1.0],
+  totodile: [145, 1.05, 1.0, 1.05],
+  mudkip: [160, 0.95, 1.05, 1.0],
+  piplup: [140, 1.0, 1.15, 0.95],
+  oshawott: [150, 1.1, 1.0, 0.95],
+}
+
 export const GENERATIONS = STARTERS.map((_, i) => i + 1)
 
 export const PETS: Pet[] = STARTERS.flatMap((gen, gi) =>
-  gen.map(([id, name, el, move]): Pet => ({ id, name, emoji: EMOJI[el], element: el as Element, gen: gi + 1, ...KIT[el], skill: { ...KIT[el].skill, name: move } })),
+  gen.map(([id, name, el, move]): Pet => {
+      const [maxHp, power, rageMul, skillMul] = STATS[id]
+      const base = KIT[el].skill
+      const damage = base.damage ? Math.round(base.damage * skillMul) : undefined
+      const desc = damage ? base.desc.replace(/Gây \d+/, `Gây ${damage}`) : base.desc
+      return { id, name, emoji: EMOJI[el], element: el as Element, gen: gi + 1, desc: KIT[el].desc, maxHp, power, rageMul, skill: { ...base, name: move, damage, desc } }
+    }),
 )
