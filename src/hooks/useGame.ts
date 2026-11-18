@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { chooseEnemyMove, type Move } from '../game/ai'
-import { applyResolution, areAdjacent, collapse, createBoard, findMatches, hasPossibleMove, resolveMatches, swapTiles } from '../game/board'
+import { applyResolution, areAdjacent, collapse, createBoard, findMatches, hasPossibleMove, resolveMatches, suggestMove, swapTiles } from '../game/board'
 import {
   applyGems,
   canEnemyCast,
@@ -13,6 +13,7 @@ import {
   useSkill as castSkill,
   type Result,
 } from '../game/combat'
+import { BALANCE } from '../game/constants'
 import { play } from '../game/sfx'
 import { FLIGHT_MS } from '../three/fxPlans'
 import { loadRecord, saveResult } from '../game/storage'
@@ -51,6 +52,8 @@ export function useGame(pet: Pet) {
   const [cast, setCast] = useState<Cast | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [enemyPick, setEnemyPick] = useState<Move | null>(null)
+  /** gợi ý nước đi cho người chơi khi sắp hết giờ (hai ô chớp tắt) */
+  const [hintMove, setHintMove] = useState<Move | null>(null)
   const [best, setBest] = useState(() => loadRecord(pet.id))
   const [newBest, setNewBest] = useState(false)
 
@@ -265,6 +268,7 @@ export function useGame(pet: Pet) {
     setFloats([])
     setNewBest(false)
     setEnemyPick(null)
+    setHintMove(null)
     setClearing(new Set())
     setBusyBoth(false)
   }
@@ -274,12 +278,18 @@ export function useGame(pet: Pet) {
   endTurnRef.current = endTurn
   useEffect(() => {
     const t = setInterval(() => {
-      if (busyRef.current) return
+      if (busyRef.current) {
+        setHintMove((h) => (h ? null : h))
+        return
+      }
       const cur = battleRef.current
       if (cur.status !== 'playing') return
       const s = tickTurn(cur, TICK)
       battleRef.current = s
       setBattle(s)
+      // sắp hết giờ mà chưa đi: chớp 2 ngọc của nước đi tốt nhất; sang lượt/đang xử lý thì tắt
+      if (s.turn === 'player' && s.turnLeft > 0 && s.turnLeft <= BALANCE.hintMs) setHintMove((h) => h ?? suggestMove(boardRef.current))
+      else setHintMove((h) => (h ? null : h))
       if (s.turnLeft <= 0 && s.turn === 'player') {
         pushFloats([{ side: 'player', text: 'Hết giờ!', kind: 'combo' }])
         play('invalid')
@@ -289,5 +299,5 @@ export function useGame(pet: Pet) {
     return () => clearInterval(t)
   }, [pushFloats])
 
-  return { board, battle, clearing, busy, floats, hitFlash, shaking, attacker, cast, notice, enemyPick, best, newBest, trySwap, useSkill, restart }
+  return { board, battle, clearing, busy, floats, hitFlash, shaking, attacker, cast, notice, enemyPick, hintMove, best, newBest, trySwap, useSkill, restart }
 }

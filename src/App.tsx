@@ -42,7 +42,7 @@ function GameView({ pet, onChangePet }: { pet: Pet; onChangePet: () => void }) {
         <div className="text-[10px] text-yellow-300">
           Ngọc <ElementDot element={pet.element} /> nạp +{BALANCE.ownRage} Nộ, ngọc khác +{BALANCE.otherRage}
         </div>
-        <Board board={g.board} clearing={g.clearing} locked={g.busy || g.battle.status !== 'playing' || g.battle.turn !== 'player'} notice={g.notice} hint={g.enemyPick} dim={g.battle.status === 'playing' && g.battle.turn === 'enemy'} onSwap={g.trySwap} />
+        <Board board={g.board} clearing={g.clearing} locked={g.busy || g.battle.status !== 'playing' || g.battle.turn !== 'player'} notice={g.notice} hint={g.enemyPick} blink={g.hintMove} dim={g.battle.status === 'playing' && g.battle.turn === 'enemy'} onSwap={g.trySwap} />
       </div>
     </div>
   )

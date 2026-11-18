@@ -22,6 +22,7 @@ export const ELEMENT_INFO: Record<
 export const BALANCE = {
   // Lượt chơi
   turnMs: 12000, // thời gian mỗi lượt; hết giờ là mất lượt
+  hintMs: 4500, // còn ngần này ms mà người chơi chưa đi thì chớp gợi ý nước đi
   // Kẻ địch: giá trị màn n = base + (n-1) * step
   enemyHp: 110,
   enemyHpStep: 55,

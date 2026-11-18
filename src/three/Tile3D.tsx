@@ -23,6 +23,8 @@ interface Props {
   col: number
   selected: boolean
   clearing: boolean
+  /** gợi ý nước đi: chớp sáng/tắt */
+  blink?: boolean
 }
 
 /** Tia sáng bắn ra khi ngọc nổ. */
@@ -55,7 +57,7 @@ function GemBurst({ color }: { color: string }) {
   )
 }
 
-function TileView({ tile, row, col, selected, clearing }: Props) {
+function TileView({ tile, row, col, selected, clearing, blink }: Props) {
   const group = useRef<THREE.Group>(null)
   const inner = useRef<THREE.Group>(null)
   const halo = useRef<THREE.Mesh>(null)
@@ -122,6 +124,13 @@ function TileView({ tile, row, col, selected, clearing }: Props) {
       lift = 0.3
       rz += Math.sin(t * 7) * 0.12
       flash = 0.35 + Math.sin(t * 8) * 0.15
+    }
+    if (blink && !clearing) {
+      // chớp tắt dứt khoát (~3 lần/giây), cả hai ngọc cùng nhịp (không cộng phase riêng)
+      const on = Math.sin(state.clock.elapsedTime * 19) > 0
+      flash = on ? 1 : 0
+      scale = on ? 1.18 : 0.92
+      lift = on ? 0.25 : 0
     }
     if (tile.special && !clearing) {
       scale *= 1 + Math.sin(t * 5) * 0.06

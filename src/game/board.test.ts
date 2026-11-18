@@ -36,7 +36,7 @@ assert.ok(col.every((row) => row.every(Boolean)))
 assert.equal(col[7][0]?.id, w[5][0]?.id)
 
 // 6. Ngọc đặc biệt
-import { resolveMatches } from './board'
+import { resolveMatches, suggestMove } from './board'
 const LETTERS = 'KMTHO'
 const base = () => mk(Array.from({ length: 8 }, (_, r) => Array.from({ length: 8 }, (_, c) => LETTERS[(c + 2 * r) % 5]).join('')))
 assert.equal(findMatches(base()).length, 0)
@@ -65,5 +65,12 @@ const bl = base()
 setType(bl, 3, [2, 3, 4], 'kim')
 bl[3][3] = { ...bl[3][3]!, special: 'lightning' }
 assert.equal(resolveMatches(bl).cleared.length, 15)
+
+// --- gợi ý: luôn là nước hợp lệ trên bàn mới tạo ---
+for (let i = 0; i < 20; i++) {
+  const b = createBoard()
+  const mv = suggestMove(b)
+  assert.ok(mv && isValidSwap(b, mv[0], mv[1]))
+}
 
 console.log('board tests OK')

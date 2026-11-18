@@ -182,6 +182,21 @@ export function listMoves(board: Board): [Position, Position][] {
   return out
 }
 
+/** Gợi ý cho người chơi: nước đi ăn được nhiều ngọc nhất (ưu tiên ngọc đặc biệt). null nếu hết nước. */
+export function suggestMove(board: Board): [Position, Position] | null {
+  let best: [Position, Position] | null = null
+  let bestScore = -1
+  for (const mv of listMoves(board)) {
+    const res = resolveMatches(swapTiles(board, mv[0], mv[1]), mv)
+    const score = res.cleared.length + res.spawns.length * 3
+    if (score > bestScore) {
+      bestScore = score
+      best = mv
+    }
+  }
+  return best
+}
+
 export function hasPossibleMove(board: Board): boolean {
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {

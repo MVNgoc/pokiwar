@@ -12,6 +12,7 @@ interface Props {
   clearing: Set<number>
   locked: boolean
   hint?: [Position, Position] | null
+  blink?: [Position, Position] | null
   onSwap: (a: Position, b: Position) => void
 }
 
@@ -42,7 +43,7 @@ function Tray() {
   )
 }
 
-function Scene({ board, clearing, locked, hint, onSwap }: Props) {
+function Scene({ board, clearing, locked, hint, blink, onSwap }: Props) {
   const [selected, setSelected] = useState<Position | null>(null)
   const drag = useRef<{ pos: Position; x: number; y: number } | null>(null)
 
@@ -98,6 +99,7 @@ function Scene({ board, clearing, locked, hint, onSwap }: Props) {
               row={r}
               col={c}
               clearing={clearing.has(tile.id)}
+              blink={!!blink?.some((p) => p.r === r && p.c === c)}
               selected={(selected?.r === r && selected?.c === c) || !!hint?.some((p) => p.r === r && p.c === c)}
             />
           ) : null,
