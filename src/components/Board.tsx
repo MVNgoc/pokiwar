@@ -19,10 +19,9 @@ interface Props {
 export default function Board({ board, clearing, locked, notice, hint, blink, dim, onSwap }: Props) {
   return (
     <div
-      className={`relative aspect-square touch-none overflow-hidden rounded-2xl border-4 bg-stone-900/80 shadow-xl transition-[filter,border-color] duration-300 ${
+      className={`relative aspect-square w-[min(calc(100vw-16px),52dvh)] touch-none overflow-hidden rounded-2xl border-4 bg-stone-900/80 shadow-xl lg:w-[min(40vw,calc(100dvh-120px),780px)] transition-[filter,border-color] duration-300 ${
         dim ? 'border-red-900 brightness-75 saturate-75' : 'border-amber-900'
       }`}
-      style={{ width: 'min(calc(100vw - 16px), 52dvh)' }}
     >
       <BoardScene board={board} clearing={clearing} locked={locked} hint={hint} blink={blink} onSwap={onSwap} />
       {notice && (

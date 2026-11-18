@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
+import Backdrop from './Backdrop'
 import ElementDot from './ElementDot'
 import HelpPanel, { HelpButton } from './HelpPanel'
 import { ELEMENT_INFO } from '../game/constants'
@@ -9,6 +10,7 @@ import Creature from '../three/Creature'
 import { CharacterLights, Platform } from '../three/SceneLights'
 import { GEM_COLOR } from '../three/gems'
 import { loadCharacter } from '../three/loadCharacter'
+import { THEMES } from '../three/themes'
 
 export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
   const [sel, setSel] = useState<Pet>(PETS[0])
@@ -21,13 +23,16 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
   // đổi thế hệ: giữ nguyên hệ đang chọn (Mộc / Hỏa / Thủy) nếu có
   const pickGen = (g: number) => setSel(PETS.find((p) => p.gen === g && p.element === sel.element) ?? PETS.find((p) => p.gen === g)!)
   return (
-    <div className="mx-auto flex h-dvh max-w-xl flex-col gap-2 overflow-hidden bg-gradient-to-b from-emerald-950 to-stone-950 p-3 text-white">
+    <div className="relative h-dvh overflow-hidden text-white">
+    <Backdrop theme={THEMES[0]} />
+    <div className="relative z-10 mx-auto flex h-full max-w-xl flex-col gap-2 p-3 lg:max-w-6xl lg:p-8">
       <div className="relative">
-        <h1 className="text-center text-2xl font-black text-amber-300">Linh Thú Xếp Ngọc</h1>
+        <h1 className="text-center text-2xl font-black text-amber-300 [text-shadow:0_3px_6px_rgba(0,0,0,.55)] lg:text-4xl">Linh Thú Xếp Ngọc</h1>
         <HelpButton onClick={() => setHelp(true)} className="absolute right-0 top-1/2 -translate-y-1/2" />
       </div>
 
-      <div className="relative h-[34dvh] min-h-[190px] shrink-0 overflow-hidden rounded-xl border-2 border-amber-900 bg-gradient-to-b from-sky-900 to-emerald-900">
+      <div className="flex min-h-0 flex-1 flex-col gap-2 lg:flex-row lg:gap-6">
+      <div className="relative h-[34dvh] min-h-[190px] shrink-0 overflow-hidden rounded-xl border-2 border-amber-900 bg-gradient-to-b from-sky-400 to-emerald-300 shadow-xl lg:h-auto lg:min-h-0 lg:w-[min(56vw,700px)] lg:flex-none lg:aspect-[5/4] lg:self-center lg:rounded-3xl lg:border-4">
         <Canvas className="!absolute inset-0" dpr={[1, 1.5]} flat gl={{ alpha: true, antialias: true }} camera={{ fov: 32, position: [0, 1.25, 5.2] }} onCreated={({ camera }) => camera.lookAt(0, 0.9, 0)}>
           <CharacterLights />
           <Platform position={[0, 0, 0]} color={GEM_COLOR[sel.element]} />
@@ -35,9 +40,10 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
             <Creature key={sel.id} id={sel.id} position={[0, 0, 0]} dir={1} spin enterKey={sel.id} />
           </Suspense>
         </Canvas>
-        <div className="absolute inset-x-0 bottom-1 text-center text-sm font-black text-white [text-shadow:0_2px_3px_#000]">{sel.name}</div>
+        <div className="absolute inset-x-0 bottom-1 text-center text-sm font-black text-white [text-shadow:0_2px_3px_#000] lg:bottom-3 lg:text-xl">{sel.name}</div>
       </div>
 
+      <div className="flex min-h-0 flex-1 flex-col gap-2 lg:w-[440px] lg:flex-none">
       <div className="flex shrink-0 justify-center gap-1.5">
         {GENERATIONS.map((g) => (
           <button
@@ -59,7 +65,7 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
               key={pet.id}
               onClick={() => setSel(pet)}
               className={`flex items-center gap-3 rounded-xl border-2 p-2 text-left transition active:scale-[.98] ${
-                on ? 'border-amber-400 bg-amber-950/60' : 'border-amber-900/60 bg-stone-900/80'
+                on ? 'border-amber-400 bg-amber-950/85' : 'border-amber-900/60 bg-stone-900/85'
               }`}
             >
               <ElementDot element={pet.element} size={34} />
@@ -81,10 +87,13 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
         })}
       </div>
 
-      <button onClick={() => onPick(sel)} className="shrink-0 rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 py-3 text-lg font-black text-black shadow-lg active:scale-[.98]">
+      <button onClick={() => onPick(sel)} className="shrink-0 rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 py-3 text-lg font-black text-black shadow-lg active:scale-[.98] lg:py-4 lg:text-xl">
         Chơi với {sel.name}
       </button>
+      </div>
+      </div>
       {help && <HelpPanel onClose={() => setHelp(false)} />}
+    </div>
     </div>
   )
 }

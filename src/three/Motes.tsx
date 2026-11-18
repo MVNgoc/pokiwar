@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
 /** Đốm sáng nhỏ trôi lên chậm phía sau sàn đấu cho cảnh bớt trống. */
-export default function Motes({ count = 40 }: { count?: number }) {
+export default function Motes({ count = 40, color = '#ffffff' }: { count?: number; color?: string }) {
   const ref = useRef<THREE.Points>(null)
   const { geometry, seeds } = useMemo(() => {
     const pos = new Float32Array(count * 3)
@@ -22,7 +22,7 @@ export default function Motes({ count = 40 }: { count?: number }) {
   })
   return (
     <points ref={ref} geometry={geometry}>
-      <pointsMaterial color="#ffffff" size={0.06} transparent opacity={0.55} blending={THREE.AdditiveBlending} depthWrite={false} sizeAttenuation />
+      <pointsMaterial color={color} size={0.07} transparent opacity={0.55} blending={THREE.AdditiveBlending} depthWrite={false} sizeAttenuation />
     </points>
   )
 }

@@ -4,6 +4,7 @@ import type { PetRecord } from '../game/storage'
 import type { BattleState, Side } from '../game/types'
 import type { Cast, FloatText } from '../hooks/useGame'
 import ArenaScene from '../three/ArenaScene'
+import { themeOf } from '../three/themes'
 import ElementDot from './ElementDot'
 import { HelpButton } from './HelpPanel'
 import StatusBars from './StatusBars'
@@ -46,13 +47,13 @@ interface FighterProps {
 /** Phần giao diện (HTML) của mỗi bên: tên, thanh máu/Nộ/đồng hồ và chữ sát thương nổi. Nhân vật 3D vẽ ở lớp phía sau. */
 function Fighter({ name, active, floats, children }: FighterProps) {
   return (
-    <div className={`relative flex w-1/2 max-w-[220px] flex-col items-center gap-1 transition-[opacity,filter] duration-300 ${active ? '' : 'opacity-75 saturate-50'}`}>
-      <div className={`rounded-full bg-black/35 px-2 text-xs font-bold ${active ? 'text-yellow-300' : 'text-amber-100'}`}>
+    <div className={`relative flex w-1/2 max-w-[220px] flex-col items-center gap-1 lg:max-w-[300px] transition-[opacity,filter] duration-300 ${active ? '' : 'opacity-75 saturate-50'}`}>
+      <div className={`rounded-full bg-black/45 px-2 text-xs font-bold lg:px-3 lg:py-0.5 lg:text-base ${active ? 'text-yellow-300' : 'text-amber-100'}`}>
         {active ? '▶ ' : ''}
         {name}
       </div>
       {/* chỗ trống để nhân vật 3D hiện ra phía sau */}
-      <div className="h-[clamp(80px,19dvh,140px)] w-full" />
+      <div className="h-[clamp(80px,19dvh,140px)] w-full lg:h-[clamp(140px,22dvh,210px)]" />
       <div className="relative w-full">
         {children}
         {floats.map((f) => (
@@ -74,13 +75,17 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
   const ready = canUseSkill(battle) && !busy
   const turnInfo = { pct: (battle.turnLeft / BALANCE.turnMs) * 100, secs: Math.ceil(battle.turnLeft / 1000) }
   const playing = status === 'playing'
+  const theme = themeOf(stage)
   return (
-    <div className={`relative flex flex-1 flex-col overflow-hidden bg-gradient-to-b from-sky-900 via-emerald-900 to-emerald-950 px-3 pt-2 ${shaking ? 'animate-shake' : ''}`}>
+    <div
+      className={`relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden px-3 pt-2 lg:rounded-3xl lg:border-4 lg:border-amber-900 lg:px-6 lg:pt-4 lg:shadow-2xl ${shaking ? 'animate-shake' : ''}`}
+      style={{ background: `linear-gradient(to bottom, ${theme.skyTop}, ${theme.skyMid} 55%, ${theme.skyBottom})` }}
+    >
       <ArenaScene battle={battle} hitFlash={hitFlash} attacker={attacker} cast={cast} />
 
       <div className="relative z-10 flex justify-between text-xs font-bold text-amber-100">
-        <span>{enemy.boss ? '👑 BOSS' : `Màn ${stage}/${TOTAL_STAGES}`}</span>
-        <span>
+        <span className="rounded-full bg-black/35 px-2 py-0.5 lg:text-sm">{enemy.boss ? `👑 BOSS · ${theme.name}` : `Màn ${stage}/${TOTAL_STAGES} · ${theme.name}`}</span>
+        <span className="rounded-full bg-black/35 px-2 py-0.5 lg:text-sm">
           Điểm: {score} · Kỷ lục: {Math.max(best.bestScore, score)}
         </span>
       </div>

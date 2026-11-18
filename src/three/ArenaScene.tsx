@@ -1,4 +1,5 @@
 import { Suspense, useEffect } from 'react'
+import * as THREE from 'three'
 import { Canvas, useThree } from '@react-three/fiber'
 import type { BattleState, Side } from '../game/types'
 import type { Cast } from '../hooks/useGame'
@@ -6,15 +7,39 @@ import { ENEMIES } from '../game/constants'
 import { GEM_COLOR } from './gems'
 import Creature from './Creature'
 import { CharacterLights, Platform } from './SceneLights'
-import Motes from './Motes'
 import FxLayer from './Fx3D'
 import { loadCharacter } from './loadCharacter'
+import Scenery from './Scenery'
+import { themeOf } from './themes'
 
 interface Props {
   battle: BattleState
   hitFlash: Side | null
   attacker: Side | null
   cast: Cast | null
+}
+
+const FOV = 34
+const CAM_DIST = 8.2
+/** Chiều rộng cảnh tối thiểu hiển thị tại mặt phẳng nhân vật (đơn vị thế giới) */
+const MIN_WIDTH = 7.4
+/** Khoảng cách (px) từ chân bục tới đáy khung: giữ nhân vật đứng ngay trên thanh máu dù khung cao hay thấp. */
+const FEET_FROM_BOTTOM = 118
+
+/** Đặt camera sao cho chân nhân vật luôn cách đáy khung một đoạn cố định; khung càng cao thì càng lộ nhiều ngoại cảnh phía trên. */
+function CameraRig() {
+  const size = useThree((s) => s.size)
+  const camera = useThree((s) => s.camera)
+  useEffect(() => {
+    const tan = Math.tan(THREE.MathUtils.degToRad(FOV / 2))
+    // khung hẹp (cao hơn rộng): lùi camera ra để hai bục luôn đủ chỗ đứng cạnh nhau
+    const dist = Math.max(CAM_DIST, MIN_WIDTH / (2 * tan * (size.width / size.height)))
+    const h = tan * dist
+    const look = h - (2 * h * FEET_FROM_BOTTOM) / size.height
+    camera.position.set(0, look + 0.65, dist)
+    camera.lookAt(0, look, 0)
+  }, [size.width, size.height, camera])
+  return null
 }
 
 function Stage({ battle, hitFlash, attacker, cast }: Props) {
@@ -34,7 +59,7 @@ function Stage({ battle, hitFlash, attacker, cast }: Props) {
 
   return (
     <>
-      <Motes />
+      <Scenery theme={themeOf(stage)} />
       <Platform position={[-x, 0, 0]} color={GEM_COLOR[battle.pet.element]} />
       <Platform position={[x, 0, 0]} color={GEM_COLOR[enemy.element]} />
       <Creature
@@ -72,9 +97,9 @@ export default function ArenaScene(props: Props) {
       dpr={[1, 1.5]}
       flat
       gl={{ alpha: true, antialias: true }}
-      camera={{ fov: 34, position: [0, 1.5, 8.2] }}
-      onCreated={({ camera }) => camera.lookAt(0, 0.85, 0)}
+      camera={{ fov: FOV, position: [0, 1.5, CAM_DIST] }}
     >
+      <CameraRig />
       <CharacterLights />
       <Suspense fallback={null}>
         <Stage {...props} />
