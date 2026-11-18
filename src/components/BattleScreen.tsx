@@ -92,12 +92,12 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
             </span>
           </div>
         )}
-        <Fighter name={`${ELEMENT_INFO[battle.pet.element].glyph} ${player.name}`} active={playing && battle.turn === 'player'} floats={floats.filter((f) => f.side === 'player')}>
+        <Fighter name={`${ELEMENT_INFO[battle.pet.element].icon} ${player.name}`} active={playing && battle.turn === 'player'} floats={floats.filter((f) => f.side === 'player')}>
           <StatusBars hp={player.hp} maxHp={player.maxHp} rage={player.rage} maxRage={player.maxRage} shield={player.shield} turn={playing && battle.turn === 'player' ? turnInfo : null} />
         </Fighter>
         <div className="mb-16 text-2xl font-black text-amber-200 [text-shadow:0_2px_4px_#000]">VS</div>
         <Fighter
-          name={`${enemy.boss ? '無' : ELEMENT_INFO[enemy.element].glyph} ${enemy.name}${enemy.stunned ? ' 💫' : ''}`}
+          name={`${enemy.boss ? '👑' : ELEMENT_INFO[enemy.element].icon} ${enemy.name}${enemy.stunned ? ' 💫' : ''}`}
           active={playing && battle.turn === 'enemy'}
           floats={floats.filter((f) => f.side === 'enemy')}
         >

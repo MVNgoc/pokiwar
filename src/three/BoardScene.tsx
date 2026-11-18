@@ -4,6 +4,7 @@ import { areAdjacent } from '../game/board'
 import type { Board, Position } from '../game/types'
 import { ELEMENTS } from '../game/constants'
 import { loadGem } from './gemModels'
+import { loadGemIcon } from './gemIcons'
 import { Env } from './SceneLights'
 import Tile3D, { BOARD_N, cellX, cellY } from './Tile3D'
 
@@ -16,7 +17,10 @@ interface Props {
   onSwap: (a: Position, b: Position) => void
 }
 
-ELEMENTS.forEach((e) => void loadGem(e)) // tải sẵn 5 model ngọc
+ELEMENTS.forEach((e) => {
+  // tải sẵn icon ngọc cá nhân; thiếu thì tải model ngọc 3D
+  void loadGemIcon(e).then((icon) => (icon ? null : loadGem(e)))
+})
 
 const DRAG_THRESHOLD = 18
 const TILT = 0.42 // nghiêng bàn cờ về phía sau (rad)

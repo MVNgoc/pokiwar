@@ -36,7 +36,7 @@ export default function HelpPanel({ onClose, inBattle = false }: { onClose: () =
         </Section>
 
         <Section title="Ngũ hành tương khắc">
-          <li>Kim 金 › Mộc 木 › Thổ 土 › Thủy 水 › Hỏa 火 › Kim 金</li>
+          <li>Kim › Mộc › Thổ › Thủy › Hỏa › Kim</li>
           <li>
             Khắc chế: sát thương x{BALANCE.advantage}. Bị khắc: x{BALANCE.disadvantage}. Boss không thuộc hệ nào nên không bị ảnh hưởng.
           </li>

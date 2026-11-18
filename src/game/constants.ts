@@ -9,13 +9,13 @@ export const ELEMENTS: Element[] = ['kim', 'moc', 'thuy', 'hoa', 'tho']
 
 export const ELEMENT_INFO: Record<
   Element,
-  { label: string; glyph: string; gradient: string; effect: string }
+  { label: string; icon: string; gradient: string; effect: string }
 > = {
-  kim: { label: 'Kim', glyph: '金', gradient: 'from-zinc-200 to-slate-500', effect: 'Sát thương' },
-  moc: { label: 'Mộc', glyph: '木', gradient: 'from-lime-300 to-green-600', effect: 'Hồi máu nhẹ' },
-  thuy: { label: 'Thủy', glyph: '水', gradient: 'from-sky-300 to-blue-600', effect: 'Hồi máu' },
-  hoa: { label: 'Hỏa', glyph: '火', gradient: 'from-orange-300 to-red-600', effect: 'Sát thương nhẹ' },
-  tho: { label: 'Thổ', glyph: '土', gradient: 'from-amber-300 to-yellow-700', effect: 'Giáp' },
+  kim: { label: 'Kim', icon: '⚙️', gradient: 'from-zinc-200 to-slate-500', effect: 'Sát thương' },
+  moc: { label: 'Mộc', icon: '🌿', gradient: 'from-lime-300 to-green-600', effect: 'Hồi máu nhẹ' },
+  thuy: { label: 'Thủy', icon: '💧', gradient: 'from-sky-300 to-blue-600', effect: 'Hồi máu' },
+  hoa: { label: 'Hỏa', icon: '🔥', gradient: 'from-orange-300 to-red-600', effect: 'Sát thương nhẹ' },
+  tho: { label: 'Thổ', icon: '🪨', gradient: 'from-amber-300 to-yellow-700', effect: 'Giáp' },
 }
 
 /** Cân bằng chiến đấu (chỉnh tại đây) */

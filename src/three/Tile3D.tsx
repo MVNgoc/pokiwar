@@ -3,8 +3,10 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import type { Tile } from '../game/types'
 import { clamp01 } from './easing'
+import GemAura from './GemAura'
 import { loadGem } from './gemModels'
-import { emojiTexture } from './gems'
+import { buildMedallion, loadGemIcon } from './gemIcons'
+import { emojiTexture, GEM_COLOR } from './gems'
 
 export const BOARD_N = 8
 /** Tâm ô theo cột / hàng (bàn cờ căn giữa gốc tọa độ, hàng 0 ở trên cùng). */
@@ -61,10 +63,15 @@ function TileView({ tile, row, col, selected, clearing, blink }: Props) {
   const group = useRef<THREE.Group>(null)
   const inner = useRef<THREE.Group>(null)
   const halo = useRef<THREE.Mesh>(null)
-  const model = use(loadGem(tile.type))
+  const icon = use(loadGemIcon(tile.type))
+  const model = icon ? null : use(loadGem(tile.type))
   // mỗi ô có bản sao riêng (vật liệu riêng để loé sáng độc lập)
   const gem = useMemo(() => {
-    const root = model.clone(true)
+    if (icon) {
+      const med = buildMedallion(tile.type, icon)
+      return { root: med.root, materials: med.materials.map((mat) => ({ mat, base: mat.emissive.clone() })) }
+    }
+    const root = model!.clone(true)
     const materials: { mat: THREE.MeshStandardMaterial; base: THREE.Color }[] = []
     root.traverse((o) => {
       const mesh = o as THREE.Mesh
@@ -75,7 +82,7 @@ function TileView({ tile, row, col, selected, clearing, blink }: Props) {
       }
     })
     return { root, materials }
-  }, [model])
+  }, [model, icon, tile.type])
   const white = useMemo(() => new THREE.Color('#ffffff'), [])
   const phase = useMemo(() => Math.random() * 6, [])
   // vật lý riêng của từng ngọc: ngọc mới sinh bắt đầu ở phía trên bàn cờ rồi rơi xuống
@@ -119,6 +126,32 @@ function TileView({ tile, row, col, selected, clearing, blink }: Props) {
     let flash = 0
     let rz = Math.sin(t * 1.3) * 0.05
     let lift = 0
+    let px = 0
+    let py = 0
+    let ry = 0
+    if (icon && !clearing) {
+      // chuyển động riêng của từng hệ
+      if (tile.type === 'hoa') {
+        scale *= 1 + Math.sin(t * 9) * 0.03 + Math.sin(t * 23) * 0.02
+        flash = 0.12 + Math.max(0, Math.sin(t * 13) * Math.sin(t * 7.3)) * 0.25
+        rz = Math.sin(t * 11) * 0.03
+      } else if (tile.type === 'thuy') {
+        py = Math.sin(t * 2.2) * 0.04
+        scale *= 1 + Math.sin(t * 2.2) * 0.03
+        rz = Math.sin(t * 1.1) * 0.04
+      } else if (tile.type === 'moc') {
+        rz = Math.sin(t * 1.8) * 0.13
+        px = Math.sin(t * 1.8) * 0.02
+      } else if (tile.type === 'kim') {
+        ry = Math.sin(t * 1.6) * 0.4
+        flash = Math.max(0, Math.sin(t * 1.6 - 0.4)) * 0.18
+      } else {
+        const rumble = Math.sin(t * 0.9) > 0.82 ? 1 : 0
+        px = Math.sin(t * 45) * 0.016 * rumble
+        py = Math.sin(t * 38) * 0.01 * rumble
+        rz = 0
+      }
+    }
     if (selected && !clearing) {
       scale = 1.12 + Math.sin(t * 10) * 0.05
       lift = 0.3
@@ -145,9 +178,10 @@ function TileView({ tile, row, col, selected, clearing, blink }: Props) {
       flash = 1 - k * 0.4
     }
 
-    g.position.set(s.x, s.y, 0.35 + lift)
+    g.position.set(s.x + px, s.y + py, 0.35 + lift)
     n.scale.set(scale * (1 + s.squash * 0.9), scale * (1 - s.squash), scale * (1 + s.squash * 0.9))
     n.rotation.z = rz
+    n.rotation.y = ry
     for (const { mat, base } of gem.materials) mat.emissive.copy(base).lerp(white, flash)
     if (halo.current) (halo.current.material as THREE.MeshBasicMaterial).opacity = 0.18 + Math.sin(t * 5) * 0.08
   })
@@ -156,6 +190,7 @@ function TileView({ tile, row, col, selected, clearing, blink }: Props) {
     <group ref={group} position={[cellX(col), cellY(tile.spawnRow ?? row), 0.35]}>
       <group ref={inner}>
         <primitive object={gem.root} />
+        {icon && !clearing && <GemAura type={tile.type} />}
         {tile.special && (
           <>
             <mesh ref={halo}>
@@ -168,7 +203,7 @@ function TileView({ tile, row, col, selected, clearing, blink }: Props) {
           </>
         )}
       </group>
-      {clearing && <GemBurst color="#fde68a" />}
+      {clearing && <GemBurst color={GEM_COLOR[tile.type]} />}
     </group>
   )
 }

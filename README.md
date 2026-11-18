@@ -30,11 +30,11 @@ Yêu cầu Node.js 18+.
 
 | Ngọc | Hiệu ứng mỗi viên |
 |---|---|
-| 金 Kim | Gây sát thương |
-| 木 Mộc | Hồi máu nhẹ |
-| 水 Thủy | Hồi máu |
-| 火 Hỏa | Gây sát thương nhẹ |
-| 土 Thổ | Tạo giáp (tối đa 40) |
+| Kim | Gây sát thương |
+| Mộc | Hồi máu nhẹ |
+| Thủy | Hồi máu |
+| Hỏa | Gây sát thương nhẹ |
+| Thổ | Tạo giáp (tối đa 40) |
 
 **Nộ:** ngọc cùng hệ với pet nạp +5 Nộ, ngọc hệ khác nạp +1. Ngọc cùng hệ với pet còn có hiệu quả ×1.5.
 
