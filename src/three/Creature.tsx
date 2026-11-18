@@ -156,6 +156,7 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
   useFrame((state, dtRaw) => {
     const dt = Math.min(dtRaw, 1 / 30)
     inst.mixer.update(dt)
+    model.update?.(state.clock.elapsedTime)
     const s = t.current
     const g = rig.current
     if (!g) return
