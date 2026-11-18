@@ -19,3 +19,5 @@ Icon ngọc theo hệ: gems/<hệ>.png (hoa, thuy, moc, kim, tho).
   <id>.back.gif  (tùy chọn, chỉ pet) ảnh nhìn từ sau lưng, dùng cho pet của người chơi trong trận; thiếu thì dùng <id>.gif
 
 Bục đứng: platforms/<hệ>.png (moc, thuy, hoa, tho, kim), PNG nền trong suốt cắt từ ảnh bục chiến đấu trong game (nguồn tham khảo: Bulbapedia, Battle terrain *_B2W2). Chỉ dùng cá nhân, không lên git.
+
+Hiệu ứng chiêu: fx/*.png lấy từ Pokémon Showdown client (play.pokemonshowdown.com/fx). Chỉ dùng cá nhân, không lên git.
