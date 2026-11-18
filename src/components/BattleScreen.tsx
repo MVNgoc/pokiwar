@@ -1,9 +1,10 @@
 import { canUseSkill } from '../game/combat'
-import { BALANCE, ELEMENT_INFO, TOTAL_STAGES } from '../game/constants'
+import { BALANCE, TOTAL_STAGES } from '../game/constants'
 import type { PetRecord } from '../game/storage'
 import type { BattleState, Side } from '../game/types'
 import type { Cast, FloatText } from '../hooks/useGame'
 import ArenaScene from '../three/ArenaScene'
+import ElementDot from './ElementDot'
 import { HelpButton } from './HelpPanel'
 import StatusBars from './StatusBars'
 
@@ -35,7 +36,7 @@ const FLOAT_COLOR: Record<FloatText['kind'], string> = {
 }
 
 interface FighterProps {
-  name: string
+  name: React.ReactNode
   /** đang có lượt */
   active: boolean
   floats: FloatText[]
@@ -92,12 +93,23 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
             </span>
           </div>
         )}
-        <Fighter name={`${ELEMENT_INFO[battle.pet.element].icon} ${player.name}`} active={playing && battle.turn === 'player'} floats={floats.filter((f) => f.side === 'player')}>
+        <Fighter
+          name={
+            <>
+              <ElementDot element={battle.pet.element} size={16} /> {player.name}
+            </>
+          }
+          active={playing && battle.turn === 'player'} floats={floats.filter((f) => f.side === 'player')}>
           <StatusBars hp={player.hp} maxHp={player.maxHp} rage={player.rage} maxRage={player.maxRage} shield={player.shield} turn={playing && battle.turn === 'player' ? turnInfo : null} />
         </Fighter>
         <div className="mb-16 text-2xl font-black text-amber-200 [text-shadow:0_2px_4px_#000]">VS</div>
         <Fighter
-          name={`${enemy.boss ? '👑' : ELEMENT_INFO[enemy.element].icon} ${enemy.name}${enemy.stunned ? ' 💫' : ''}`}
+          name={
+            <>
+              <ElementDot element={enemy.element} size={16} /> {enemy.name}
+              {enemy.stunned ? ' 💫' : ''}
+            </>
+          }
           active={playing && battle.turn === 'enemy'}
           floats={floats.filter((f) => f.side === 'enemy')}
         >

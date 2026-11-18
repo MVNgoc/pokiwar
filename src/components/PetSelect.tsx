@@ -67,7 +67,7 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
                 <span className="flex items-center gap-2 text-sm font-bold">
                   {pet.name}
                   <span className={`rounded bg-gradient-to-br ${el.gradient} px-1.5 text-xs`}>
-                    {el.icon} {el.label}
+                    <ElementDot element={pet.element} size={12} /> {el.label}
                   </span>
                   <span className="text-xs font-normal text-red-300">HP {pet.maxHp}</span>
                 </span>

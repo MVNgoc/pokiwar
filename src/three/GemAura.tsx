@@ -7,7 +7,7 @@ const PARTICLE: Record<Element, string> = { hoa: '#ffb347', thuy: '#bfe6ff', moc
 
 let starTex: THREE.CanvasTexture | null = null
 /** Ngôi sao 4 cánh (tia lóe của kim loại) */
-function star() {
+export function starTexture() {
   if (starTex) return starTex
   const c = document.createElement('canvas')
   c.width = c.height = 64
@@ -100,7 +100,7 @@ export default function GemAura({ type }: { type: Element }) {
       )}
       {type === 'kim' && (
         <sprite ref={sparkle} position={[0.22, 0.2, 0.25]}>
-          <spriteMaterial map={star()} depthWrite={false} blending={THREE.AdditiveBlending} />
+          <spriteMaterial map={starTexture()} depthWrite={false} blending={THREE.AdditiveBlending} />
         </sprite>
       )}
     </>

@@ -60,8 +60,8 @@ export default function HelpPanel({ onClose, inBattle = false }: { onClose: () =
         </Section>
 
         <Section title="Ngọc đặc biệt">
-          <li>💣 Xếp 4 ngọc hoặc hình chữ L/T: nổ vùng 3x3.</li>
-          <li>⚡ Xếp 5 ngọc: quét cả hàng và cột.</li>
+          <li>Xếp 4 ngọc hoặc hình chữ L/T: ra ngọc có vòng sóng cam lan ra quanh viên. Khi nổ phá vùng 3x3.</li>
+          <li>Xếp 5 ngọc: ra ngọc có tia điện vàng quanh viên. Khi nổ quét cả hàng và cột.</li>
         </Section>
       </div>
     </div>

@@ -40,8 +40,8 @@ Yêu cầu Node.js 18+.
 
 ### Ngọc đặc biệt
 
-- 💣 **Bom:** match 4, hoặc chuỗi ngang và dọc cắt nhau (chữ L, T). Khi bị phá, nổ vùng 3x3.
-- ⚡ **Sét:** match 5 trở lên. Khi bị phá, xóa cả hàng và cột.
+- **Bom** (vầng sáng đỏ, vòng sóng cam lan ra): match 4, hoặc chuỗi ngang và dọc cắt nhau (chữ L, T). Khi bị phá, nổ vùng 3x3.
+- **Sét** (tia điện vàng quanh viên): match 5 trở lên. Khi bị phá, xóa cả hàng và cột.
 - Ngọc đặc biệt nổ dây chuyền khi bị ngọc đặc biệt khác quét trúng.
 
 ### Pet

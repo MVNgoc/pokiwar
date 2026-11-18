@@ -6,7 +6,8 @@ import { clamp01 } from './easing'
 import GemAura from './GemAura'
 import { loadGem } from './gemModels'
 import { buildMedallion, loadGemIcon } from './gemIcons'
-import { emojiTexture, GEM_COLOR } from './gems'
+import { GEM_COLOR } from './gems'
+import SpecialFx from './SpecialFx'
 
 export const BOARD_N = 8
 /** Tâm ô theo cột / hàng (bàn cờ căn giữa gốc tọa độ, hàng 0 ở trên cùng). */
@@ -62,7 +63,6 @@ function GemBurst({ color }: { color: string }) {
 function TileView({ tile, row, col, selected, clearing, blink }: Props) {
   const group = useRef<THREE.Group>(null)
   const inner = useRef<THREE.Group>(null)
-  const halo = useRef<THREE.Mesh>(null)
   const icon = use(loadGemIcon(tile.type))
   const model = icon ? null : use(loadGem(tile.type))
   // mỗi ô có bản sao riêng (vật liệu riêng để loé sáng độc lập)
@@ -183,7 +183,6 @@ function TileView({ tile, row, col, selected, clearing, blink }: Props) {
     n.rotation.z = rz
     n.rotation.y = ry
     for (const { mat, base } of gem.materials) mat.emissive.copy(base).lerp(white, flash)
-    if (halo.current) (halo.current.material as THREE.MeshBasicMaterial).opacity = 0.18 + Math.sin(t * 5) * 0.08
   })
 
   return (
@@ -191,17 +190,7 @@ function TileView({ tile, row, col, selected, clearing, blink }: Props) {
       <group ref={inner}>
         <primitive object={gem.root} />
         {icon && !clearing && <GemAura type={tile.type} />}
-        {tile.special && (
-          <>
-            <mesh ref={halo}>
-              <sphereGeometry args={[0.62, 16, 12]} />
-              <meshBasicMaterial color="#fff" transparent opacity={0.2} blending={THREE.AdditiveBlending} depthWrite={false} />
-            </mesh>
-            <sprite position={[0.3, 0.32, 0.45]} scale={[0.42, 0.42, 1]}>
-              <spriteMaterial map={emojiTexture(tile.special === 'bomb' ? '💣' : '⚡')} depthWrite={false} />
-            </sprite>
-          </>
-        )}
+        {tile.special && !clearing && <SpecialFx kind={tile.special} />}
       </group>
       {clearing && <GemBurst color={GEM_COLOR[tile.type]} />}
     </group>
