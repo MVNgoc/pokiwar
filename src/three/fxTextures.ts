@@ -6,7 +6,7 @@ const loading = new Set<string>()
 
 export const FX_NAMES = [
   'fireball', 'flareball', 'bluefireball', 'waterwisp', 'mudwisp', 'energyball', 'leaf1', 'leaf2', 'petal', 'shell',
-  'topbite', 'bottombite', 'rock1', 'rock2', 'rock3', 'shine', 'impact', 'feather', 'iceball', 'wisp',
+  'topbite', 'bottombite', 'rock1', 'rock2', 'rock3', 'shine', 'impact', 'feather', 'iceball', 'wisp', 'poisonwisp', 'electroball', 'lightning',
 ]
 
 export function preloadFx(names: string[] = FX_NAMES) {

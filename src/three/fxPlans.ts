@@ -154,10 +154,36 @@ export const FX_PLANS: Record<string, FxPlan> = {
       { kind: 'dust', at: 200, on: 'foe', color: '#b98a54' },
     ],
   },
-  // kẻ địch
-  'sau-xanh': { projectiles: [{ style: 'thorn', color: '#b57cff', size: 0.28 }], events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#d9b8ff' }] },
-  'meo-xam': { events: [{ kind: 'slash', at: 0, on: 'foe', color: '#a9b8ff' }, { kind: 'slash', at: 180, on: 'foe', color: '#a9b8ff' }] },
-  'ca-hay': { projectiles: [{ style: 'thorn', color: '#2de0bf', size: 0.3 }], events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#9ffbe8' }] },
-  'heo-rung': { events: [{ kind: 'dust', at: 150, on: 'foe', color: '#cfc7b0' }, { kind: 'dust', at: 350, on: 'foe', color: '#cfc7b0' }] },
-  'su-tu-lua': { projectiles: [{ style: 'fire', color: '#ffb300', size: 0.42 }], events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#ffe27a', count: 26 }] },
+  // kẻ địch: cũng dùng ảnh hiệu ứng Showdown (Oddish độc, Magnemite điện, Magikarp cắn, Onix đá, Charizard lửa)
+  'sau-xanh': {
+    projectiles: [0, 1, 2, 3].map((i) => ({ style: 'seed' as const, sprite: 'poisonwisp', color: '#b57cff', size: 0.45, delay: i * 80, arc: 0.4 + (i % 2) * 0.3, yOff: (i - 1.5) * 0.12, flight: 380 })),
+    events: [{ kind: 'sprite', at: 440, on: 'foe', name: 'poisonwisp', size: 1.1, ms: 400 }],
+  },
+  'meo-xam': {
+    projectiles: [{ style: 'ball', sprite: 'electroball', color: '#ffe14d', size: 0.45, arc: 0.3, flight: 350 }],
+    events: [
+      { kind: 'sprite', at: 360, on: 'foe', name: 'lightning', size: 1.3, ms: 300 },
+      { kind: 'sprite', at: 460, on: 'foe', name: 'lightning', size: 1.1, ms: 300, spin: 0.2 },
+    ],
+  },
+  'ca-hay': {
+    events: [
+      { kind: 'bite', at: 150, on: 'foe' },
+      { kind: 'sprite', at: 380, on: 'foe', name: 'waterwisp', size: 0.9, ms: 350 },
+    ],
+  },
+  'heo-rung': {
+    projectiles: [
+      { style: 'ball', sprite: 'rock1', spin: 0.6, color: '#b9a98a', size: 0.55, arc: 1.0, flight: 450 },
+      { style: 'ball', sprite: 'rock2', spin: -0.6, color: '#b9a98a', size: 0.45, delay: 120, arc: 0.7, yOff: -0.2, flight: 400 },
+    ],
+    events: [{ kind: 'sprite', at: 450, on: 'foe', name: 'impact', size: 1.1, ms: 380 }],
+  },
+  'su-tu-lua': {
+    events: [
+      { kind: 'beam', at: 0, on: 'self', ms: 620, color: '#ff8a2a', size: 0.14, sprite: 'fireball' },
+      { kind: 'beam', at: 0, on: 'self', ms: 620, color: '#ffd24d', size: 0.09, sprite: 'flareball' },
+      { kind: 'sprite', at: 400, on: 'foe', name: 'flareball', size: 1.1, ms: 420 },
+    ],
+  },
 }
