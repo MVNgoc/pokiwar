@@ -39,6 +39,7 @@ const FLOAT_COLOR: Record<FloatText['kind'], string> = {
 
 interface FighterProps {
   name: React.ReactNode
+  side: 'left' | 'right'
   /** đang có lượt */
   active: boolean
   floats: FloatText[]
@@ -46,9 +47,9 @@ interface FighterProps {
 }
 
 /** Phần giao diện (HTML) của mỗi bên: tên, thanh máu/Nộ/đồng hồ và chữ sát thương nổi. Nhân vật 3D vẽ ở lớp phía sau. */
-function Fighter({ name, active, floats, children }: FighterProps) {
+function Fighter({ name, side, active, floats, children }: FighterProps) {
   return (
-    <div className={`relative flex w-1/2 max-w-[220px] flex-col items-center gap-1 lg:max-w-[300px] transition-[opacity,filter] duration-300 ${active ? '' : 'opacity-75 saturate-50'}`}>
+    <div className={`relative flex w-[44%] max-w-[220px] flex-col items-center gap-1 transition-[opacity,filter] duration-300 lg:max-w-[300px] ${side === 'left' ? 'ml-[calc(18%-min(22%,var(--half)))]' : 'mr-[calc(18%-min(22%,var(--half)))]'} ${active ? '' : 'opacity-75 saturate-50'}`}>
       <div className={`rounded-full bg-black/45 px-2 text-xs font-bold lg:px-3 lg:py-0.5 lg:text-base ${active ? 'text-yellow-300' : 'text-amber-100'}`}>
         {active ? '▶ ' : ''}
         {name}
@@ -98,7 +99,7 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
         </span>
       </div>
 
-      <div className="relative z-10 flex flex-1 items-end justify-around gap-2 pb-2">
+      <div className="relative z-10 flex flex-1 items-end justify-between gap-2 pb-2 [--half:110px] lg:[--half:150px]">
         {playing && (
           <div key={battle.turnNo} className="turn-banner pointer-events-none absolute inset-x-0 top-[8%] z-30 flex justify-center">
             <span className={`rounded-full px-4 py-1 text-sm font-black shadow-lg ${battle.turn === 'player' ? 'bg-emerald-400 text-black' : 'bg-red-500 text-white'}`}>
@@ -115,6 +116,7 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
           </div>
         )}
         <Fighter
+          side="left"
           name={
             <>
               <ElementDot element={battle.pet.element} size={16} /> {player.name}
@@ -125,6 +127,7 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
         </Fighter>
         <div className="mb-16 text-2xl font-black text-amber-200 [text-shadow:0_2px_4px_#000]">VS</div>
         <Fighter
+          side="right"
           name={
             <>
               <ElementDot element={enemy.element} size={16} /> {enemy.name}

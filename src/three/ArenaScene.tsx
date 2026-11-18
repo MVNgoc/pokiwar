@@ -19,6 +19,8 @@ interface Props {
   cast: Cast | null
 }
 
+/** khoảng cách mỗi bên so với tâm, theo tỉ lệ chiều rộng khung (HUD ở BattleScreen căn theo cùng số này) */
+const SPREAD = 0.32
 const FOV = 34
 const CAM_DIST = 8.2
 /** Chiều rộng cảnh tối thiểu hiển thị tại mặt phẳng nhân vật (đơn vị thế giới) */
@@ -44,14 +46,11 @@ function CameraRig() {
 
 function Stage({ battle, hitFlash, attacker, cast }: Props) {
   const viewport = useThree((s) => s.viewport)
-  // pet đứng ở 1/4 chiều rộng, kẻ địch ở 3/4, bất kể tỉ lệ khung hình
-  const x = viewport.width * 0.25
+  // hai bên đứng cách tâm 32% chiều rộng (pet ở 18%, kẻ địch ở 82%), bất kể tỉ lệ khung hình
+  const x = viewport.width * SPREAD
   const { player, enemy, stage } = battle
 
   // tải sẵn model kẻ địch của màn kế tiếp
-  useEffect(() => {
-    void loadCharacter(battle.pet.id, true)
-  }, [battle.pet.id])
   useEffect(() => {
     const next = ENEMIES[stage % ENEMIES.length]
     if (next) void loadCharacter(next.id)
@@ -67,7 +66,6 @@ function Stage({ battle, hitFlash, attacker, cast }: Props) {
         id={battle.pet.id}
         position={[-x, 0, 0]}
         dir={1}
-        back
         hurt={hitFlash === 'player'}
         attacking={attacker === 'player'}
         defeated={player.hp <= 0}
