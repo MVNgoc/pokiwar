@@ -15,7 +15,7 @@ import {
 } from '../game/combat'
 import { BALANCE } from '../game/constants'
 import { play } from '../game/sfx'
-import { FLIGHT_MS } from '../three/fxPlans'
+import { FLIGHT_MS, FX_PLANS } from '../three/fxPlans'
 import { loadRecord, saveResult } from '../game/storage'
 import type { Board, FloatEvent, Pet, Position, Side } from '../game/types'
 
@@ -251,7 +251,7 @@ export function useGame(pet: Pet, paused = false) {
     setBusyBoth(true)
     const offensive = !!cur.pet.skill.damage
     const id = floatId.current++
-    setCast({ id, fxId: `pet-${cur.pet.element}`, side: 'player', offensive })
+    setCast({ id, fxId: FX_PLANS[cur.pet.id] ? cur.pet.id : `pet-${cur.pet.element}`, side: 'player', offensive })
     play('skill')
     if (offensive) flashAttack('player')
     setTimeout(() => setCast((c) => (c?.id === id ? null : c)), 1500)

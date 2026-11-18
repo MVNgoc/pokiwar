@@ -24,16 +24,17 @@ const KIT: Record<'moc' | 'hoa' | 'thuy', { maxHp: number; desc: string; skill: 
 const EMOJI: Record<'moc' | 'hoa' | 'thuy', string> = { moc: '🌱', hoa: '🔥', thuy: '💧' }
 
 /** [id (cũng là tên file ảnh), tên hiển thị, hệ] theo từng thế hệ, thứ tự Mộc, Hỏa, Thủy */
-const STARTERS: [string, string, 'moc' | 'hoa' | 'thuy'][][] = [
-  [['bulbasaur', 'Bulbasaur', 'moc'], ['charmander', 'Charmander', 'hoa'], ['squirtle', 'Squirtle', 'thuy']],
-  [['chikorita', 'Chikorita', 'moc'], ['cyndaquil', 'Cyndaquil', 'hoa'], ['totodile', 'Totodile', 'thuy']],
-  [['treecko', 'Treecko', 'moc'], ['torchic', 'Torchic', 'hoa'], ['mudkip', 'Mudkip', 'thuy']],
-  [['turtwig', 'Turtwig', 'moc'], ['chimchar', 'Chimchar', 'hoa'], ['piplup', 'Piplup', 'thuy']],
-  [['snivy', 'Snivy', 'moc'], ['tepig', 'Tepig', 'hoa'], ['oshawott', 'Oshawott', 'thuy']],
+/** [id, tên, hệ, tên chiêu đặc biệt (khi đầy Nộ)] theo từng thế hệ, thứ tự Mộc, Hỏa, Thủy */
+const STARTERS: [string, string, 'moc' | 'hoa' | 'thuy', string][][] = [
+  [['bulbasaur', 'Bulbasaur', 'moc', 'Roi Gai'], ['charmander', 'Charmander', 'hoa', 'Phun Lửa'], ['squirtle', 'Squirtle', 'thuy', 'Súng Nước']],
+  [['chikorita', 'Chikorita', 'moc', 'Lá Dao Cắt'], ['cyndaquil', 'Cyndaquil', 'hoa', 'Bánh Xe Lửa'], ['totodile', 'Totodile', 'thuy', 'Nanh Nước']],
+  [['treecko', 'Treecko', 'moc', 'Bom Hạt'], ['torchic', 'Torchic', 'hoa', 'Tàn Lửa'], ['mudkip', 'Mudkip', 'thuy', 'Bùn Bắn']],
+  [['turtwig', 'Turtwig', 'moc', 'Búa Gỗ'], ['chimchar', 'Chimchar', 'hoa', 'Lốc Lửa'], ['piplup', 'Piplup', 'thuy', 'Chùm Bong Bóng']],
+  [['snivy', 'Snivy', 'moc', 'Lốc Lá'], ['tepig', 'Tepig', 'hoa', 'Đại Bác Lửa'], ['oshawott', 'Oshawott', 'thuy', 'Vỏ Sò Chém']],
 ]
 
 export const GENERATIONS = STARTERS.map((_, i) => i + 1)
 
 export const PETS: Pet[] = STARTERS.flatMap((gen, gi) =>
-  gen.map(([id, name, el]): Pet => ({ id, name, emoji: EMOJI[el], element: el as Element, gen: gi + 1, ...KIT[el] })),
+  gen.map(([id, name, el, move]): Pet => ({ id, name, emoji: EMOJI[el], element: el as Element, gen: gi + 1, ...KIT[el], skill: { ...KIT[el].skill, name: move } })),
 )

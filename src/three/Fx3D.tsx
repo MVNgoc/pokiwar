@@ -56,25 +56,70 @@ function Burst({ t0, at, pos, color, count = 14, up = false }: { t0: number; at:
   )
 }
 
-function Projectile({ t0, from, to, style, color, size = 0.32 }: { t0: number; from: Vec3; to: Vec3; style: 'fire' | 'thorn'; color: string; size?: number }) {
+export type ProjectileStyle = 'fire' | 'thorn' | 'leaf' | 'seed' | 'ball' | 'wheel' | 'bubble' | 'mud'
+
+export interface ProjectileProps {
+  t0: number
+  from: Vec3
+  to: Vec3
+  style: ProjectileStyle
+  color: string
+  size?: number
+  /** trễ so với lúc tung (ms) */
+  delay?: number
+  /** bay trong bao lâu (ms), mặc định bằng FLIGHT_MS để trúng đúng lúc sát thương hiện ra */
+  flight?: number
+  /** độ cong quỹ đạo (đơn vị cao), âm = cong xuống */
+  arc?: number
+  /** lệch độ cao điểm trúng */
+  yOff?: number
+}
+
+function ProjectileShape({ style, size }: { style: ProjectileStyle; size: number }) {
+  switch (style) {
+    case 'thorn':
+      return <octahedronGeometry args={[size * 1.2, 0]} />
+    case 'leaf':
+      return <sphereGeometry args={[size * 1.4, 10, 6]} />
+    case 'seed':
+      return <sphereGeometry args={[size * 0.8, 8, 6]} />
+    case 'wheel':
+      return <torusGeometry args={[size * 1.1, size * 0.4, 8, 18]} />
+    case 'mud':
+      return <dodecahedronGeometry args={[size, 0]} />
+    case 'bubble':
+      return <sphereGeometry args={[size * 1.2, 14, 10]} />
+    default:
+      return <icosahedronGeometry args={[style === 'ball' ? size * 1.5 : size, 1]} />
+  }
+}
+
+function Projectile({ t0, from, to, style, color, size = 0.32, delay = 0, flight = FLIGHT_MS, arc = 0.7, yOff = 0 }: ProjectileProps) {
   const group = useRef<THREE.Group>(null)
   const core = useRef<THREE.Mesh>(null)
   const trail = useRef<THREE.InstancedMesh>(null)
   const dummy = useMemo(() => new THREE.Object3D(), [])
-  const N = 12
+  const N = style === 'bubble' || style === 'leaf' ? 5 : 12
   const pos = (k: number, out: THREE.Vector3) =>
-    out.set(from[0] + (to[0] - from[0]) * k, from[1] + (to[1] - from[1]) * k + Math.sin(k * Math.PI) * 0.7, from[2] + (to[2] - from[2]) * k)
+    out.set(from[0] + (to[0] - from[0]) * k, from[1] + (to[1] + yOff - from[1]) * k + Math.sin(k * Math.PI) * arc, from[2] + (to[2] - from[2]) * k)
   const tmp = useMemo(() => new THREE.Vector3(), [])
   useFrame((_, dt) => {
-    const k = (performance.now() - t0) / FLIGHT_MS
+    const k = (performance.now() - t0 - delay) / flight
     const on = k >= 0 && k <= 1
     if (group.current) group.current.visible = on
     if (!on) return
     if (core.current) {
       pos(k, core.current.position)
-      core.current.rotation.x += dt * 9
-      core.current.rotation.y += dt * 7
-      core.current.scale.setScalar(1 + Math.sin(k * 40) * 0.08)
+      if (style === 'wheel') {
+        core.current.rotation.z += dt * 18
+      } else if (style === 'leaf') {
+        core.current.rotation.x += dt * 14
+        core.current.scale.set(1, 0.22, 0.6)
+      } else {
+        core.current.rotation.x += dt * 9
+        core.current.rotation.y += dt * 7
+        core.current.scale.setScalar(1 + Math.sin(k * 40) * 0.08)
+      }
     }
     if (trail.current) {
       for (let i = 0; i < N; i++) {
@@ -88,17 +133,60 @@ function Projectile({ t0, from, to, style, color, size = 0.32 }: { t0: number; f
       trail.current.instanceMatrix.needsUpdate = true
     }
   })
+  const glassy = style === 'bubble'
   return (
     <group ref={group} visible={false}>
       <mesh ref={core}>
-        {style === 'fire' ? <icosahedronGeometry args={[size, 1]} /> : <octahedronGeometry args={[size * 1.2, 0]} />}
-        <meshBasicMaterial color={color} />
+        <ProjectileShape style={style} size={size} />
+        <meshBasicMaterial color={color} transparent={glassy} opacity={glassy ? 0.65 : 1} />
       </mesh>
       <instancedMesh ref={trail} args={[undefined, undefined, N]}>
         <sphereGeometry args={[1, 8, 6]} />
-        <meshBasicMaterial color={color} transparent opacity={0.8} blending={ADD} depthWrite={false} />
+        <meshBasicMaterial color={color} transparent opacity={style === 'mud' ? 0.9 : 0.8} blending={style === 'mud' ? THREE.NormalBlending : ADD} depthWrite={false} />
       </instancedMesh>
     </group>
+  )
+}
+
+/** Luồng tia kéo dài từ người tung tới mục tiêu (phun lửa, súng nước): hạt chảy liên tục dọc đường bay. */
+function Beam({ t0, at, ms, from, to, color, size = 0.16 }: { t0: number; at: number; ms: number; from: Vec3; to: Vec3; color: string; size?: number }) {
+  const mesh = useRef<THREE.InstancedMesh>(null)
+  const glow = useRef<THREE.Mesh>(null)
+  const dummy = useMemo(() => new THREE.Object3D(), [])
+  const N = 46
+  const parts = useMemo(() => Array.from({ length: N }, (_, i) => ({ o: i / N, jx: (Math.random() - 0.5) * 0.28, jy: (Math.random() - 0.5) * 0.28, sp: 1.6 + Math.random() * 0.8, s: 0.6 + Math.random() * 0.8 })), [])
+  const dx = to[0] - from[0]
+  const angle = Math.atan2(to[1] - from[1], dx)
+  const len = Math.hypot(dx, to[1] - from[1])
+  useFrame(() => {
+    const t = since(t0, at)
+    const on = t >= 0 && t < ms / 1000
+    if (mesh.current) mesh.current.visible = on
+    if (glow.current) glow.current.visible = on
+    if (!on || !mesh.current) return
+    const env = Math.min(1, t * 8) * Math.min(1, (ms / 1000 - t) * 8)
+    parts.forEach((p, i) => {
+      const k = (t * p.sp + p.o) % 1
+      const spread = 0.35 + k
+      dummy.position.set(from[0] + dx * k + p.jx * spread, from[1] + (to[1] - from[1]) * k + p.jy * spread, 0.1)
+      dummy.scale.setScalar(size * p.s * (0.5 + k) * env)
+      dummy.updateMatrix()
+      mesh.current!.setMatrixAt(i, dummy.matrix)
+    })
+    mesh.current.instanceMatrix.needsUpdate = true
+    if (glow.current) (glow.current.material as THREE.MeshBasicMaterial).opacity = 0.28 * env
+  })
+  return (
+    <>
+      <instancedMesh ref={mesh} args={[undefined, undefined, N]} visible={false} frustumCulled={false}>
+        <sphereGeometry args={[1, 8, 6]} />
+        <meshBasicMaterial color={color} transparent blending={ADD} depthWrite={false} />
+      </instancedMesh>
+      <mesh ref={glow} position={[(from[0] + to[0]) / 2, (from[1] + to[1]) / 2, 0.05]} rotation={[0, 0, angle]} visible={false}>
+        <planeGeometry args={[len, 0.45]} />
+        <meshBasicMaterial color={color} transparent opacity={0.28} blending={ADD} depthWrite={false} />
+      </mesh>
+    </>
   )
 }
 
@@ -220,7 +308,9 @@ export default function FxLayer({ cast, playerX, enemyX }: { cast: Cast; playerX
   const at = (on: 'self' | 'foe') => (on === 'self' ? selfPos : foePos)
   return (
     <group>
-      {plan.projectile && <Projectile t0={t0} from={selfPos} to={foePos} {...plan.projectile} />}
+      {plan.projectiles?.map((p, i) => (
+        <Projectile key={`p${i}`} t0={t0} from={selfPos} to={foePos} {...p} />
+      ))}
       {plan.events.map((e: FxEvent, i) => {
         const pos = at(e.on)
         switch (e.kind) {
@@ -234,6 +324,8 @@ export default function FxLayer({ cast, playerX, enemyX }: { cast: Cast; playerX
             return <Dome key={i} t0={t0} at={e.at} pos={pos} color={e.color} />
           case 'dust':
             return <Dust key={i} t0={t0} at={e.at} pos={pos} color={e.color} />
+          case 'beam':
+            return <Beam key={i} t0={t0} at={e.at} ms={e.ms} from={selfPos} to={foePos} color={e.color} size={e.size} />
           case 'stars':
             return <Stars key={i} t0={t0} at={e.at} ms={e.ms} pos={pos} color={e.color} />
         }
