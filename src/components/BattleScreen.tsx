@@ -4,7 +4,7 @@ import type { PetRecord } from '../game/storage'
 import type { BattleState, Side } from '../game/types'
 import type { Cast, FloatText } from '../hooks/useGame'
 import ArenaScene from '../three/ArenaScene'
-import { themeOf } from '../three/themes'
+import { bgUrl, themeOf } from '../three/themes'
 import ElementDot from './ElementDot'
 import { HelpButton } from './HelpPanel'
 import StatusBars from './StatusBars'
@@ -79,7 +79,7 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
   return (
     <div
       className={`relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden px-3 pt-2 lg:rounded-3xl lg:border-4 lg:border-amber-900 lg:px-6 lg:pt-4 lg:shadow-2xl ${shaking ? 'animate-shake' : ''}`}
-      style={{ background: `linear-gradient(to bottom, ${theme.skyTop}, ${theme.skyMid} 55%, ${theme.skyBottom})` }}
+      style={{ background: `url(${bgUrl(theme)}) center bottom / cover no-repeat, ${theme.skyMid}` }}
     >
       <ArenaScene battle={battle} hitFlash={hitFlash} attacker={attacker} cast={cast} />
 
