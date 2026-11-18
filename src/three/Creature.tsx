@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import { bounceOut, clamp01, keyframes } from './easing'
 import { loadCharacter } from './loadCharacter'
+import { getFx } from './fxTextures'
 
 export interface CreatureProps {
   /** id model (trùng id pet / kẻ địch) */
@@ -37,6 +38,52 @@ const DEFEAT_S = 0.9
  * Nhân vật 3D: hoạt ảnh có sẵn trong file (idle/run/gesture) cộng thêm chuyển động
  * viết tay phủ lên mọi nhân vật: thở, lấy đà rồi lao tới, giật lùi khi bị đánh, ngã khi bị hạ, rơi xuống khi xuất hiện.
  */
+
+/** Hiệu ứng tiến hóa (ảnh "shine" của Showdown): quầng sáng bùng lên rồi các tia sáng bay tỏa ra và bay lên quanh pet. */
+function EvolveFx() {
+  const refs = useRef<(THREE.Sprite | null)[]>([])
+  const age = useRef(0)
+  const tex = getFx('shine')
+  const parts = useMemo(() => Array.from({ length: 12 }, (_, i) => ({ a: (i / 12) * Math.PI * 2, d: 0.5 + (i % 3) * 0.18, r: 0.25 + (i % 4) * 0.06, delay: (i % 4) * 0.08 })), [])
+  useFrame((_, dtRaw) => {
+    age.current += Math.min(dtRaw, 1 / 30)
+    const a = age.current
+    // 0: quầng trung tâm; 1..12: tia bay ra
+    const core = refs.current[0]
+    if (core) {
+      const k = clamp01(a / 1.1)
+      core.visible = k < 1
+      const sc = (0.6 + Math.sin(Math.min(1, k * 1.6) * Math.PI * 0.5) * 1.5) * 1.1
+      core.scale.set(sc, sc, 1)
+      core.material.rotation = k * 3
+      core.material.opacity = 0.8 * (1 - k * k)
+    }
+    parts.forEach((p, i) => {
+      const sp = refs.current[i + 1]
+      if (!sp) return
+      const k = clamp01((a - 0.35 - p.delay) / 0.9)
+      sp.visible = k > 0 && k < 1
+      if (!sp.visible) return
+      const out = p.d * (1 - Math.pow(1 - k, 2.2)) * 1.7
+      sp.position.set(Math.cos(p.a) * out, 0.9 + Math.sin(p.a) * out * 0.7 + k * 0.5, 0.5)
+      const sc = p.r * (1 - k * 0.5)
+      sp.scale.set(sc, sc, 1)
+      sp.material.rotation = k * 5
+      sp.material.opacity = 0.9 * (1 - k)
+    })
+  })
+  if (!tex) return null
+  return (
+    <group>
+      {Array.from({ length: 13 }, (_, i) => (
+        <sprite key={i} ref={(el) => void (refs.current[i] = el)} position={[0, 0.9, 0.5]} visible={false}>
+          <spriteMaterial map={tex} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+        </sprite>
+      ))}
+    </group>
+  )
+}
+
 export default function Creature({ id, position, dir, hurt, attacking, defeated, enterKey, spin, back, evolved }: CreatureProps) {
   const model = use(loadCharacter(id, back))
 
@@ -254,6 +301,7 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
         <circleGeometry args={[0.85, 24]} />
         <meshBasicMaterial color="#000" transparent opacity={0.42} depthWrite={false} />
       </mesh>
+      {evolved && <EvolveFx />}
       <group ref={rig}>
         {/* ảnh 2D vốn nhìn về bên trái: bên trái màn hình (dir = 1) lật lại để hai bên quay mặt vào nhau */}
         <group rotation={[0, model.sprite && dir === 1 ? Math.PI : 0, 0]}>
