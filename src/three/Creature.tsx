@@ -52,7 +52,7 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
     const outlineMaterials: THREE.MeshBasicMaterial[] = []
     const skinned: THREE.Mesh[] = []
     root.traverse((o) => {
-      if ((o as THREE.Mesh).isMesh) skinned.push(o as THREE.Mesh)
+      if ((o as THREE.Mesh).isMesh && !o.userData.noOutline) skinned.push(o as THREE.Mesh)
     })
     root.updateWorldMatrix(true, true)
     for (const m of skinned) {

@@ -4,6 +4,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 /** Kích thước chuẩn hóa: cao tối đa / dài tối đa (đơn vị thế giới). Thú đứng nghiêng nên chiều dài là kích thước chính. */
 const TARGET_HEIGHT = 2.0
 const TARGET_LENGTH = 2.2
+/** chiều cao nhân vật 2D (ảnh có viền trống nên hơi lớn hơn 3D) */
+const SPRITE_HEIGHT = 2.3
 
 export interface CharacterModel {
   /** nhóm đã chuẩn hóa kích thước, chân chạm y = 0, tâm ở gốc (nhân bản bằng SkeletonUtils.clone) */
@@ -48,12 +50,50 @@ async function fetchGlb(url: string): Promise<ArrayBuffer | null> {
   }
 }
 
+async function isPng(url: string): Promise<boolean> {
+  try {
+    const r = await fetch(url)
+    if (!r.ok) return false
+    return new TextDecoder().decode((await r.arrayBuffer()).slice(1, 4)) === 'PNG'
+  } catch {
+    return false
+  }
+}
+
+/** Nhân vật 2D: tấm phẳng đứng có ảnh PNG (nền trong suốt), chân chạm y = 0, giữ tỉ lệ ảnh. */
+async function loadSprite(url: string, opt: { lift?: number; scale?: number; flip?: boolean }): Promise<CharacterModel> {
+  const tex = await new THREE.TextureLoader().loadAsync(url)
+  tex.colorSpace = THREE.SRGBColorSpace
+  tex.anisotropy = 4
+  const img = tex.image as { width: number; height: number }
+  const h = SPRITE_HEIGHT * (opt.scale ?? 1)
+  const w = h * (img.width / img.height)
+  const mat = new THREE.MeshToonMaterial({
+    map: tex,
+    gradientMap: TOON_RAMP,
+    emissive: new THREE.Color(0.55, 0.55, 0.55), // ảnh vẽ sẵn bóng: gần như không cần ánh sáng cảnh
+    emissiveMap: tex,
+    transparent: true,
+    alphaTest: 0.05,
+    side: THREE.DoubleSide,
+  })
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat)
+  mesh.position.y = h / 2 + (opt.lift ?? 0)
+  mesh.userData.noOutline = true
+  mesh.frustumCulled = false
+  const holder = new THREE.Group()
+  holder.add(mesh)
+  if (opt.flip) holder.rotation.y = Math.PI
+  return { holder, clips: [] }
+}
+
 async function load(id: string): Promise<CharacterModel> {
   const base = import.meta.env.BASE_URL
   const opt = MODEL_OPTIONS[id] ?? {}
-  // ưu tiên model cá nhân trong public/local-assets (không lên git), thiếu thì dùng model CC0 đi kèm
+  // ưu tiên model cá nhân trong public/local-assets (không lên git): .glb (3D), rồi .png (2D); thiếu thì dùng model CC0 đi kèm
   let dir = `${base}local-assets/`
   let buffer = await fetchGlb(`${dir}${id}.glb`)
+  if (!buffer && (await isPng(`${dir}${id}.png`))) return loadSprite(`${dir}${id}.png`, opt)
   if (!buffer) {
     dir = `${base}models/`
     buffer = await fetchGlb(`${dir}${id}.glb`)
