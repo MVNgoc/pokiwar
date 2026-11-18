@@ -216,7 +216,7 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
     g.position.set(ox, oy, 0)
     g.scale.set(sx, sy, sx)
     g.rotation.z = rz
-    if (spin) g.rotation.y = Math.sin(time * 0.9) * 0.75 // lắc qua lại, luôn thấy mặt
+    if (spin && !model.sprite) g.rotation.y = Math.sin(time * 0.9) * 0.75 // lắc qua lại, luôn thấy mặt
     for (const { mat, base } of inst.materials) {
       mat.emissive.setRGB(base.r + flash, base.g + flash * 0.1, base.b + flash * 0.1)
       mat.transparent = alpha < 1
@@ -234,7 +234,7 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
   })
 
   return (
-    <group position={position} rotation={[0, dir * FACE, 0]}>
+    <group position={position} rotation={[0, model.sprite ? 0 : dir * FACE, 0]}>
       <mesh ref={shadow} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} renderOrder={-1}>
         <circleGeometry args={[0.85, 24]} />
         <meshBasicMaterial color="#000" transparent opacity={0.42} depthWrite={false} />

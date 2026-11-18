@@ -40,7 +40,7 @@ const TICK = 100
  * Điều phối trận đấu theo lượt: mỗi lượt đi 1 nước trên bàn cờ chung, có đồng hồ đếm ngược.
  * Lượt pet: người chơi xếp ngọc (hết giờ thì mất lượt). Lượt kẻ địch: AI tự chọn và xếp ngọc.
  */
-export function useGame(pet: Pet) {
+export function useGame(pet: Pet, paused = false) {
   const [board, setBoard] = useState<Board>(createBoard)
   const [battle, setBattle] = useState(() => createBattle(pet))
   const [clearing, setClearing] = useState<Set<number>>(new Set())
@@ -60,6 +60,9 @@ export function useGame(pet: Pet) {
   const boardRef = useRef(board)
   const battleRef = useRef(battle)
   const busyRef = useRef(false)
+  /** mở hướng dẫn: tạm dừng đồng hồ lượt */
+  const pausedRef = useRef(paused)
+  pausedRef.current = paused
   const floatId = useRef(0)
   const hitTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
   /** tăng khi chơi lại: các chuỗi bất đồng bộ cũ tự dừng */
@@ -278,6 +281,7 @@ export function useGame(pet: Pet) {
   endTurnRef.current = endTurn
   useEffect(() => {
     const t = setInterval(() => {
+      if (pausedRef.current) return
       if (busyRef.current) {
         setHintMove((h) => (h ? null : h))
         return

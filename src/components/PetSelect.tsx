@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import ElementDot from './ElementDot'
+import HelpPanel, { HelpButton } from './HelpPanel'
 import { ELEMENT_INFO } from '../game/constants'
 import { PETS } from '../game/pets'
 import type { Pet } from '../game/types'
@@ -11,15 +12,16 @@ import { loadCharacter } from '../three/loadCharacter'
 
 export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
   const [sel, setSel] = useState<Pet>(PETS[0])
+  const [help, setHelp] = useState(false)
   useEffect(() => {
     PETS.forEach((p) => void loadCharacter(p.id)) // tải sẵn để đổi pet không bị khựng
   }, [])
   return (
     <div className="mx-auto flex h-dvh max-w-xl flex-col gap-2 overflow-hidden bg-gradient-to-b from-emerald-950 to-stone-950 p-3 text-white">
-      <h1 className="text-center text-2xl font-black text-amber-300">Linh Thú Xếp Ngọc</h1>
-      <p className="text-center text-xs text-amber-200">
-        Tương khắc: Kim 金 › Mộc 木 › Thổ 土 › Thủy 水 › Hỏa 火 › Kim 金 · Khắc chế x1.5 sát thương, bị khắc x0.7
-      </p>
+      <div className="relative">
+        <h1 className="text-center text-2xl font-black text-amber-300">Linh Thú Xếp Ngọc</h1>
+        <HelpButton onClick={() => setHelp(true)} className="absolute right-0 top-1/2 -translate-y-1/2" />
+      </div>
 
       <div className="relative h-[34dvh] min-h-[190px] shrink-0 overflow-hidden rounded-xl border-2 border-amber-900 bg-gradient-to-b from-sky-900 to-emerald-900">
         <Canvas className="!absolute inset-0" dpr={[1, 1.5]} flat gl={{ alpha: true, antialias: true }} camera={{ fov: 32, position: [0, 1.25, 5.2] }} onCreated={({ camera }) => camera.lookAt(0, 0.9, 0)}>
@@ -66,6 +68,7 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
       <button onClick={() => onPick(sel)} className="shrink-0 rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 py-3 text-lg font-black text-black shadow-lg active:scale-[.98]">
         Chơi với {sel.name}
       </button>
+      {help && <HelpPanel onClose={() => setHelp(false)} />}
     </div>
   )
 }

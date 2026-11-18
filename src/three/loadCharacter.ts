@@ -12,6 +12,8 @@ export interface CharacterModel {
   holder: THREE.Group
   /** các hoạt ảnh (Cube Pets: idle, walk, run, eat, dance, gesture-positive, gesture-negative) */
   clips: THREE.AnimationClip[]
+  /** ảnh 2D (tấm phẳng): luôn quay mặt về camera, không xoay */
+  sprite?: boolean
 }
 
 /** Dải 4 mức sáng cho tô bóng kiểu hoạt hình: mảng màu rõ thay vì chuyển sắc lem. */
@@ -84,7 +86,7 @@ async function loadSprite(url: string, opt: { lift?: number; scale?: number; fli
   const holder = new THREE.Group()
   holder.add(mesh)
   if (opt.flip) holder.rotation.y = Math.PI
-  return { holder, clips: [] }
+  return { holder, clips: [], sprite: true }
 }
 
 async function load(id: string): Promise<CharacterModel> {

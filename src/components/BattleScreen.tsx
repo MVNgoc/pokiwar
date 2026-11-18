@@ -4,6 +4,7 @@ import type { PetRecord } from '../game/storage'
 import type { BattleState, Side } from '../game/types'
 import type { Cast, FloatText } from '../hooks/useGame'
 import ArenaScene from '../three/ArenaScene'
+import { HelpButton } from './HelpPanel'
 import StatusBars from './StatusBars'
 
 interface Props {
@@ -19,6 +20,7 @@ interface Props {
   onSkill: () => void
   onRestart: () => void
   onChangePet: () => void
+  onHelp: () => void
   muted: boolean
   onToggleMute: () => void
 }
@@ -66,7 +68,7 @@ function Fighter({ name, active, floats, children }: FighterProps) {
   )
 }
 
-export default function BattleScreen({ battle, floats, hitFlash, shaking, attacker, cast, best, newBest, busy, onSkill, onRestart, onChangePet, muted, onToggleMute }: Props) {
+export default function BattleScreen({ battle, floats, hitFlash, shaking, attacker, cast, best, newBest, busy, onSkill, onRestart, onChangePet, onHelp, muted, onToggleMute }: Props) {
   const { player, enemy, stage, score, status } = battle
   const ready = canUseSkill(battle) && !busy
   const turnInfo = { pct: (battle.turnLeft / BALANCE.turnMs) * 100, secs: Math.ceil(battle.turnLeft / 1000) }
@@ -77,7 +79,6 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
 
       <div className="relative z-10 flex justify-between text-xs font-bold text-amber-100">
         <span>{enemy.boss ? '👑 BOSS' : `Màn ${stage}/${TOTAL_STAGES}`}</span>
-        <span className="text-[10px] font-normal text-amber-100/70">Kim›Mộc›Thổ›Thủy›Hỏa›Kim</span>
         <span>
           Điểm: {score} · Kỷ lục: {Math.max(best.bestScore, score)}
         </span>
@@ -115,6 +116,8 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
       >
         {battle.pet.skill.emoji} {battle.pet.skill.name}
       </button>
+
+      <HelpButton onClick={onHelp} className="absolute bottom-2 left-3 z-20" />
 
       <button
         onClick={onToggleMute}
