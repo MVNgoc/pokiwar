@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import ElementDot from './ElementDot'
 import HelpPanel, { HelpButton } from './HelpPanel'
 import { ELEMENT_INFO } from '../game/constants'
-import { PETS } from '../game/pets'
+import { GENERATIONS, PETS } from '../game/pets'
 import type { Pet } from '../game/types'
 import Creature from '../three/Creature'
 import { CharacterLights, Platform } from '../three/SceneLights'
@@ -13,9 +13,13 @@ import { loadCharacter } from '../three/loadCharacter'
 export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
   const [sel, setSel] = useState<Pet>(PETS[0])
   const [help, setHelp] = useState(false)
+  const gen = sel.gen
+  const inGen = PETS.filter((p) => p.gen === gen)
   useEffect(() => {
-    PETS.forEach((p) => void loadCharacter(p.id)) // tải sẵn để đổi pet không bị khựng
-  }, [])
+    inGen.forEach((p) => void loadCharacter(p.id)) // tải sẵn 3 pet của thế hệ này để đổi pet không bị khựng
+  }, [gen]) // eslint-disable-line react-hooks/exhaustive-deps
+  // đổi thế hệ: giữ nguyên hệ đang chọn (Mộc / Hỏa / Thủy) nếu có
+  const pickGen = (g: number) => setSel(PETS.find((p) => p.gen === g && p.element === sel.element) ?? PETS.find((p) => p.gen === g)!)
   return (
     <div className="mx-auto flex h-dvh max-w-xl flex-col gap-2 overflow-hidden bg-gradient-to-b from-emerald-950 to-stone-950 p-3 text-white">
       <div className="relative">
@@ -34,8 +38,20 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
         <div className="absolute inset-x-0 bottom-1 text-center text-sm font-black text-white [text-shadow:0_2px_3px_#000]">{sel.name}</div>
       </div>
 
+      <div className="flex shrink-0 justify-center gap-1.5">
+        {GENERATIONS.map((g) => (
+          <button
+            key={g}
+            onClick={() => pickGen(g)}
+            className={`rounded-full px-3 py-1 text-xs font-black transition active:scale-95 ${g === gen ? 'bg-amber-400 text-black' : 'bg-stone-800 text-amber-100/80'}`}
+          >
+            Thế hệ {g}
+          </button>
+        ))}
+      </div>
+
       <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto">
-        {PETS.map((pet) => {
+        {inGen.map((pet) => {
           const el = ELEMENT_INFO[pet.element]
           const on = pet.id === sel.id
           return (

@@ -18,33 +18,33 @@ export interface FxPlan {
 }
 
 /**
- * Kịch bản hiệu ứng kỹ năng theo id pet / kẻ địch. `at` tính bằng ms từ lúc tung kỹ năng;
+ * Kịch bản hiệu ứng kỹ năng: pet theo hệ (`pet-<hệ>`), kẻ địch theo id. `at` tính bằng ms từ lúc tung kỹ năng;
  * `self` là người tung, `foe` là mục tiêu (kẻ địch tung chiêu thì hai bên đảo lại).
  */
 export const FX_PLANS: Record<string, FxPlan> = {
   // pet
-  'cao-lua': { projectile: { style: 'fire', color: '#ff7a1a', size: 0.34 }, events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#ffc14d', count: 22 }] },
-  'cut-thuy': {
+  'pet-hoa': { projectile: { style: 'fire', color: '#ff7a1a', size: 0.34 }, events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#ffc14d', count: 22 }] },
+  'pet-thuy': {
     events: [
       { kind: 'bubble', at: 0, on: 'self', color: '#5ab4ff' },
       { kind: 'burst', at: 150, on: 'self', color: '#c8ecff', up: true, count: 18 },
     ],
   },
-  'huou-moc': {
+  'pet-moc': {
     projectile: { style: 'thorn', color: '#4fd05a', size: 0.3 },
     events: [
       { kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#9cff8a' },
       { kind: 'stars', at: FLIGHT_MS + 100, on: 'foe', color: '#ffe14d', ms: 1300 },
     ],
   },
-  'ho-kim': {
+  'pet-kim': {
     events: [
       { kind: 'slash', at: 0, on: 'foe', color: '#e9f0ff' },
       { kind: 'slash', at: 150, on: 'foe', color: '#e9f0ff' },
       { kind: 'slash', at: 300, on: 'foe', color: '#fff3b0' },
     ],
   },
-  'voi-tho': {
+  'pet-tho': {
     events: [
       { kind: 'dome', at: 0, on: 'self', color: '#ffd24a' },
       { kind: 'dust', at: 200, on: 'foe', color: '#b98a54' },

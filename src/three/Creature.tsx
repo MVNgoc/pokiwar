@@ -18,6 +18,8 @@ export interface CreatureProps {
   enterKey?: string
   /** xoay tròn (màn chọn pet) */
   spin?: boolean
+  /** nhìn từ sau lưng (pet của người chơi trong trận; chỉ áp dụng cho ảnh 2D có bản sau lưng) */
+  back?: boolean
 }
 
 /** độ dày đường viền (đơn vị thế giới) */
@@ -33,8 +35,8 @@ const DEFEAT_S = 0.9
  * Nhân vật 3D: hoạt ảnh có sẵn trong file (idle/run/gesture) cộng thêm chuyển động
  * viết tay phủ lên mọi nhân vật: thở, lấy đà rồi lao tới, giật lùi khi bị đánh, ngã khi bị hạ, rơi xuống khi xuất hiện.
  */
-export default function Creature({ id, position, dir, hurt, attacking, defeated, enterKey, spin }: CreatureProps) {
-  const model = use(loadCharacter(id))
+export default function Creature({ id, position, dir, hurt, attacking, defeated, enterKey, spin, back }: CreatureProps) {
+  const model = use(loadCharacter(id, back))
 
   const inst = useMemo(() => {
     const root = clone(model.holder) as THREE.Group

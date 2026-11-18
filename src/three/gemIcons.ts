@@ -34,7 +34,7 @@ export function buildMedallion(type: Element, tex: THREE.Texture) {
   const root = new THREE.Group()
   const rim = new THREE.MeshStandardMaterial({ color: color.clone().multiplyScalar(0.6), roughness: 0.35, metalness: 0.5, emissive: color.clone().multiplyScalar(0.18) })
   const edge = new THREE.MeshStandardMaterial({ color: color.clone().lerp(new THREE.Color('#fff'), 0.35), roughness: 0.25, metalness: 0.6, emissive: color.clone().multiplyScalar(0.2) })
-  const face = new THREE.MeshStandardMaterial({ map: tex, emissiveMap: tex, emissive: new THREE.Color(0.55, 0.55, 0.55), roughness: 0.55, alphaTest: 0.1 })
+  const face = new THREE.MeshStandardMaterial({ color: '#000', emissiveMap: tex, emissive: new THREE.Color(0.92, 0.92, 0.92), roughness: 1, metalness: 0 })
 
   const body = new THREE.Mesh(new THREE.CylinderGeometry(0.43, 0.43, 0.2, 40), rim)
   body.rotation.x = Math.PI / 2
@@ -44,7 +44,7 @@ export function buildMedallion(type: Element, tex: THREE.Texture) {
   front.position.z = 0.104
   const shine = new THREE.Mesh(
     new THREE.CircleGeometry(0.13, 20),
-    new THREE.MeshBasicMaterial({ color: '#fff', transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ color: '#fff', transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false }),
   )
   shine.scale.set(1.7, 0.8, 1)
   shine.rotation.z = 0.6

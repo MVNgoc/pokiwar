@@ -25,6 +25,9 @@ function Stage({ battle, hitFlash, attacker, cast }: Props) {
 
   // tải sẵn model kẻ địch của màn kế tiếp
   useEffect(() => {
+    void loadCharacter(battle.pet.id, true)
+  }, [battle.pet.id])
+  useEffect(() => {
     const next = ENEMIES[stage % ENEMIES.length]
     if (next) void loadCharacter(next.id)
   }, [stage])
@@ -39,6 +42,7 @@ function Stage({ battle, hitFlash, attacker, cast }: Props) {
         id={battle.pet.id}
         position={[-x, 0, 0]}
         dir={1}
+        back
         hurt={hitFlash === 'player'}
         attacking={attacker === 'player'}
         defeated={player.hp <= 0}

@@ -251,7 +251,7 @@ export function useGame(pet: Pet, paused = false) {
     setBusyBoth(true)
     const offensive = !!cur.pet.skill.damage
     const id = floatId.current++
-    setCast({ id, fxId: cur.pet.id, side: 'player', offensive })
+    setCast({ id, fxId: `pet-${cur.pet.element}`, side: 'player', offensive })
     play('skill')
     if (offensive) flashAttack('player')
     setTimeout(() => setCast((c) => (c?.id === id ? null : c)), 1500)

@@ -97,6 +97,8 @@ export interface Pet {
   emoji: string
   /** hệ sở trường: ngọc cùng hệ hiệu quả x1.5 */
   element: Element
+  /** thế hệ (chỉ để nhóm khi chọn pet) */
+  gen: number
   maxHp: number
   desc: string
   skill: Skill

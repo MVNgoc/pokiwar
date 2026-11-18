@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { PETS } from '../game/pets'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 /** Kích thước chuẩn hóa: cao tối đa / dài tối đa (đơn vị thế giới). Thú đứng nghiêng nên chiều dài là kích thước chính. */
@@ -43,6 +44,13 @@ function toon(color: THREE.Color, map: THREE.Texture | null = null) {
 }
 
 /** Tải file .glb; trả null nếu thiếu (dev server trả index.html cho file không có nên kiểm tra chữ ký "glTF"). */
+/** Model Cube Pets đi kèm (CC0) dùng khi thiếu hình cá nhân: pet lấy theo hệ, kẻ địch theo id. */
+const CUBE_BY_ELEMENT = { moc: 'huou-moc', hoa: 'cao-lua', thuy: 'cut-thuy', kim: 'ho-kim', tho: 'voi-tho' } as const
+const fallbackId = (id: string) => {
+  const pet = PETS.find((p) => p.id === id)
+  return pet ? CUBE_BY_ELEMENT[pet.element] : id
+}
+
 async function fetchGlb(url: string): Promise<ArrayBuffer | null> {
   try {
     const r = await fetch(url)
@@ -161,21 +169,22 @@ async function isGif(url: string): Promise<ArrayBuffer | null> {
   }
 }
 
-async function load(id: string): Promise<CharacterModel> {
+async function load(id: string, back: boolean): Promise<CharacterModel> {
   const base = import.meta.env.BASE_URL
   const opt = MODEL_OPTIONS[id] ?? {}
   // ưu tiên model cá nhân trong public/local-assets (không lên git): .glb (3D), rồi .png (2D); thiếu thì dùng model CC0 đi kèm
   let dir = `${base}local-assets/`
   let buffer = await fetchGlb(`${dir}${id}.glb`)
   if (!buffer) {
-    const gif = await isGif(`${dir}${id}.gif`)
+    // pet của người chơi: ưu tiên ảnh nhìn từ sau lưng (<id>.back.gif), thiếu thì dùng ảnh trước
+    const gif = (back ? await isGif(`${dir}${id}.back.gif`) : null) ?? (await isGif(`${dir}${id}.gif`))
     const animated = gif ? await loadGifSprite(gif, opt) : null
     if (animated) return animated
   }
   if (!buffer && (await isPng(`${dir}${id}.png`))) return loadSprite(`${dir}${id}.png`, opt)
   if (!buffer) {
     dir = `${base}models/`
-    buffer = await fetchGlb(`${dir}${id}.glb`)
+    buffer = await fetchGlb(`${dir}${fallbackId(id)}.glb`)
     if (!buffer) throw new Error(`Không tải được model ${id}`)
   }
   const gltf = await new GLTFLoader().parseAsync(buffer, dir)
@@ -208,11 +217,12 @@ async function load(id: string): Promise<CharacterModel> {
 }
 
 /** Tải (và lưu cache) model nhân vật. Gọi trước để tải sẵn khi biết sắp dùng. */
-export function loadCharacter(id: string): Promise<CharacterModel> {
-  let p = cache.get(id)
+export function loadCharacter(id: string, back = false): Promise<CharacterModel> {
+  const key = back ? `${id}:back` : id
+  let p = cache.get(key)
   if (!p) {
-    p = load(id)
-    cache.set(id, p)
+    p = load(id, back)
+    cache.set(key, p)
   }
   return p
 }

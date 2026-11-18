@@ -16,3 +16,4 @@ Hình 2D (tùy chọn, thay cho model 3D): đặt cạnh nhau cùng tên id
 Thứ tự ưu tiên: .glb > .gif > .png > model đi kèm.
 
 Icon ngọc theo hệ: gems/<hệ>.png (hoa, thuy, moc, kim, tho).
+  <id>.back.gif  (tùy chọn, chỉ pet) ảnh nhìn từ sau lưng, dùng cho pet của người chơi trong trận; thiếu thì dùng <id>.gif
