@@ -243,7 +243,10 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
         <meshBasicMaterial color="#000" transparent opacity={0.42} depthWrite={false} />
       </mesh>
       <group ref={rig}>
-        <primitive object={inst.root} />
+        {/* ảnh 2D vốn nhìn về bên trái: bên trái màn hình (dir = 1) lật lại để hai bên quay mặt vào nhau */}
+        <group rotation={[0, model.sprite && dir === 1 ? Math.PI : 0, 0]}>
+          <primitive object={inst.root} />
+        </group>
       </group>
     </group>
   )
