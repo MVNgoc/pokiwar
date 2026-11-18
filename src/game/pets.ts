@@ -13,12 +13,12 @@ const KIT: Record<'moc' | 'hoa' | 'thuy', { maxHp: number; desc: string; skill: 
   hoa: {
     maxHp: 150,
     desc: 'Khởi đầu hệ lửa, nạp Nộ cực nhanh.',
-    skill: { name: 'Hỏa Cầu Thiêu Đốt', emoji: '🔥', desc: 'Gây 80 sát thương', damage: 80 },
+    skill: { name: 'Hỏa Cầu Thiêu Đốt', emoji: '🔥', desc: 'Gây 85 sát thương', damage: 85 },
   },
   thuy: {
     maxHp: 150,
     desc: 'Khởi đầu hệ nước, trụ vững nhờ hồi máu.',
-    skill: { name: 'Suối Nguồn Sinh Mệnh', emoji: '💧', desc: 'Gây 30 sát thương, hồi 40% HP và +15 giáp', damage: 30, healPct: 0.4, shield: 15 },
+    skill: { name: 'Suối Nguồn Sinh Mệnh', emoji: '💧', desc: 'Gây 30 sát thương, hồi 35% HP và +15 giáp', damage: 30, healPct: 0.35, shield: 15 },
   },
 }
 const EMOJI: Record<'moc' | 'hoa' | 'thuy', string> = { moc: '🌱', hoa: '🔥', thuy: '💧' }
@@ -38,13 +38,13 @@ const STATS: Record<string, [number, number, number, number]> = {
   bulbasaur: [135, 1.0, 1.0, 1.0],
   chikorita: [145, 0.95, 0.95, 0.95],
   treecko: [120, 1.05, 1.15, 1.0],
-  turtwig: [150, 0.95, 0.9, 1.1],
+  turtwig: [150, 1.0, 0.95, 1.1],
   snivy: [120, 1.1, 1.05, 1.05],
   charmander: [150, 1.0, 1.0, 1.0],
   cyndaquil: [140, 1.05, 1.1, 1.0],
   torchic: [130, 1.1, 1.2, 0.9],
   chimchar: [135, 1.05, 1.05, 1.05],
-  tepig: [170, 0.95, 0.9, 1.0],
+  tepig: [170, 1.0, 0.95, 1.0],
   squirtle: [155, 1.0, 1.0, 1.0],
   totodile: [145, 1.05, 1.0, 1.05],
   mudkip: [160, 0.95, 1.05, 1.0],

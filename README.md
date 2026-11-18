@@ -51,8 +51,8 @@ Chỉ có 3 pet khởi đầu mỗi thế hệ (Mộc, Hỏa, Thủy), 5 thế h
 | Hệ | HP | Kỹ năng |
 |---|---|---|
 | 🌱 Mộc | 130 | Dây Leo Trói Buộc: 25 sát thương, kẻ địch mất 1 lượt |
-| 🔥 Hỏa | 150 | Hỏa Cầu Thiêu Đốt: 80 sát thương |
-| 💧 Thủy | 150 | Suối Nguồn Sinh Mệnh: 30 sát thương, hồi 40% HP, +15 giáp |
+| 🔥 Hỏa | 150 | Hỏa Cầu Thiêu Đốt: 85 sát thương |
+| 💧 Thủy | 150 | Suối Nguồn Sinh Mệnh: 30 sát thương, hồi 35% HP, +15 giáp |
 
 Kim và Thổ chỉ có ở ngọc và kẻ địch. Kẻ địch theo thứ tự các màn: 🌿 Oddish (Mộc), 🧲 Magnemite (Kim), 🐟 Magikarp (Thủy), 🪨 Onix (Thổ), 🐲 Charizard (Hỏa, Boss).
 

@@ -57,7 +57,7 @@ for (const pet of PETS) {
 const ready = withEnemy(withPlayer(base, { rage: 100 }), { element: 'kim', hp: 500, maxHp: 500 })
 assert.ok(canUseSkill(ready))
 assert.ok(!canUseSkill({ ...ready, turn: 'enemy' }))
-assert.equal(ready.enemy.hp - useSkill(ready).state.enemy.hp, 120) // 80 x 1.5 khắc chế
+assert.equal(ready.enemy.hp - useSkill(ready).state.enemy.hp, Math.round(hoaHo.skill.damage! * 1.5)) // x1.5 khắc chế
 assert.equal(useSkill({ ...ready, turn: 'enemy' }).state.enemy.hp, 500)
 // kỹ năng choáng: kẻ địch mất lượt kế tiếp
 const mocLoc = createBattle(PETS.find((p) => p.id === 'bulbasaur')!)
