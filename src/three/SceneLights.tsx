@@ -35,12 +35,12 @@ export function CharacterLights() {
 }
 
 /** Bục đứng phát sáng theo hệ của nhân vật. */
-export function Platform({ position, color }: { position: [number, number, number]; color: string }) {
+export function Platform({ position, color, ground }: { position: [number, number, number]; color: string; ground?: string }) {
   return (
     <group position={position}>
       <mesh position={[0, -0.09, 0]}>
         <cylinderGeometry args={[1.2, 1.34, 0.18, 40]} />
-        <meshStandardMaterial color="#2a2f3d" roughness={0.55} metalness={0.25} />
+        <meshStandardMaterial color={ground ?? '#2a2f3d'} roughness={0.9} metalness={ground ? 0 : 0.25} />
       </mesh>
       <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.98, 1.1, 48]} />

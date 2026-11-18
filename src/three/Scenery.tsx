@@ -134,6 +134,126 @@ function Flowers() {
   )
 }
 
+/** Bụi cỏ cao: nơi Pokémon hoang dã xuất hiện, đung đưa theo gió */
+function TallGrass({ color, count = 22 }: { color: string; count?: number }) {
+  const g = useRef<THREE.Group>(null)
+  const tufts = useMemo(() => {
+    const r = rng(77)
+    return Array.from({ length: count }, (_, i) => ({ x: (i % 2 ? 1 : -1) * (1.7 + r() * 6.5), z: 1.2 - r() * 4.2, s: 0.7 + r() * 0.7, p: r() * 6 }))
+  }, [count])
+  useFrame(({ clock }) => {
+    g.current?.children.forEach((c, i) => {
+      c.rotation.z = Math.sin(clock.elapsedTime * 1.6 + tufts[i].p) * 0.12
+    })
+  })
+  return (
+    <group ref={g}>
+      {tufts.map((t, i) => (
+        <group key={i} position={[t.x, -0.15, t.z]} scale={t.s}>
+          {[-0.14, 0, 0.14].map((dx, k) => (
+            <mesh key={k} position={[dx, 0.28, 0]} rotation={[0, 0, dx * 1.6]}>
+              <coneGeometry args={[0.09, 0.62 + (k === 1 ? 0.14 : 0), 4]} />
+              {flat(color)}
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </group>
+  )
+}
+
+/** Hàng rào gỗ dọc đường */
+function Fence() {
+  return (
+    <group position={[0, -0.15, -3.2]}>
+      {Array.from({ length: 22 }, (_, i) => (
+        <mesh key={i} position={[-10.5 + i, 0.3, 0]}>
+          <boxGeometry args={[0.13, 0.6, 0.13]} />
+          {flat('#b07a45')}
+        </mesh>
+      ))}
+      {[0.22, 0.46].map((y) => (
+        <mesh key={y} position={[0, y, 0]}>
+          <boxGeometry args={[22, 0.08, 0.07]} />
+          {flat('#c68b52')}
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+/** Bảng chỉ đường ven lối đi */
+function Sign({ x }: { x: number }) {
+  return (
+    <group position={[x, -0.15, -1.6]} rotation={[0, -0.25, 0]}>
+      <mesh position={[0, 0.4, 0]}>
+        <boxGeometry args={[0.09, 0.8, 0.09]} />
+        {flat('#8a5a34')}
+      </mesh>
+      <mesh position={[0, 0.85, 0.05]}>
+        <boxGeometry args={[0.9, 0.5, 0.07]} />
+        {flat('#d9a066')}
+      </mesh>
+      <mesh position={[0, 0.85, 0.095]}>
+        <boxGeometry args={[0.62, 0.05, 0.02]} />
+        {flat('#6b4a2f')}
+      </mesh>
+      <mesh position={[0, 0.74, 0.095]}>
+        <boxGeometry args={[0.5, 0.05, 0.02]} />
+        {flat('#6b4a2f')}
+      </mesh>
+    </group>
+  )
+}
+
+/** Pokéball (nửa đỏ, nửa trắng, nút giữa) đặt trên mặt đất */
+function Pokeball({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) {
+  return (
+    <group position={position} scale={scale}>
+      <mesh position={[0, 0.2, 0]}>
+        <sphereGeometry args={[0.2, 18, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        <meshStandardMaterial color="#e63232" roughness={0.35} />
+      </mesh>
+      <mesh position={[0, 0.2, 0]} rotation={[Math.PI, 0, 0]}>
+        <sphereGeometry args={[0.2, 18, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        <meshStandardMaterial color="#f5f5f5" roughness={0.35} />
+      </mesh>
+      <mesh position={[0, 0.2, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.2, 0.022, 8, 28]} />
+        <meshStandardMaterial color="#222" />
+      </mesh>
+      <mesh position={[0, 0.2, 0.2]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.055, 0.055, 0.03, 14]} />
+        <meshStandardMaterial color="#fff" emissive="#ffffff" emissiveIntensity={0.25} />
+      </mesh>
+    </group>
+  )
+}
+
+/** Nhà nhỏ mái đỏ (kiểu Trung tâm Pokémon) ở xa */
+function Center({ position }: { position: [number, number, number] }) {
+  return (
+    <group position={position}>
+      <mesh position={[0, 0.9, 0]}>
+        <boxGeometry args={[3.4, 1.8, 2.2]} />
+        {flat('#fdf3e6')}
+      </mesh>
+      <mesh position={[0, 2.1, 0]} rotation={[0, Math.PI / 4, 0]} scale={[1.15, 1, 0.78]}>
+        <coneGeometry args={[2.2, 1.0, 4]} />
+        {flat('#ee5d7a')}
+      </mesh>
+      <mesh position={[0, 0.55, 1.12]}>
+        <boxGeometry args={[0.7, 1.1, 0.06]} />
+        {flat('#7ab8ff')}
+      </mesh>
+      <mesh position={[0, 1.75, 1.13]}>
+        <circleGeometry args={[0.2, 16]} />
+        <meshBasicMaterial color="#e63232" />
+      </mesh>
+    </group>
+  )
+}
+
 function Clouds({ tint }: { tint: string }) {
   const refs = useRef<(THREE.Group | null)[]>([])
   const clouds = useMemo(() => {
@@ -306,17 +426,30 @@ export default function Scenery({ theme }: { theme: StageTheme }) {
         <>
           <Hills theme={theme} />
           <Rocks color="#4c4163" crystals />
+          <Pokeball position={[4.2, -0.15, 1]} scale={0.8} />
         </>
       ) : m === 'beach' ? (
         <>
           <Sea />
           <Trees theme={theme} kind="palm" />
+          <Pokeball position={[-3.9, -0.15, 1.3]} />
+          <Pokeball position={[4.3, -0.15, 0.9]} scale={0.8} />
         </>
       ) : (
         <>
           <Hills theme={theme} />
           <Trees theme={theme} kind={m === 'forest' ? 'pine' : 'round'} />
-          {m === 'meadow' && <Flowers />}
+          <TallGrass color={m === 'forest' ? '#2f9a4a' : '#43c24f'} count={m === 'forest' ? 30 : 22} />
+          {m === 'meadow' && (
+            <>
+              <Flowers />
+              <Fence />
+              <Sign x={-4.6} />
+              <Center position={[8.5, -0.15, -9]} />
+              <Pokeball position={[4.6, -0.15, 1.2]} />
+            </>
+          )}
+          {m === 'forest' && <Pokeball position={[-4.5, -0.15, 1.2]} scale={0.9} />}
         </>
       )}
       <Motes count={m === 'volcano' ? 60 : 40} color={theme.mote} />

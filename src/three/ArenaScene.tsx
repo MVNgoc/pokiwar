@@ -60,8 +60,8 @@ function Stage({ battle, hitFlash, attacker, cast }: Props) {
   return (
     <>
       <Scenery theme={themeOf(stage)} />
-      <Platform position={[-x, 0, 0]} color={GEM_COLOR[battle.pet.element]} />
-      <Platform position={[x, 0, 0]} color={GEM_COLOR[enemy.element]} />
+      <Platform position={[-x, 0, 0]} color={GEM_COLOR[battle.pet.element]} ground={themeOf(stage).hillNear} />
+      <Platform position={[x, 0, 0]} color={GEM_COLOR[enemy.element]} ground={themeOf(stage).hillNear} />
       <Creature
         key={battle.pet.id}
         id={battle.pet.id}
