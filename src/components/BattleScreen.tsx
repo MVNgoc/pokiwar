@@ -6,6 +6,7 @@ import type { Cast, FloatText } from '../hooks/useGame'
 import ArenaScene from '../three/ArenaScene'
 import { bgUrl, themeOf } from '../three/themes'
 import ElementDot from './ElementDot'
+import Icon from './Icon'
 import { HelpButton } from './HelpPanel'
 import StatusBars from './StatusBars'
 
@@ -84,7 +85,14 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
       <ArenaScene battle={battle} hitFlash={hitFlash} attacker={attacker} cast={cast} />
 
       <div className="relative z-10 flex justify-between text-xs font-bold text-amber-100">
-        <span className="rounded-full bg-black/35 px-2 py-0.5 lg:text-sm">{enemy.boss ? `👑 BOSS · ${theme.name}` : `Màn ${stage}/${TOTAL_STAGES} · ${theme.name}`}</span>
+        <span className="rounded-full bg-black/35 px-2 py-0.5 lg:text-sm">{enemy.boss ? (
+            <>
+              <Icon name="crown" size={14} className="text-yellow-300" /> BOSS · {theme.name}
+            </>
+          ) : (
+            `Màn ${stage}/${TOTAL_STAGES} · ${theme.name}`
+          )}
+        </span>
         <span className="rounded-full bg-black/35 px-2 py-0.5 lg:text-sm">
           Điểm: {score} · Kỷ lục: {Math.max(best.bestScore, score)}
         </span>
@@ -94,7 +102,15 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
         {playing && (
           <div key={battle.turnNo} className="turn-banner pointer-events-none absolute inset-x-0 top-[8%] z-30 flex justify-center">
             <span className={`rounded-full px-4 py-1 text-sm font-black shadow-lg ${battle.turn === 'player' ? 'bg-emerald-400 text-black' : 'bg-red-500 text-white'}`}>
-              {battle.turn === 'player' ? '⚔ LƯỢT CỦA BẠN' : '💢 LƯỢT KẺ ĐỊCH'}
+              {battle.turn === 'player' ? (
+                <>
+                  <Icon name="sword" size={16} /> LƯỢT CỦA BẠN
+                </>
+              ) : (
+                <>
+                  <Icon name="bolt" size={16} /> LƯỢT KẺ ĐỊCH
+                </>
+              )}
             </span>
           </div>
         )}
@@ -112,7 +128,7 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
           name={
             <>
               <ElementDot element={enemy.element} size={16} /> {enemy.name}
-              {enemy.stunned ? ' 💫' : ''}
+              {enemy.stunned && <Icon name="star" size={14} className="ml-1 text-yellow-300" />}
             </>
           }
           active={playing && battle.turn === 'enemy'}
@@ -141,7 +157,7 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
         aria-label={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}
         className="absolute bottom-2 right-3 z-20 rounded-full bg-black/40 px-2 py-1 text-lg"
       >
-        {muted ? '🔇' : '🔊'}
+        <Icon name={muted ? 'mute' : 'volume'} size={20} className="text-amber-100" />
       </button>
 
       {status !== 'playing' && (
@@ -153,11 +169,23 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
             </>
           ) : (
             <>
-              <div className={`text-3xl font-black ${status === 'won' ? 'text-yellow-300' : 'text-red-400'}`}>{status === 'won' ? '🏆 Chiến thắng!' : 'Thất bại!'}</div>
+              <div className={`text-3xl font-black ${status === 'won' ? 'text-yellow-300' : 'text-red-400'}`}>{status === 'won' ? (
+                  <>
+                    <Icon name="trophy" size={30} /> Chiến thắng!
+                  </>
+                ) : (
+                  'Thất bại!'
+                )}</div>
               <div className="text-sm text-amber-100">{status === 'won' ? `${player.name} đã hạ gục Boss!` : `Dừng chân ở màn ${stage}/${TOTAL_STAGES}`}</div>
               <div className="text-lg font-bold text-white">Điểm: {score}</div>
               <div className="text-xs text-amber-200">
-                {newBest ? '🎉 Kỷ lục mới!' : `Kỷ lục: ${best.bestScore}`} · Thắng: {best.wins} lần
+                {newBest ? (
+                  <>
+                    <Icon name="star" size={13} className="text-yellow-300" /> Kỷ lục mới!
+                  </>
+                ) : (
+                  `Kỷ lục: ${best.bestScore}`
+                )} · Thắng: {best.wins} lần
               </div>
               <div className="flex gap-2">
                 <button onClick={onRestart} className="rounded-lg bg-amber-500 px-5 py-2 font-bold text-black">
