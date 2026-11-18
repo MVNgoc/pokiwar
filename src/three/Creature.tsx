@@ -30,7 +30,7 @@ const ENTER_S = 0.75
 const DEFEAT_S = 0.9
 
 /**
- * Nhân vật 3D: hoạt ảnh xương có sẵn trong file (Idle/Bite/HitRecieve/Death) cộng thêm chuyển động
+ * Nhân vật 3D: hoạt ảnh có sẵn trong file (idle/run/gesture) cộng thêm chuyển động
  * viết tay phủ lên mọi nhân vật: thở, lấy đà rồi lao tới, giật lùi khi bị đánh, ngã khi bị hạ, rơi xuống khi xuất hiện.
  */
 export default function Creature({ id, position, dir, hurt, attacking, defeated, enterKey, spin }: CreatureProps) {
@@ -50,9 +50,9 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
     })
     // Viền: bản sao mesh có xương, lật mặt và đẩy đỉnh ra theo pháp tuyến → đường viền đậm như tranh vẽ
     const outlineMaterials: THREE.MeshBasicMaterial[] = []
-    const skinned: THREE.SkinnedMesh[] = []
+    const skinned: THREE.Mesh[] = []
     root.traverse((o) => {
-      if ((o as THREE.SkinnedMesh).isSkinnedMesh) skinned.push(o as THREE.SkinnedMesh)
+      if ((o as THREE.Mesh).isMesh) skinned.push(o as THREE.Mesh)
     })
     root.updateWorldMatrix(true, true)
     for (const m of skinned) {
@@ -65,24 +65,33 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
         shader.uniforms.uWidth = { value: width }
         shader.vertexShader = `uniform float uWidth;\n${shader.vertexShader}`.replace('#include <begin_vertex>', '#include <begin_vertex>\n  transformed += normalize(normal) * uWidth;')
       }
-      const line = new THREE.SkinnedMesh(m.geometry, mat)
-      line.bind(m.skeleton, m.bindMatrix)
-      line.position.copy(m.position)
-      line.quaternion.copy(m.quaternion)
-      line.scale.copy(m.scale)
+      let line: THREE.Mesh
+      if ((m as THREE.SkinnedMesh).isSkinnedMesh) {
+        const sk = m as THREE.SkinnedMesh
+        const skl = new THREE.SkinnedMesh(m.geometry, mat)
+        skl.bind(sk.skeleton, sk.bindMatrix)
+        skl.position.copy(m.position)
+        skl.quaternion.copy(m.quaternion)
+        skl.scale.copy(m.scale)
+        m.parent?.add(skl)
+        line = skl
+      } else {
+        // mesh thường (chuyển động theo node): viền là con của mesh nên đi theo mọi hoạt ảnh
+        line = new THREE.Mesh(m.geometry, mat)
+        m.add(line)
+      }
       line.frustumCulled = false
-      m.parent?.add(line)
       outlineMaterials.push(mat)
     }
     const mixer = new THREE.AnimationMixer(root)
     const find = (re: RegExp) => model.clips.find((c) => re.test(c.name))
-    const idleClip = find(/^(Idle|Flying_Idle|Swim|Swimming|Dragon_Flying)$/) ?? model.clips[0]
+    const idleClip = find(/^idle$/i) ?? model.clips[0]
     const action = (clip?: THREE.AnimationClip) => (clip ? mixer.clipAction(clip) : undefined)
     const actions = {
       idle: action(idleClip),
-      attack: action(find(/^(Attack|Bite|Headbutt|Punch|Weapon|Dragon_Attack)/)),
-      hit: action(find(/^(Hit|Dragon_Hit)/)),
-      death: action(find(/(^|_)Death$/)),
+      attack: action(find(/^run$/i)), // chạy nước rút khi lao tới
+      hit: action(find(/^gesture-negative$/i)), // lắc đầu khi bị đánh
+      death: undefined as THREE.AnimationAction | undefined, // không có clip ngã: dùng chuyển động tự tạo
     }
     actions.idle?.play()
     return { root, materials, outlineMaterials, mixer, actions }
@@ -109,22 +118,23 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
     return () => mixer.removeEventListener('finished', back as never)
   }, [inst])
 
-  const playOnce = (a?: THREE.AnimationAction) => {
+  /** clip của model rất ngắn (0.25s) nên lặp vài lần cho đủ thời gian nhìn thấy */
+  const playOnce = (a?: THREE.AnimationAction, reps = 1) => {
     if (!a) return
     inst.actions.idle?.fadeOut(0.08)
-    a.reset().setLoop(THREE.LoopOnce, 1).fadeIn(0.08).play()
+    a.reset().setLoop(THREE.LoopRepeat, reps).fadeIn(0.08).play()
   }
 
   useEffect(() => {
     if (attacking) {
       t.current.atk = 0
-      playOnce(inst.actions.attack)
+      playOnce(inst.actions.attack, 3)
     }
   }, [attacking]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (hurt) {
       t.current.hurt = 0
-      playOnce(inst.actions.hit)
+      playOnce(inst.actions.hit, 2)
     }
   }, [hurt]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {

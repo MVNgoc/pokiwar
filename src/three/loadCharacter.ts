@@ -8,7 +8,7 @@ const TARGET_LENGTH = 2.2
 export interface CharacterModel {
   /** nhóm đã chuẩn hóa kích thước, chân chạm y = 0, tâm ở gốc (nhân bản bằng SkeletonUtils.clone) */
   holder: THREE.Group
-  /** các hoạt ảnh (glTF đã đổi tên gọn: Idle, Attack, Hit, Death; FBX giữ tên gốc) */
+  /** các hoạt ảnh (Cube Pets: idle, walk, run, eat, dance, gesture-positive, gesture-negative) */
   clips: THREE.AnimationClip[]
 }
 
@@ -22,16 +22,17 @@ const TOON_RAMP = (() => {
   return tex
 })()
 
-/** Tùy chỉnh theo từng model: `lift` nâng lên khỏi bục (bay/bơi), `length` giới hạn chiều dài, `flip` quay 180° (model nhìn sang phải). */
-const MODEL_OPTIONS: Record<string, { lift?: number; length?: number; flip?: boolean }> = {
-  'rong-lua': { lift: 0.55 },
-  'ca-nho': { lift: 0.6, length: 2.6, flip: true },
+/** Tùy chỉnh theo từng model: `lift` nâng lên khỏi bục, `length` giới hạn chiều dài, `scale` phóng to thêm (Boss), `flip` quay 180°. */
+const MODEL_OPTIONS: Record<string, { lift?: number; length?: number; scale?: number; flip?: boolean }> = {
+  'su-tu-lua': { scale: 1.15 },
 }
 
 const cache = new Map<string, Promise<CharacterModel>>()
 
 function toon(color: THREE.Color, map: THREE.Texture | null = null) {
   // Tô bóng hoạt hình, giữ màu gốc; phát sáng nền = màu x 0.28 để phần tối không bị xỉn
+  // Có texture: phát sáng theo chính texture (emissiveMap) để màu không bị nhạt đi
+  if (map) return new THREE.MeshToonMaterial({ color, map, gradientMap: TOON_RAMP, emissive: new THREE.Color(0.3, 0.3, 0.3), emissiveMap: map })
   return new THREE.MeshToonMaterial({ color, map, gradientMap: TOON_RAMP, emissive: color.clone().multiplyScalar(0.28) })
 }
 
@@ -42,7 +43,7 @@ async function load(id: string): Promise<CharacterModel> {
     if (!r.ok) throw new Error(`Không tải được model ${id}`)
     return r.arrayBuffer()
   })
-  const gltf = await new GLTFLoader().parseAsync(buffer, '')
+  const gltf = await new GLTFLoader().parseAsync(buffer, `${base}models/`)
   const model = gltf.scene
   // tên clip dạng "CharacterArmature|Idle": bỏ tiền tố
   const clips = gltf.animations.map((c) => {
@@ -61,7 +62,7 @@ async function load(id: string): Promise<CharacterModel> {
 
   const box = new THREE.Box3().setFromObject(model)
   const size = box.getSize(new THREE.Vector3())
-  const scale = Math.min(TARGET_HEIGHT / size.y, (opt.length ?? TARGET_LENGTH) / Math.max(size.x, size.z))
+  const scale = Math.min(TARGET_HEIGHT / size.y, (opt.length ?? TARGET_LENGTH) / Math.max(size.x, size.z)) * (opt.scale ?? 1)
   model.scale.multiplyScalar(scale)
   model.position.set(-((box.min.x + box.max.x) / 2) * scale, -box.min.y * scale + (opt.lift ?? 0), -((box.min.z + box.max.z) / 2) * scale)
 

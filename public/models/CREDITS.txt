@@ -1,8 +1,6 @@
-Model 3D (đều CC0 1.0, public domain) của Quaternius, lấy từ Poly Pizza (https://poly.pizza, tác giả Quaternius):
-
-Nhân vật, từ pack "Ultimate Monsters" (https://quaternius.com/packs/ultimatemonsters.html):
-  hoa-ma = Demon, thuy-ma = Blue Demon, moc-cactoro = Cactoro, kim-nhan = Ninja, tho-toc = Tribal   (pet)
-  nam-con = Mushnub, orc-chien = Orc, ca-nho = Fish, orc-xanh = Orc Enemy, rong-lua = Dragon Evolved   (kẻ địch)
-Ngọc (thư mục gems/), từ "Ultimate RPG Items Pack" (https://quaternius.com/packs/ultimaterpg.html):
-  thuy = Gem Green (tô xanh dương), moc = Gem Blue (tô xanh lá), hoa = Gem Pink (tô đỏ), kim = Mineral (tô bạc), tho = Gold Ingots
-Giữ nguyên hình dạng và hoạt ảnh gốc; màu ngọc được tô lại trong code (src/three/gemModels.ts).
+3D models: "Cube Pets" 2.0 by Kenney (www.kenney.nl) - CC0 1.0 (public domain).
+  https://kenney.nl/assets/cube-pets
+  cao-lua = fox, cut-thuy = penguin, huou-moc = deer, ho-kim = tiger, voi-tho = elephant   (pet)
+  sau-xanh = caterpillar, meo-xam = cat, ca-hay = fish, heo-rung = hog, su-tu-lua = lion   (ke dich)
+  Textures/colormap.png dung chung cho moi model.
+Gems: Quaternius "Ultimate RPG Items" (CC0, qua Poly Pizza) - xem gems/.

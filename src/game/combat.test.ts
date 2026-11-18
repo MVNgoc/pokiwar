@@ -8,7 +8,7 @@ import type { BattleState } from './types'
 
 const zero = { kim: 0, moc: 0, thuy: 0, hoa: 0, tho: 0 }
 const gems = (o: Partial<typeof zero>) => ({ ...zero, ...o })
-const hoaHo = PETS.find((p) => p.id === 'hoa-ma')! // Hỏa khắc Kim
+const hoaHo = PETS.find((p) => p.id === 'cao-lua')! // Hỏa khắc Kim
 const withEnemy = (s: BattleState, e: Partial<BattleState['enemy']>): BattleState => ({ ...s, enemy: { ...s.enemy, ...e } })
 const withPlayer = (s: BattleState, p: Partial<BattleState['player']>): BattleState => ({ ...s, player: { ...s.player, ...p } })
 const base = createBattle(hoaHo)
@@ -60,7 +60,7 @@ assert.ok(!canUseSkill({ ...ready, turn: 'enemy' }))
 assert.equal(ready.enemy.hp - useSkill(ready).state.enemy.hp, 120) // 80 x 1.5 khắc chế
 assert.equal(useSkill({ ...ready, turn: 'enemy' }).state.enemy.hp, 500)
 // kỹ năng choáng: kẻ địch mất lượt kế tiếp
-const mocLoc = createBattle(PETS.find((p) => p.id === 'moc-cactoro')!)
+const mocLoc = createBattle(PETS.find((p) => p.id === 'huou-moc')!)
 const stunned = useSkill(withEnemy(withPlayer(mocLoc, { rage: 100 }), { hp: 500, maxHp: 500 })).state
 assert.ok(stunned.enemy.stunned)
 const skipped = passTurn(stunned)
