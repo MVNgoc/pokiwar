@@ -36,14 +36,30 @@ function toon(color: THREE.Color, map: THREE.Texture | null = null) {
   return new THREE.MeshToonMaterial({ color, map, gradientMap: TOON_RAMP, emissive: color.clone().multiplyScalar(0.28) })
 }
 
+/** Tải file .glb; trả null nếu thiếu (dev server trả index.html cho file không có nên kiểm tra chữ ký "glTF"). */
+async function fetchGlb(url: string): Promise<ArrayBuffer | null> {
+  try {
+    const r = await fetch(url)
+    if (!r.ok) return null
+    const buf = await r.arrayBuffer()
+    return new TextDecoder().decode(buf.slice(0, 4)) === 'glTF' ? buf : null
+  } catch {
+    return null
+  }
+}
+
 async function load(id: string): Promise<CharacterModel> {
   const base = import.meta.env.BASE_URL
   const opt = MODEL_OPTIONS[id] ?? {}
-  const buffer = await fetch(`${base}models/${id}.glb`).then((r) => {
-    if (!r.ok) throw new Error(`Không tải được model ${id}`)
-    return r.arrayBuffer()
-  })
-  const gltf = await new GLTFLoader().parseAsync(buffer, `${base}models/`)
+  // ưu tiên model cá nhân trong public/local-assets (không lên git), thiếu thì dùng model CC0 đi kèm
+  let dir = `${base}local-assets/`
+  let buffer = await fetchGlb(`${dir}${id}.glb`)
+  if (!buffer) {
+    dir = `${base}models/`
+    buffer = await fetchGlb(`${dir}${id}.glb`)
+    if (!buffer) throw new Error(`Không tải được model ${id}`)
+  }
+  const gltf = await new GLTFLoader().parseAsync(buffer, dir)
   const model = gltf.scene
   // tên clip dạng "CharacterArmature|Idle": bỏ tiền tố
   const clips = gltf.animations.map((c) => {

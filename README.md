@@ -119,3 +119,6 @@ Mô phỏng chạy theo lượt: bot đóng vai người chơi, kẻ địch dù
 - Thêm pet, cấp độ và tiến hóa pet
 - Tối ưu cho điện thoại yếu (giảm chất lượng, model GLB nén)
 - Gợi ý nước đi
+
+## Model cá nhân (tùy chọn)
+Đặt file `.glb` vào `public/local-assets/<id>.glb` (xem `public/local-assets/README.md` để biết danh sách id). Game dùng file đó nếu có, không thì dùng model CC0 trong `public/models`. Thư mục này nằm trong `.gitignore`, không đưa lên git.

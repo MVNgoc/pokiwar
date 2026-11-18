@@ -85,12 +85,12 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
     }
     const mixer = new THREE.AnimationMixer(root)
     const find = (re: RegExp) => model.clips.find((c) => re.test(c.name))
-    const idleClip = find(/^idle$/i) ?? model.clips[0]
+    const idleClip = find(/idle|wait|stand|breath/i) ?? model.clips[0]
     const action = (clip?: THREE.AnimationClip) => (clip ? mixer.clipAction(clip) : undefined)
     const actions = {
       idle: action(idleClip),
-      attack: action(find(/^run$/i)), // chạy nước rút khi lao tới
-      hit: action(find(/^gesture-negative$/i)), // lắc đầu khi bị đánh
+      attack: action(find(/^run$/i) ?? find(/attack|tackle|bite|strike|punch|kick/i)), // Cube Pets: chạy nước rút; model khác: clip tấn công
+      hit: action(find(/^gesture-negative$/i) ?? find(/^(hit|damage|hurt)/i)), // lắc đầu / clip bị đánh
       death: undefined as THREE.AnimationAction | undefined, // không có clip ngã: dùng chuyển động tự tạo
     }
     actions.idle?.play()
