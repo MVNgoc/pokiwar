@@ -1,4 +1,4 @@
-# Linh Thú Xếp Ngọc
+# Ngọc Linh Đại Chiến
 
 Game web **match-3 kết hợp đấu pet** đồ họa **3D**, viết bằng **React + TypeScript + Tailwind CSS** (Vite) và **three.js** (React Three Fiber).
 Xếp ngọc ngũ hành để nạp Nộ, hồi máu, dựng giáp và tung kỹ năng của pet hạ gục kẻ địch.
