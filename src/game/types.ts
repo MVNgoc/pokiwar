@@ -60,6 +60,10 @@ export type Status = 'playing' | 'stageClear' | 'won' | 'lost'
 
 export interface BattleState {
   pet: Pet
+  /** dạng tiến hóa hiện tại: 0, 1, 2 */
+  form: number
+  /** kinh nghiệm tích lũy trong ván */
+  xp: number
   stage: number
   status: Status
   score: number
@@ -76,7 +80,18 @@ export interface BattleState {
 export interface FloatEvent {
   side: 'player' | 'enemy'
   text: string
-  kind: 'damage' | 'heal' | 'shield' | 'rage' | 'skill' | 'combo'
+  kind: 'damage' | 'heal' | 'shield' | 'rage' | 'skill' | 'combo' | 'xp'
+}
+
+/** Một dạng tiến hóa: tên, tên file hình, chỉ số và chiêu riêng */
+export interface PetForm {
+  /** tên file hình (public/local-assets/<id>.png / .gif) */
+  id: string
+  name: string
+  maxHp: number
+  power: number
+  rageMul: number
+  skill: Skill
 }
 
 export interface Skill {
@@ -101,6 +116,8 @@ export interface Pet {
   element: Element
   /** thế hệ (chỉ để nhóm khi chọn pet) */
   gen: number
+  /** 3 dạng tiến hóa; forms[0] là dạng khởi đầu (trùng chỉ số ở trên) */
+  forms: PetForm[]
   /** sức mạnh ngọc (nhân sát thương, hồi máu, giáp từ ngọc) */
   power: number
   /** tốc độ nạp Nộ */

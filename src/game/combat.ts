@@ -1,5 +1,5 @@
 import { BALANCE, COUNTER, ENEMIES, TOTAL_STAGES } from './constants'
-import type { BattleState, Combatant, Element, EnemyState, FloatEvent, GemCounts, Pet, Side } from './types'
+import type { BattleState, Combatant, PetForm, Element, EnemyState, FloatEvent, GemCounts, Pet, Side } from './types'
 
 export interface Result {
   state: BattleState
@@ -48,9 +48,35 @@ export function createEnemy(stage: number): EnemyState {
   }
 }
 
+/** Dạng tiến hóa hiện tại của pet (tên, chỉ số, chiêu). */
+export const currentForm = (s: BattleState): PetForm => s.pet.forms[s.form]
+
+/** XP cần tích lũy (tổng) để lên dạng kế tiếp; null nếu đã ở dạng cuối. */
+export const nextEvolveXp = (s: BattleState): number | null => (s.form < s.pet.forms.length - 1 ? BALANCE.evolveXp[s.form] : null)
+
+/**
+ * Cộng XP cho pet; đủ mốc thì tiến hóa ngay (có thể liên tiếp nhiều dạng): đổi tên, tăng máu tối đa
+ * và sức mạnh, hồi một phần máu. Chiêu mới dùng được từ lần tung kế tiếp.
+ */
+export function gainXp(s: BattleState, amount: number): Result {
+  if (amount <= 0) return { state: s, events: [] }
+  let state: BattleState = { ...s, xp: s.xp + amount }
+  const events: FloatEvent[] = [{ side: 'player', text: `+${Math.round(amount)} XP`, kind: 'xp' }]
+  for (let t = nextEvolveXp(state); t !== null && state.xp >= t; t = nextEvolveXp(state)) {
+    const form = state.pet.forms[state.form + 1]
+    const gainedHp = form.maxHp - state.player.maxHp
+    const hp = Math.min(form.maxHp, state.player.hp + gainedHp + Math.round(form.maxHp * BALANCE.evolveHeal))
+    state = { ...state, form: state.form + 1, player: { ...state.player, name: form.name, maxHp: form.maxHp, hp, power: form.power, rageMul: form.rageMul } }
+    events.push({ side: 'player', text: `Tiến hóa! ${form.name}`, kind: 'combo' })
+  }
+  return { state, events }
+}
+
 export function createBattle(pet: Pet): BattleState {
   return {
     pet,
+    form: 0,
+    xp: 0,
     stage: 1,
     status: 'playing',
     score: 0,
@@ -148,7 +174,16 @@ export function applyGems(s: BattleState, side: Side, rawGems: GemCounts, combo:
     const cleared = Object.values(rawGems).reduce((a, b) => a + b, 0)
     score += Math.round(cleared * 10 * m)
   }
-  return finalize({ ...s, score, [side]: me, [foeSide]: foe }, events)
+  let next: BattleState = { ...s, score, [side]: me, [foeSide]: foe }
+  if (side === 'player') {
+    // XP từ ngọc xếp được: ngọc cùng hệ với pet nhiều hơn, combo nhân thêm
+    const total = Object.values(rawGems).reduce((a, b) => a + b, 0)
+    const xp = (total - rawGems[me.element]) * BALANCE.xpGem + rawGems[me.element] * BALANCE.xpOwnGem
+    const g = gainXp(next, xp * m)
+    next = g.state
+    events.push(...g.events)
+  }
+  return finalize(next, events)
 }
 
 /** Chỉ dùng kỹ năng được trong lượt của mình. */
@@ -157,7 +192,7 @@ export const canEnemyCast = (s: BattleState) => s.status === 'playing' && s.turn
 
 export function useSkill(s: BattleState): Result {
   if (!canUseSkill(s)) return { state: s, events: [] }
-  const k = s.pet.skill
+  const k = currentForm(s).skill
   const events: FloatEvent[] = []
   const enemy = { ...s.enemy }
   const player = { ...s.player, rage: 0 }
@@ -214,7 +249,16 @@ export function passTurn(s: BattleState): Result {
 
 function finalize(s: BattleState, events: FloatEvent[]): Result {
   let status = s.status
+  let state = s
   if (s.player.hp <= 0) status = 'lost'
-  else if (s.enemy.hp <= 0) status = s.stage >= TOTAL_STAGES ? 'won' : 'stageClear'
-  return { state: { ...s, status }, events }
+  else if (s.enemy.hp <= 0) {
+    status = s.stage >= TOTAL_STAGES ? 'won' : 'stageClear'
+    // Kết liễu kẻ địch: thưởng XP lớn (chỉ một lần khi màn vừa kết thúc)
+    if (s.status === 'playing') {
+      const g = gainXp(s, BALANCE.xpKill + (s.stage - 1) * BALANCE.xpKillStep)
+      state = g.state
+      events = [...events, ...g.events]
+    }
+  }
+  return { state: { ...state, status }, events }
 }

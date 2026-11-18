@@ -62,14 +62,15 @@ function Stage({ battle, hitFlash, attacker, cast }: Props) {
       <Platform position={[-x, 0, 0]} color={GEM_COLOR[battle.pet.element]} element={battle.pet.element} />
       <Platform position={[x, 0, 0]} color={GEM_COLOR[enemy.element]} element={enemy.element} />
       <Creature
-        key={battle.pet.id}
-        id={battle.pet.id}
+        key={`${battle.pet.id}-${battle.form}`}
+        id={battle.pet.forms[battle.form].id}
         position={[-x, 0, 0]}
         dir={1}
         hurt={hitFlash === 'player'}
         attacking={attacker === 'player'}
         defeated={player.hp <= 0}
-        enterKey={battle.pet.id}
+        enterKey={`${battle.pet.id}-${battle.form}`}
+        evolved={battle.form > 0}
       />
       <Creature
         key={`${enemy.id}-${stage}`}

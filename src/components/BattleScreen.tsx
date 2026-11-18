@@ -1,4 +1,4 @@
-import { canUseSkill } from '../game/combat'
+import { canUseSkill, currentForm, nextEvolveXp } from '../game/combat'
 import { BALANCE, TOTAL_STAGES } from '../game/constants'
 import type { PetRecord } from '../game/storage'
 import type { BattleState, Side } from '../game/types'
@@ -35,6 +35,7 @@ const FLOAT_COLOR: Record<FloatText['kind'], string> = {
   rage: 'text-orange-300',
   skill: 'text-yellow-300 text-4xl',
   combo: 'text-fuchsia-300',
+  xp: 'text-sky-300 text-base',
 }
 
 interface FighterProps {
@@ -123,7 +124,7 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
             </>
           }
           active={playing && battle.turn === 'player'} floats={floats.filter((f) => f.side === 'player')}>
-          <StatusBars hp={player.hp} maxHp={player.maxHp} rage={player.rage} maxRage={player.maxRage} shield={player.shield} turn={playing && battle.turn === 'player' ? turnInfo : null} />
+          <StatusBars hp={player.hp} maxHp={player.maxHp} rage={player.rage} maxRage={player.maxRage} shield={player.shield} turn={playing && battle.turn === 'player' ? turnInfo : null} xp={{ value: battle.xp, next: nextEvolveXp(battle), prev: battle.form > 0 ? BALANCE.evolveXp[battle.form - 1] : 0 }} />
         </Fighter>
         <Fighter
           side="right"
@@ -149,7 +150,7 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
             : 'border-stone-600 bg-stone-700 text-stone-400'
         }`}
       >
-        <ElementDot element={battle.pet.element} size={16} /> {battle.pet.skill.name}
+        <ElementDot element={battle.pet.element} size={16} /> {currentForm(battle).skill.name}
       </button>
 
       <HelpButton onClick={onHelp} className="absolute bottom-2 left-3 z-20" />

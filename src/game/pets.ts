@@ -1,4 +1,4 @@
-import type { Element, Pet, Skill } from './types'
+import type { Element, Pet, PetForm, Skill } from './types'
 
 /**
  * Pet khởi đầu: mỗi thế hệ có 3 con (Mộc, Hỏa, Thủy). Bộ chỉ số và kỹ năng theo hệ,
@@ -52,14 +52,51 @@ const STATS: Record<string, [number, number, number, number]> = {
   oshawott: [150, 1.1, 1.0, 0.95],
 }
 
+/** Dạng 2 và 3 của từng pokemon: [id hình, tên, tên chiêu]. Dạng 1 lấy từ bảng STARTERS. */
+const EVOLUTIONS: Record<string, [[string, string, string], [string, string, string]]> = {
+  bulbasaur: [['ivysaur', 'Ivysaur', 'Roi Gai Kép'], ['venusaur', 'Venusaur', 'Bão Roi Gai']],
+  chikorita: [['bayleef', 'Bayleef', 'Lá Dao Xoáy'], ['meganium', 'Meganium', 'Mưa Lá Dao']],
+  treecko: [['grovyle', 'Grovyle', 'Bom Hạt Liên Hoàn'], ['sceptile', 'Sceptile', 'Mưa Hạt Bão']],
+  turtwig: [['grotle', 'Grotle', 'Búa Gỗ Nặng'], ['torterra', 'Torterra', 'Búa Đại Thụ']],
+  snivy: [['servine', 'Servine', 'Lốc Lá Xoáy'], ['serperior', 'Serperior', 'Bão Lá Hoàng Gia']],
+  charmander: [['charmeleon', 'Charmeleon', 'Phun Lửa Dữ'], ['charizard', 'Charizard', 'Bão Hỏa Diệm']],
+  cyndaquil: [['quilava', 'Quilava', 'Bánh Xe Lửa Kép'], ['typhlosion', 'Typhlosion', 'Bánh Xe Núi Lửa']],
+  torchic: [['combusken', 'Combusken', 'Tàn Lửa Dữ'], ['blaziken', 'Blaziken', 'Mưa Lửa']],
+  chimchar: [['monferno', 'Monferno', 'Lốc Lửa Dữ'], ['infernape', 'Infernape', 'Lốc Lửa Địa Ngục']],
+  tepig: [['pignite', 'Pignite', 'Đại Bác Lửa Nặng'], ['emboar', 'Emboar', 'Đại Bác Hỏa Diệm']],
+  squirtle: [['wartortle', 'Wartortle', 'Súng Nước Mạnh'], ['blastoise', 'Blastoise', 'Đại Bác Thủy']],
+  totodile: [['croconaw', 'Croconaw', 'Nanh Nước Sắc'], ['feraligatr', 'Feraligatr', 'Nanh Thủy Vương']],
+  mudkip: [['marshtomp', 'Marshtomp', 'Bùn Bắn Nặng'], ['swampert', 'Swampert', 'Địa Chấn Bùn']],
+  piplup: [['prinplup', 'Prinplup', 'Chùm Bọt Lớn'], ['empoleon', 'Empoleon', 'Bão Bọt Hoàng Đế']],
+  oshawott: [['dewott', 'Dewott', 'Vỏ Sò Kép'], ['samurott', 'Samurott', 'Vỏ Sò Kiếm Vương']],
+}
+
+/** Hệ số theo dạng: [máu, sức mạnh ngọc, nạp Nộ, sát thương và giáp của chiêu] */
+const FORM_MUL: [number, number, number, number][] = [
+  [1, 1, 1, 1],
+  [1.2, 1.1, 1.05, 1.25],
+  [1.4, 1.2, 1.1, 1.5],
+]
+
 export const GENERATIONS = STARTERS.map((_, i) => i + 1)
 
 export const PETS: Pet[] = STARTERS.flatMap((gen, gi) =>
   gen.map(([id, name, el, move]): Pet => {
       const [maxHp, power, rageMul, skillMul] = STATS[id]
-      const base = KIT[el].skill
-      const damage = base.damage ? Math.round(base.damage * skillMul) : undefined
-      const desc = damage ? base.desc.replace(/Gây \d+/, `Gây ${damage}`) : base.desc
-      return { id, name, emoji: EMOJI[el], element: el as Element, gen: gi + 1, desc: KIT[el].desc, maxHp, power, rageMul, skill: { ...base, name: move, damage, desc } }
+      const base0 = KIT[el].skill
+      const damage = base0.damage ? Math.round(base0.damage * skillMul) : undefined
+      const desc = damage ? base0.desc.replace(/Gây \d+/, `Gây ${damage}`) : base0.desc
+      const base: PetForm = { id, name, maxHp, power, rageMul, skill: { ...base0, name: move, damage, desc } }
+      const evo = EVOLUTIONS[id]
+      const forms: PetForm[] = [base, ...evo.map(([fid, fname, fmove], i): PetForm => {
+        const [hpM, powM, rageM, skM] = FORM_MUL[i + 1]
+        const dmg = base0.damage ? Math.round(base0.damage * skillMul * skM) : undefined
+        const shield = base0.shield ? Math.round(base0.shield * skM) : undefined
+        let d = base0.desc
+        if (dmg) d = d.replace(/Gây \d+/, `Gây ${dmg}`)
+        if (shield) d = d.replace(/\+\d+ giáp/, `+${shield} giáp`)
+        return { id: fid, name: fname, maxHp: Math.round(maxHp * hpM), power: +(power * powM).toFixed(3), rageMul: +(rageMul * rageM).toFixed(3), skill: { ...base0, name: fmove, damage: dmg, shield, desc: d } }
+      })]
+      return { id, name, emoji: EMOJI[el], element: el as Element, gen: gi + 1, desc: KIT[el].desc, maxHp, power, rageMul, forms, skill: base.skill }
     }),
 )

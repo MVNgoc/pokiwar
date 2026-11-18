@@ -117,6 +117,7 @@ export function useGame(pet: Pet, paused = false) {
     pushFloats(res.events)
     if (res.events.some((e) => e.side === 'player' && (e.kind === 'damage' || e.kind === 'skill'))) play('hit')
     if (res.events.some((e) => e.side === 'player' && e.kind === 'heal')) play('heal')
+    if (res.events.some((e) => e.text.startsWith('Tiến hóa'))) play('special')
     if (prevStatus === 'playing') {
       if (res.state.status === 'stageClear') play('stageClear')
       else if (res.state.status === 'won') play('win')

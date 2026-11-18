@@ -18,6 +18,8 @@ export interface CreatureProps {
   enterKey?: string
   /** xoay tròn (màn chọn pet) */
   spin?: boolean
+  /** vừa tiến hóa: nháy trắng khi hình mới xuất hiện (đổi enterKey để phát lại) */
+  evolved?: boolean
   /** nhìn từ sau lưng (pet của người chơi trong trận; chỉ áp dụng cho ảnh 2D có bản sau lưng) */
   back?: boolean
 }
@@ -35,7 +37,7 @@ const DEFEAT_S = 0.9
  * Nhân vật 3D: hoạt ảnh có sẵn trong file (idle/run/gesture) cộng thêm chuyển động
  * viết tay phủ lên mọi nhân vật: thở, lấy đà rồi lao tới, giật lùi khi bị đánh, ngã khi bị hạ, rơi xuống khi xuất hiện.
  */
-export default function Creature({ id, position, dir, hurt, attacking, defeated, enterKey, spin, back }: CreatureProps) {
+export default function Creature({ id, position, dir, hurt, attacking, defeated, enterKey, spin, back, evolved }: CreatureProps) {
   const model = use(loadCharacter(id, back))
 
   const inst = useMemo(() => {
@@ -108,7 +110,7 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
 
   const rig = useRef<THREE.Group>(null)
   const shadow = useRef<THREE.Mesh>(null)
-  const t = useRef({ atk: -1, hurt: -1, enter: 0, def: -1, phase: Math.random() * 6 })
+  const t = useRef({ atk: -1, hurt: -1, enter: 0, evo: -1, def: -1, phase: Math.random() * 6 })
 
   // Hoạt ảnh xương một lần rồi quay lại Idle
   useEffect(() => {
@@ -153,7 +155,8 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
   }, [defeated]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     t.current.enter = 0
-  }, [enterKey])
+    if (evolved) t.current.evo = 0
+  }, [enterKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useFrame((state, dtRaw) => {
     const dt = Math.min(dtRaw, 1 / 30)
@@ -203,6 +206,15 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
       rz += -dir * 0.12 * decay
       flash = Math.max(0, 1 - k * 1.6)
       if (k >= 1) s.hurt = -1
+    }
+    if (s.evo >= 0) {
+      // tiến hóa: trắng xóa rồi hiện dần hình mới, hơi phình ra
+      s.evo += dt
+      const k = clamp01(s.evo / 1.1)
+      flash = Math.max(flash, 1 - k)
+      sx *= 1 + Math.sin(k * Math.PI) * 0.18
+      sy *= 1 + Math.sin(k * Math.PI) * 0.18
+      if (k >= 1) s.evo = -1
     }
     if (s.def >= 0) {
       s.def += dt

@@ -47,7 +47,7 @@ function toon(color: THREE.Color, map: THREE.Texture | null = null) {
 /** Model Cube Pets đi kèm (CC0) dùng khi thiếu hình cá nhân: pet lấy theo hệ, kẻ địch theo id. */
 const CUBE_BY_ELEMENT = { moc: 'huou-moc', hoa: 'cao-lua', thuy: 'cut-thuy', kim: 'ho-kim', tho: 'voi-tho' } as const
 const fallbackId = (id: string) => {
-  const pet = PETS.find((p) => p.id === id)
+  const pet = PETS.find((p) => p.forms.some((f) => f.id === id))
   return pet ? CUBE_BY_ELEMENT[pet.element] : id
 }
 

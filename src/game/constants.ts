@@ -43,6 +43,13 @@ export const BALANCE = {
   otherRage: 1, // Nộ nhận được từ mỗi ngọc hệ khác
   comboStep: 0.25, // mỗi combo tăng thêm 25% hiệu quả
   maxRage: 100,
+  // Kinh nghiệm và tiến hóa (XP tích lũy trong ván)
+  evolveXp: [90, 240], // XP cần để lên dạng 2 và dạng 3
+  xpGem: 1, // XP mỗi ngọc xếp được
+  xpOwnGem: 1.6, // ngọc cùng hệ với pet
+  xpKill: 30, // XP khi hạ kẻ địch ở màn 1
+  xpKillStep: 10, // cộng thêm mỗi màn
+  evolveHeal: 0.4, // hồi % máu tối đa khi tiến hóa
   bossHp: 1.6, // Boss máu x1.6
   bossPower: 1.2, // Boss mạnh x1.2 (cả đòn thường lẫn kỹ năng)
   advantage: 1.5, // khắc chế: sát thương gây ra x1.5

@@ -120,6 +120,7 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
           {sel.name}
         </div>
         <div className="text-xs text-amber-100/70">{sel.desc}</div>
+        <div className="text-xs text-sky-300">Tiến hóa: {sel.forms.map((f) => f.name).join(' › ')}</div>
         <div className="space-y-2">
           {statsOf(sel).map((st) => (
             <StatBar key={st.label} {...st} />

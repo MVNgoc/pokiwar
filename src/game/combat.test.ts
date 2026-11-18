@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { chooseEnemyMove } from './ai'
 import { BALANCE, COUNTER, ELEMENTS, TOTAL_STAGES } from './constants'
-import { applyGems, canEnemyCast, canUseSkill, createBattle, enemyCastSkill, matchup, nextStage, passTurn, tickTurn, useSkill } from './combat'
+import { applyGems, canEnemyCast, currentForm, gainXp, canUseSkill, createBattle, enemyCastSkill, matchup, nextStage, passTurn, tickTurn, useSkill } from './combat'
 import { createBoard } from './board'
 import { PETS } from './pets'
 import type { BattleState } from './types'
@@ -105,5 +105,41 @@ const mv = chooseEnemyMove(board, withEnemy({ ...base, turn: 'enemy' }, { mistak
 assert.ok(mv)
 const sure = withEnemy({ ...base, turn: 'enemy' }, { mistake: 0, power: 1, element: 'kim' })
 assert.deepEqual(chooseEnemyMove(board, sure, () => 0.5), chooseEnemyMove(board, sure, () => 0.5)) // xác định khi rand cố định
+
+// --- XP và tiến hóa ---
+const evoBase = createBattle(hoaHo)
+assert.equal(evoBase.form, 0)
+assert.equal(currentForm(evoBase).name, 'Charmander')
+// ngọc xếp được cho XP: ngọc cùng hệ (Hỏa) nhiều hơn ngọc khác
+const own = applyGems(evoBase, 'player', gems({ hoa: 3 }), 1).state.xp
+const oth = applyGems(evoBase, 'player', gems({ thuy: 3 }), 1).state.xp
+assert.ok(own > oth && oth === 3 * BALANCE.xpGem)
+// kẻ địch xếp ngọc không cho pet XP
+assert.equal(applyGems({ ...evoBase, turn: 'enemy' }, 'enemy', gems({ kim: 3 }), 1).state.xp, 0)
+// đủ mốc: tiến hóa dạng 2, tăng máu tối đa, hồi máu, đổi tên, chiêu mạnh hơn
+const hurt = { ...evoBase, player: { ...evoBase.player, hp: 50 } }
+const e1 = gainXp(hurt, BALANCE.evolveXp[0])
+assert.equal(e1.state.form, 1)
+assert.equal(e1.state.player.name, 'Charmeleon')
+assert.ok(e1.state.player.maxHp > evoBase.player.maxHp && e1.state.player.hp > 50)
+assert.ok(e1.state.player.power > evoBase.player.power)
+assert.ok(currentForm(e1.state).skill.damage! > evoBase.pet.skill.damage!)
+assert.ok(e1.events.some((e) => e.text.startsWith('Tiến hóa')))
+// một lần nhận rất nhiều XP: lên thẳng dạng 3, không vượt quá dạng cuối
+const e3 = gainXp(evoBase, 9999)
+assert.equal(e3.state.form, 2)
+assert.equal(gainXp(e3.state, 500).state.form, 2)
+// kết liễu kẻ địch thưởng XP và giữ nguyên dạng khi sang màn sau
+const killed = applyGems(withEnemy(evoBase, { hp: 1, element: 'tho' }), 'player', gems({ kim: 3 }), 1).state
+assert.equal(killed.status, 'stageClear')
+assert.ok(killed.xp >= BALANCE.xpKill)
+assert.equal(nextStage(e1.state).form, 1)
+assert.equal(nextStage(e1.state).xp, e1.state.xp)
+// mọi pokemon đều có đủ 3 dạng với chỉ số tăng dần
+for (const pet of PETS) {
+  assert.equal(pet.forms.length, 3)
+  assert.ok(pet.forms[1].maxHp > pet.forms[0].maxHp && pet.forms[2].maxHp > pet.forms[1].maxHp)
+  assert.ok(pet.forms[2].skill.damage! > pet.forms[1].skill.damage! && pet.forms[1].skill.damage! > pet.forms[0].skill.damage!)
+}
 
 console.log('combat tests OK')
