@@ -11,6 +11,46 @@ import { GEM_COLOR } from '../three/gems'
 import { loadCharacter } from '../three/loadCharacter'
 import { bgUrl, THEMES } from '../three/themes'
 
+/** Ảnh nhỏ của pokemon (ảnh tĩnh cá nhân); thiếu ảnh thì hiện emoji */
+function PetThumb({ pet }: { pet: Pet }) {
+  const [ok, setOk] = useState(true)
+  if (!ok) return <span className="flex h-full w-full items-center justify-center text-4xl">{pet.emoji}</span>
+  return <img src={`${import.meta.env.BASE_URL}local-assets/${pet.id}.png`} alt={pet.name} onError={() => setOk(false)} className="h-full w-full object-contain" draggable={false} />
+}
+
+interface Stat {
+  label: string
+  /** 0..1 */
+  pct: number
+  text: string
+  color: string
+}
+
+/** Các chỉ số hiển thị (suy ra từ máu và kỹ năng); thang đo chung để so sánh được giữa các hệ. */
+function statsOf(pet: Pet): Stat[] {
+  const sk = pet.skill
+  const dmg = (sk.damage ?? 0) * (sk.hits ?? 1)
+  return [
+    { label: 'Máu', pct: pet.maxHp / 160, text: `${pet.maxHp}`, color: 'bg-red-500' },
+    { label: 'Sát thương chiêu', pct: dmg / 85, text: `${dmg}`, color: 'bg-orange-500' },
+    { label: 'Hồi máu', pct: (sk.healPct ?? 0) / 0.5, text: sk.healPct ? `${Math.round(sk.healPct * 100)}%` : '–', color: 'bg-emerald-500' },
+    { label: 'Giáp', pct: (sk.shield ?? 0) / 40, text: sk.shield ? `+${sk.shield}` : '–', color: 'bg-sky-500' },
+    { label: 'Khống chế', pct: sk.stun ? 1 : 0, text: sk.stun ? '1 lượt' : '–', color: 'bg-fuchsia-500' },
+  ]
+}
+
+function StatBar({ label, pct, text, color }: Stat) {
+  return (
+    <div className="flex items-center gap-2 text-xs">
+      <span className="w-28 shrink-0 text-amber-100/80">{label}</span>
+      <div className="h-3 flex-1 overflow-hidden rounded-full bg-black/50">
+        <div className={`h-full rounded-full ${color} [transition:width_300ms_ease-out]`} style={{ width: `${Math.min(100, Math.max(0, pct * 100))}%` }} />
+      </div>
+      <span className="w-20 shrink-0 text-right font-bold">{text}</span>
+    </div>
+  )
+}
+
 export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
   const [sel, setSel] = useState<Pet>(PETS[0])
   const [help, setHelp] = useState(false)
@@ -55,31 +95,40 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
         ))}
       </div>
 
-      <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto">
-        {inGen.map((pet) => {
-          const on = pet.id === sel.id
-          return (
-            <button
-              key={pet.id}
-              onClick={() => setSel(pet)}
-              className={`flex items-center gap-3 rounded-xl border-2 p-2 text-left transition active:scale-[.98] ${
-                on ? 'border-amber-400 bg-amber-950/85' : 'border-amber-900/60 bg-stone-900/85'
-              }`}
-            >
-              <ElementDot element={pet.element} size={34} />
-              <span className="flex-1">
-                <span className="flex items-center gap-2 text-sm font-bold">
-                  {pet.name}
-                  <span className="text-xs font-normal text-red-300">HP {pet.maxHp}</span>
-                </span>
-                <span className="block text-[11px] text-amber-100/70">{pet.desc}</span>
-                <span className="block text-[11px] text-yellow-300">
-                  {pet.skill.emoji} {pet.skill.name}: {pet.skill.desc}
-                </span>
-              </span>
-            </button>
-          )
-        })}
+      {/* chọn pokemon: ảnh nhỏ làm nút */}
+      <div className="flex shrink-0 justify-center gap-3">
+        {inGen.map((pet) => (
+          <button
+            key={pet.id}
+            onClick={() => setSel(pet)}
+            aria-label={pet.name}
+            title={pet.name}
+            className={`relative h-24 w-24 overflow-hidden rounded-2xl border-4 bg-stone-900/80 p-1 transition active:scale-95 ${pet.id === sel.id ? 'border-amber-400 shadow-[0_0_18px_#fbbf24aa]' : 'border-stone-700 opacity-80 hover:opacity-100'}`}
+          >
+            <PetThumb pet={pet} />
+            <span className="absolute bottom-1 right-1"><ElementDot element={pet.element} size={20} /></span>
+          </button>
+        ))}
+      </div>
+
+      {/* thông tin và chỉ số của pokemon đang chọn */}
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto rounded-2xl border-2 border-amber-900/60 bg-stone-900/85 p-4">
+        <div className="flex items-center gap-2 text-xl font-black">
+          <ElementDot element={sel.element} size={28} />
+          {sel.name}
+        </div>
+        <div className="text-xs text-amber-100/70">{sel.desc}</div>
+        <div className="space-y-2">
+          {statsOf(sel).map((st) => (
+            <StatBar key={st.label} {...st} />
+          ))}
+        </div>
+        <div className="mt-auto rounded-xl bg-black/30 p-2 text-xs text-yellow-300">
+          <div className="font-bold">
+            {sel.skill.emoji} {sel.skill.name}
+          </div>
+          <div className="text-yellow-100/80">{sel.skill.desc}</div>
+        </div>
       </div>
 
       <button onClick={() => onPick(sel)} className="shrink-0 rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 py-3 text-lg font-black text-black shadow-lg active:scale-[.98] lg:py-4 lg:text-xl">
