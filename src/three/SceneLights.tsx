@@ -34,21 +34,21 @@ export function CharacterLights() {
   )
 }
 
-/** Bục đứng phát sáng theo hệ của nhân vật. */
-export function Platform({ position, color, ground }: { position: [number, number, number]; color: string; ground?: string }) {
+/** Bục đứng: mảng đất oval dẹt (như bục đấu trong game Pokémon) với vòng sáng theo hệ của nhân vật. */
+export function Platform({ position, color }: { position: [number, number, number]; color: string; ground?: string }) {
   return (
-    <group position={position}>
-      <mesh position={[0, -0.09, 0]}>
-        <cylinderGeometry args={[1.2, 1.34, 0.18, 40]} />
-        <meshStandardMaterial color={ground ?? '#2a2f3d'} roughness={0.9} metalness={ground ? 0 : 0.25} />
+    <group position={position} scale={[1, 1, 0.55]}>
+      <mesh position={[0, -0.03, 0]}>
+        <cylinderGeometry args={[1.25, 1.3, 0.06, 48]} />
+        <meshStandardMaterial color="#5c6b3e" roughness={1} transparent opacity={0.82} />
       </mesh>
-      <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.98, 1.1, 48]} />
-        <meshBasicMaterial color={color} />
+      <mesh position={[0, 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[1.22, 48]} />
+        <meshBasicMaterial color="#8fb25a" transparent opacity={0.55} />
       </mesh>
-      <mesh position={[0, 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[1.1, 40]} />
-        <meshBasicMaterial color={color} transparent opacity={0.16} blending={THREE.AdditiveBlending} depthWrite={false} />
+      <mesh position={[0, 0.006, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[1.05, 1.15, 56]} />
+        <meshBasicMaterial color={color} transparent opacity={0.9} />
       </mesh>
     </group>
   )
