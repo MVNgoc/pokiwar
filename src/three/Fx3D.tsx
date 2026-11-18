@@ -311,14 +311,14 @@ function Bite({ t0, at, pos, top, bottom }: { t0: number; at: number; pos: Vec3;
     ;[a.current, b.current].forEach((sp) => sp && (sp.visible = on))
     if (!on || !a.current || !b.current) return
     const close = easeOutCubic(clamp01(t / 0.22))
-    const fade = t > 0.45 ? 1 - (t - 0.45) / 0.25 : 1
-    const off = 0.95 - close * 0.7
+    const fade = t > 0.38 ? 1 - (t - 0.38) / 0.3 : 1
+    const off = 0.75 - close * 0.52
     a.current.position.set(pos[0], pos[1] + off, pos[2] + 0.4)
     b.current.position.set(pos[0], pos[1] - off, pos[2] + 0.4)
     ;[a.current, b.current].forEach((sp) => (sp.material.opacity = fade))
   })
-  const sa = spriteScale(top, 1.5)
-  const sb = spriteScale(bottom, 1.5)
+  const sa = spriteScale(top, 0.95)
+  const sb = spriteScale(bottom, 0.95)
   return (
     <>
       <sprite ref={a} scale={sa} visible={false}>
