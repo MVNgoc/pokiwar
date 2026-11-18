@@ -1,0 +1,3 @@
+Battle backgrounds: "Backgrounds" by Nidhoggn, OpenGameArt - CC0.
+  https://opengameart.org/content/backgrounds-3
+  battleback10=route, 1=forest, 3=desert, 5=cave, 7=autumn, 9=arena (1104x621, converted to JPG).
