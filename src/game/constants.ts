@@ -59,9 +59,9 @@ export const COUNTER: Record<Element, Element> = {
 }
 
 export const ENEMIES: { id: string; name: string; emoji: string; element: Element; skill: string }[] = [
-  { id: 'huou-rung', name: 'Hươu Rừng', emoji: '🦌', element: 'moc', skill: 'Húc Sừng' },
-  { id: 'lua-xam', name: 'Lừa Xám', emoji: '🫏', element: 'kim', skill: 'Đá Hậu' },
-  { id: 'ca-piranha', name: 'Cá Piranha', emoji: '🐟', element: 'thuy', skill: 'Cắn Xé' },
-  { id: 'bo-nui', name: 'Bò Núi', emoji: '🐄', element: 'tho', skill: 'Giậm Chân' },
-  { id: 'bo-tot', name: 'Bò Tót Lửa', emoji: '🐂', element: 'hoa', skill: 'Húc Lửa' },
+  { id: 'nam-con', name: 'Nấm Con', emoji: '🍄', element: 'moc', skill: 'Bào Tử Độc' },
+  { id: 'orc-chien', name: 'Orc Chiến', emoji: '👹', element: 'kim', skill: 'Vung Chùy' },
+  { id: 'ca-nho', name: 'Cá Nhỏ', emoji: '🐟', element: 'thuy', skill: 'Cắn Xé' },
+  { id: 'orc-xanh', name: 'Quái Xanh', emoji: '🧌', element: 'tho', skill: 'Giậm Chân' },
+  { id: 'rong-lua', name: 'Rồng Lửa', emoji: '🐲', element: 'hoa', skill: 'Hơi Thở Lửa' },
 ]

@@ -23,44 +23,37 @@ export interface FxPlan {
  */
 export const FX_PLANS: Record<string, FxPlan> = {
   // pet
-  'hoa-ho': { projectile: { style: 'fire', color: '#ff7a1a', size: 0.34 }, events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#ffc14d', count: 22 }] },
-  'thuy-suong': {
+  'hoa-ma': { projectile: { style: 'fire', color: '#ff7a1a', size: 0.34 }, events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#ffc14d', count: 22 }] },
+  'thuy-ma': {
     events: [
       { kind: 'bubble', at: 0, on: 'self', color: '#5ab4ff' },
       { kind: 'burst', at: 150, on: 'self', color: '#c8ecff', up: true, count: 18 },
     ],
   },
-  'thuy-kinh': {
-    events: [
-      { kind: 'bubble', at: 0, on: 'self', color: '#6ab6ff' },
-      { kind: 'burst', at: 120, on: 'self', color: '#d6f0ff', up: true, count: 22 },
-      { kind: 'burst', at: 400, on: 'foe', color: '#9fd8ff', count: 20 },
-    ],
-  },
-  'moc-loc': {
+  'moc-cactoro': {
     projectile: { style: 'thorn', color: '#4fd05a', size: 0.3 },
     events: [
       { kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#9cff8a' },
       { kind: 'stars', at: FLIGHT_MS + 100, on: 'foe', color: '#ffe14d', ms: 1300 },
     ],
   },
-  'kim-lang': {
+  'kim-nhan': {
     events: [
       { kind: 'slash', at: 0, on: 'foe', color: '#e9f0ff' },
       { kind: 'slash', at: 150, on: 'foe', color: '#e9f0ff' },
       { kind: 'slash', at: 300, on: 'foe', color: '#fff3b0' },
     ],
   },
-  'tho-ma': {
+  'tho-toc': {
     events: [
       { kind: 'dome', at: 0, on: 'self', color: '#ffd24a' },
       { kind: 'dust', at: 200, on: 'foe', color: '#b98a54' },
     ],
   },
   // kẻ địch
-  'huou-rung': { projectile: { style: 'thorn', color: '#b57cff', size: 0.28 }, events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#d9b8ff' }] },
-  'lua-xam': { events: [{ kind: 'slash', at: 0, on: 'foe', color: '#a9b8ff' }, { kind: 'slash', at: 180, on: 'foe', color: '#a9b8ff' }] },
-  'ca-piranha': { projectile: { style: 'thorn', color: '#2de0bf', size: 0.3 }, events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#9ffbe8' }] },
-  'bo-nui': { events: [{ kind: 'dust', at: 150, on: 'foe', color: '#cfc7b0' }, { kind: 'dust', at: 350, on: 'foe', color: '#cfc7b0' }] },
-  'bo-tot': { projectile: { style: 'fire', color: '#ffb300', size: 0.42 }, events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#ffe27a', count: 26 }] },
+  'nam-con': { projectile: { style: 'thorn', color: '#b57cff', size: 0.28 }, events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#d9b8ff' }] },
+  'orc-chien': { events: [{ kind: 'slash', at: 0, on: 'foe', color: '#a9b8ff' }, { kind: 'slash', at: 180, on: 'foe', color: '#a9b8ff' }] },
+  'ca-nho': { projectile: { style: 'thorn', color: '#2de0bf', size: 0.3 }, events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#9ffbe8' }] },
+  'orc-xanh': { events: [{ kind: 'dust', at: 150, on: 'foe', color: '#cfc7b0' }, { kind: 'dust', at: 350, on: 'foe', color: '#cfc7b0' }] },
+  'rong-lua': { projectile: { style: 'fire', color: '#ffb300', size: 0.42 }, events: [{ kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#ffe27a', count: 26 }] },
 }

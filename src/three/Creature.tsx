@@ -22,8 +22,8 @@ export interface CreatureProps {
 
 /** độ dày đường viền (đơn vị thế giới) */
 const OUTLINE_WORLD = 0.02
-/** hướng nhìn: thú quay mặt về phía đối thủ, hơi nghiêng về camera để thấy cả thân lẫn mặt */
-const FACE = Math.PI / 2 - 0.5
+/** hướng nhìn: quái đứng quay mặt về phía camera, hơi xoay về phía đối thủ */
+const FACE = 0.4
 const ATTACK_S = 0.55
 const HURT_S = 0.45
 const ENTER_S = 0.75
@@ -76,13 +76,13 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
     }
     const mixer = new THREE.AnimationMixer(root)
     const find = (re: RegExp) => model.clips.find((c) => re.test(c.name))
-    const idleClip = find(/^(Idle|Swimming)$/) ?? model.clips[0]
+    const idleClip = find(/^(Idle|Flying_Idle|Swim|Swimming|Dragon_Flying)$/) ?? model.clips[0]
     const action = (clip?: THREE.AnimationClip) => (clip ? mixer.clipAction(clip) : undefined)
     const actions = {
       idle: action(idleClip),
-      attack: action(find(/^(Attack|Bite)/)),
-      hit: action(find(/^Hit/)),
-      death: action(find(/^Death$/)),
+      attack: action(find(/^(Attack|Bite|Headbutt|Punch|Weapon|Dragon_Attack)/)),
+      hit: action(find(/^(Hit|Dragon_Hit)/)),
+      death: action(find(/(^|_)Death$/)),
     }
     actions.idle?.play()
     return { root, materials, outlineMaterials, mixer, actions }

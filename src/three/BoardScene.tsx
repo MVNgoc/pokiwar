@@ -1,7 +1,9 @@
-import { useRef, useState } from 'react'
+import { Suspense, useRef, useState } from 'react'
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
 import { areAdjacent } from '../game/board'
 import type { Board, Position } from '../game/types'
+import { ELEMENTS } from '../game/constants'
+import { loadGem } from './gemModels'
 import { Env } from './SceneLights'
 import Tile3D, { BOARD_N, cellX, cellY } from './Tile3D'
 
@@ -12,6 +14,8 @@ interface Props {
   hint?: [Position, Position] | null
   onSwap: (a: Position, b: Position) => void
 }
+
+ELEMENTS.forEach((e) => void loadGem(e)) // tải sẵn 5 model ngọc
 
 const DRAG_THRESHOLD = 18
 const TILT = 0.42 // nghiêng bàn cờ về phía sau (rad)
@@ -120,7 +124,9 @@ export default function BoardScene(props: Props) {
       <ambientLight intensity={0.5} />
       <directionalLight position={[2, 4, 9]} intensity={2.2} />
       <pointLight position={[-4, -4, 6]} intensity={30} color="#ffb86b" />
-      <Scene {...props} />
+      <Suspense fallback={null}>
+        <Scene {...props} />
+      </Suspense>
     </Canvas>
   )
 }

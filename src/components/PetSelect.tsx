@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { GEM_IMAGES } from '../assets/gems'
+import ElementDot from './ElementDot'
 import { ELEMENT_INFO } from '../game/constants'
 import { PETS } from '../game/pets'
 import type { Pet } from '../game/types'
@@ -44,7 +44,7 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
                 on ? 'border-amber-400 bg-amber-950/60' : 'border-amber-900/60 bg-stone-900/80'
               }`}
             >
-              <img src={GEM_IMAGES[pet.element]} alt={el.label} className="h-9 w-9 shrink-0" draggable={false} />
+              <ElementDot element={pet.element} size={34} />
               <span className="flex-1">
                 <span className="flex items-center gap-2 text-sm font-bold">
                   {pet.name}

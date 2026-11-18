@@ -1,9 +1,10 @@
-import { memo, useMemo, useRef } from 'react'
+import { memo, use, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import type { Tile } from '../game/types'
 import { clamp01 } from './easing'
-import { emojiTexture, GemShape, makeGemMaterial } from './gems'
+import { loadGem } from './gemModels'
+import { emojiTexture } from './gems'
 
 export const BOARD_N = 8
 /** Tâm ô theo cột / hàng (bàn cờ căn giữa gốc tọa độ, hàng 0 ở trên cùng). */
@@ -58,8 +59,22 @@ function TileView({ tile, row, col, selected, clearing }: Props) {
   const group = useRef<THREE.Group>(null)
   const inner = useRef<THREE.Group>(null)
   const halo = useRef<THREE.Mesh>(null)
-  const material = useMemo(() => makeGemMaterial(tile.type), [tile.type])
-  const baseEmissive = useMemo(() => material.emissive.clone(), [material])
+  const model = use(loadGem(tile.type))
+  // mỗi ô có bản sao riêng (vật liệu riêng để loé sáng độc lập)
+  const gem = useMemo(() => {
+    const root = model.clone(true)
+    const materials: { mat: THREE.MeshStandardMaterial; base: THREE.Color }[] = []
+    root.traverse((o) => {
+      const mesh = o as THREE.Mesh
+      if (mesh.isMesh) {
+        const mat = (mesh.material as THREE.MeshStandardMaterial).clone()
+        mesh.material = mat
+        materials.push({ mat, base: mat.emissive.clone() })
+      }
+    })
+    return { root, materials }
+  }, [model])
+  const white = useMemo(() => new THREE.Color('#ffffff'), [])
   const phase = useMemo(() => Math.random() * 6, [])
   // vật lý riêng của từng ngọc: ngọc mới sinh bắt đầu ở phía trên bàn cờ rồi rơi xuống
   const st = useRef({ x: cellX(col), y: cellY(tile.spawnRow ?? row), vx: 0, vy: 0, falling: false, squash: 0, clearT: -1 })
@@ -124,14 +139,14 @@ function TileView({ tile, row, col, selected, clearing }: Props) {
     g.position.set(s.x, s.y, 0.35 + lift)
     n.scale.set(scale * (1 + s.squash * 0.9), scale * (1 - s.squash), scale * (1 + s.squash * 0.9))
     n.rotation.z = rz
-    material.emissive.copy(baseEmissive).lerp(new THREE.Color('#ffffff'), flash)
+    for (const { mat, base } of gem.materials) mat.emissive.copy(base).lerp(white, flash)
     if (halo.current) (halo.current.material as THREE.MeshBasicMaterial).opacity = 0.18 + Math.sin(t * 5) * 0.08
   })
 
   return (
     <group ref={group} position={[cellX(col), cellY(tile.spawnRow ?? row), 0.35]}>
       <group ref={inner}>
-        <GemShape type={tile.type} material={material} />
+        <primitive object={gem.root} />
         {tile.special && (
           <>
             <mesh ref={halo}>
