@@ -3,7 +3,6 @@ import { Canvas } from '@react-three/fiber'
 import Backdrop from './Backdrop'
 import ElementDot from './ElementDot'
 import HelpPanel, { HelpButton } from './HelpPanel'
-import { ELEMENT_INFO } from '../game/constants'
 import { GENERATIONS, PETS } from '../game/pets'
 import type { Pet } from '../game/types'
 import Creature from '../three/Creature'
@@ -58,7 +57,6 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
 
       <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto">
         {inGen.map((pet) => {
-          const el = ELEMENT_INFO[pet.element]
           const on = pet.id === sel.id
           return (
             <button
@@ -72,9 +70,6 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
               <span className="flex-1">
                 <span className="flex items-center gap-2 text-sm font-bold">
                   {pet.name}
-                  <span className={`rounded bg-gradient-to-br ${el.gradient} px-1.5 text-xs`}>
-                    <ElementDot element={pet.element} size={12} /> {el.label}
-                  </span>
                   <span className="text-xs font-normal text-red-300">HP {pet.maxHp}</span>
                 </span>
                 <span className="block text-[11px] text-amber-100/70">{pet.desc}</span>
