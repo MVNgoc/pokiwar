@@ -5,6 +5,7 @@ import {
   applyGems,
   canEnemyCast,
   canUseSkill,
+  currentForm,
   createBattle,
   enemyCastSkill,
   nextStage,
@@ -252,7 +253,7 @@ export function useGame(pet: Pet, paused = false) {
     setBusyBoth(true)
     const offensive = !!cur.pet.skill.damage
     const id = floatId.current++
-    setCast({ id, fxId: FX_PLANS[cur.pet.id] ? cur.pet.id : `pet-${cur.pet.element}`, side: 'player', offensive })
+    setCast({ id, fxId: [currentForm(cur).id, cur.pet.id].find((k) => FX_PLANS[k]) ?? `pet-${cur.pet.element}`, side: 'player', offensive })
     play('skill')
     if (offensive) flashAttack('player')
     setTimeout(() => setCast((c) => (c?.id === id ? null : c)), 1500)
