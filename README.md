@@ -122,3 +122,6 @@ Mô phỏng chạy theo lượt: bot đóng vai người chơi, kẻ địch dù
 
 ## Model cá nhân (tùy chọn)
 Đặt file `.glb` vào `public/local-assets/<id>.glb` (xem `public/local-assets/README.md` để biết danh sách id). Game dùng file đó nếu có, không thì dùng model CC0 trong `public/models`. Thư mục này nằm trong `.gitignore`, không đưa lên git.
+
+## Tiến hóa
+Pet có thanh XP (xanh dương, dưới thanh Nộ). XP nhận từ ngọc xếp được (ngọc cùng hệ nhiều hơn, combo nhân thêm) và từ việc kết liễu kẻ địch. Đủ XP thì tiến hóa dạng 2 rồi dạng 3: đổi hình và tên, tăng máu tối đa, sức mạnh ngọc, tốc độ nạp Nộ, chiêu mạnh hơn với tên mới, hồi 40% máu. Mốc XP và hệ số ở `BALANCE` (constants.ts) và `FORM_MUL` (pets.ts). Tiến hóa chỉ tính trong một ván.

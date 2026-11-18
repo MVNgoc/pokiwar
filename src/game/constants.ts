@@ -24,12 +24,12 @@ export const BALANCE = {
   turnMs: 12000, // thời gian mỗi lượt; hết giờ là mất lượt
   hintMs: 4500, // còn ngần này ms mà người chơi chưa đi thì chớp gợi ý nước đi
   // Kẻ địch: giá trị màn n = base + (n-1) * step
-  enemyHp: 110,
-  enemyHpStep: 55,
-  enemyPower: 0.28, // hệ số sát thương/hiệu quả ngọc so với pet
-  enemyPowerStep: 0.055,
-  enemySkillDamage: 14, // sát thương kỹ năng kẻ địch (đầy Nộ)
-  enemySkillStep: 3.5,
+  enemyHp: 145,
+  enemyHpStep: 72,
+  enemyPower: 0.365, // hệ số sát thương/hiệu quả ngọc so với pet
+  enemyPowerStep: 0.075,
+  enemySkillDamage: 17.5, // sát thương kỹ năng kẻ địch (đầy Nộ)
+  enemySkillStep: 4.8,
   enemyMistake: 0.5, // xác suất đi nước ngẫu nhiên ở màn 1
   enemyMistakeStep: 0.1,
   enemyMistakeMin: 0.1,
