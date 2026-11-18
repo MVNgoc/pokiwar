@@ -76,8 +76,8 @@ export default function PetSelect({ onPick }: { onPick: (pet: Pet) => void }) {
       <div style={{ backgroundImage: `url(${bgUrl(THEMES[0])})` }} className="relative h-[34dvh] min-h-[190px] shrink-0 overflow-hidden rounded-xl border-2 border-amber-900 bg-cover bg-bottom shadow-xl lg:h-auto lg:min-h-0 lg:flex-1 lg:rounded-3xl lg:border-4">
         <Canvas className="!absolute inset-0" dpr={[1, 1.5]} flat gl={{ alpha: true, antialias: true }} camera={{ fov: 32, position: [0, 1.5, 8.6] }} onCreated={({ camera }) => camera.lookAt(0, 0.95, 0)}>
           <CharacterLights />
-          <Platform position={[0, 0, 0]} color={GEM_COLOR[sel.element]} />
           <Suspense fallback={null}>
+            <Platform position={[0, 0, 0]} color={GEM_COLOR[sel.element]} element={sel.element} />
             <Creature key={sel.id} id={sel.id} position={[0, 0, 0]} dir={1} spin enterKey={sel.id} />
           </Suspense>
         </Canvas>

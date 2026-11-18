@@ -1,6 +1,8 @@
-import { useEffect } from 'react'
+import { use, useEffect } from 'react'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import type { Element } from '../game/types'
+import { loadPlatform } from './platforms'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 
 /** Môi trường phản chiếu dựng sẵn trong code (không tải file): cho mắt, ngọc và kim loại có độ bóng. */
@@ -34,8 +36,18 @@ export function CharacterLights() {
   )
 }
 
-/** Bục đứng: mảng đất oval dẹt (như bục đấu trong game Pokémon) với vòng sáng theo hệ của nhân vật. */
-export function Platform({ position, color }: { position: [number, number, number]; color: string; ground?: string }) {
+/** Bục đứng: ảnh bục oval cá nhân theo hệ (nếu có); thiếu ảnh thì dùng mảng đất oval dẹt vẽ sẵn với vòng sáng theo hệ. */
+export function Platform({ position, color, element }: { position: [number, number, number]; color: string; element: Element }) {
+  const tex = use(loadPlatform(element))
+  if (tex) {
+    // ảnh đã vẽ sẵn phối cảnh nên dựng thẳng đứng, quay mặt về camera, chân nhân vật nằm ở tâm ảnh
+    return (
+      <mesh position={[position[0], position[1] + 0.2, position[2] - 0.05]} renderOrder={-2}>
+        <planeGeometry args={[3.2, 3.2 * (35 / 138)]} />
+        <meshBasicMaterial map={tex} transparent depthWrite={false} />
+      </mesh>
+    )
+  }
   return (
     <group position={position} scale={[1, 1, 0.55]}>
       <mesh position={[0, -0.03, 0]}>
