@@ -447,12 +447,25 @@ export default function FxLayer({ cast, playerX, enemyX }: { cast: Cast; playerX
   const selfPos: Vec3 = [fromEnemy ? enemyX : playerX, HEAD, 0]
   const foePos: Vec3 = [fromEnemy ? playerX : enemyX, HEAD, 0]
   const at = (on: 'self' | 'foe') => (on === 'self' ? selfPos : foePos)
+  // Cấp tiến hoá: dạng 2 to hơn ~35%, dạng 3 ~75%, kèm vòng sáng tụ lực và sóng xung kích khi trúng
+  const tier = cast.tier ?? 0
+  const k = 1 + tier * 0.38
+  const extra: FxEvent[] = tier > 0 ? [
+    { kind: 'sprite', at: 0, on: 'self', name: 'shine', size: 1.1 * k, ms: 420, spin: 1 },
+    { kind: 'sprite', at: FLIGHT_MS, on: 'foe', name: 'impact', size: 1.2 * k, ms: 420 },
+    { kind: 'sprite', at: FLIGHT_MS + 60, on: 'foe', name: 'shine', size: 1.8 * k, ms: 520 },
+    ...(tier > 1 ? [
+      { kind: 'sprite', at: 0, on: 'self', name: 'shine', size: 1.8, ms: 520, spin: -1.5 } as FxEvent,
+      { kind: 'sprite', at: FLIGHT_MS + 140, on: 'foe', name: 'shine', size: 2.8, ms: 600, spin: 1 } as FxEvent,
+      { kind: 'burst', at: FLIGHT_MS, on: 'foe', color: '#ffe27a', count: 24 } as FxEvent,
+    ] : []),
+  ] : []
   return (
     <group>
       {plan.projectiles?.map((p, i) => (
-        <Projectile key={`p${i}`} t0={t0} from={selfPos} to={foePos} {...p} />
+        <Projectile key={`p${i}`} t0={t0} from={selfPos} to={foePos} {...p} size={(p.size ?? 1) * k} />
       ))}
-      {plan.events.map((e: FxEvent, i) => {
+      {[...plan.events.map((e) => (e.kind === 'sprite' || e.kind === 'beam') && e.size ? { ...e, size: e.size * k } : e), ...extra].map((e: FxEvent, i) => {
         const pos = at(e.on)
         switch (e.kind) {
           case 'burst':
