@@ -16,17 +16,21 @@ export const RULE_INFO: Record<StageRule['type'], { label: string; icon: IconNam
   limit: { label: 'Giới hạn lượt', icon: 'timer' },
   surge: { label: 'Cộng hưởng', icon: 'swirl' },
   swift: { label: 'Chớp nhoáng', icon: 'bolt' },
+  rubble: { label: 'Đống đổ nát', icon: 'rock' },
+  frost: { label: 'Băng giá', icon: 'snow' },
 }
 
 export function ruleText(rule: StageRule, elementLabel: (e: Element) => string): string {
   if (rule.type === 'limit') return `Quá ${rule.turns} lượt kẻ địch sẽ cuồng nộ`
   if (rule.type === 'surge') return `Ngọc ${elementLabel(rule.element!)} mạnh x1.5, hệ khác yếu đi`
+  if (rule.type === 'rubble') return 'Bàn cờ có sẵn đá chắn đường'
+  if (rule.type === 'frost') return 'Bàn cờ có sẵn ngọc bị đóng băng'
   return 'Đồng hồ lượt của bạn rút còn 7 giây'
 }
 
 function makeRule(kind: NodeKind, level: number, rand: Rand): StageRule | undefined {
   if (kind === 'boss' || kind === 'rest' || level < 1.5 || rand() > 0.4) return undefined
-  const types: StageRule['type'][] = kind === 'elite' ? ['surge', 'swift'] : ['limit', 'surge', 'swift']
+  const types: StageRule['type'][] = kind === 'elite' ? ['surge', 'swift', 'rubble', 'frost'] : ['limit', 'surge', 'swift', 'rubble', 'frost']
   const type = pick(types, rand)
   if (type === 'limit') return { type, turns: 9 + Math.floor(rand() * 3) }
   if (type === 'surge') return { type, element: pick(ELEMENTS, rand) }

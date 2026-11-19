@@ -29,6 +29,7 @@ Yêu cầu Node.js 18+.
 - **Luật riêng của màn:** một số trận có luật: ⏱️ *Giới hạn lượt* (quá hạn kẻ địch cuồng nộ), 🌀 *Cộng hưởng* (một hệ ngọc mạnh x1.5, hệ khác yếu đi), ⚡ *Chớp nhoáng* (đồng hồ lượt rút còn 7 giây).
 - **Kẻ địch có chiêu trò riêng:** 15 loài thường chia 3 tầng (xuất hiện sớm đến muộn) và 4 Boss. Mỗi con có đặc tính 🛡️ Giáp / 🌱 Hồi phục / 🔥 Cuồng nộ (ở nửa máu) và chiêu có thể gây ☠️ Độc / 🔒 Phong ấn / 📉 Suy yếu.
 - **Mega:** pet ở dạng cuối có thêm nút **MEGA** cạnh nút kỹ năng. Bấm khi đầy Nộ (tốn hết Nộ, không tốn lượt đi) để mạnh hẳn lên **4 lượt**: ngọc x1.35, nạp Nộ x1.25, kỹ năng x1.5, kèm hồi 20% máu và +15 giáp; mỗi trận dùng một lần. Pet toả sáng hồng tím và phình to khi Mega. Thông số trong `BALANCE` (`mega*`).
+- **Chướng ngại bàn cờ:** kẻ địch như Onix, Grotle, Torterra, Swampert thả **đá** (khối nặng, không đổi chỗ, không match; vỡ sau 2 lần có match liền kề, bom/tia điện phá ngay), còn Empoleon, Marshtomp, Croconaw, Feraligatr **đóng băng** ngọc (không đổi chỗ được cho đến khi match với nó làm tan băng). Luật màn 🪨 *Đống đổ nát* / ❄️ *Băng giá* đặt sẵn chướng ngại lúc vào trận. Sang màn mới bàn cờ được dọn sạch. Logic ở `src/game/board.ts` (`placeObstacles`, `resolveMatches`), chiêu gắn qua trường `hazard` của kẻ địch trong `constants.ts`.
 - **Báo trước đòn:** kẻ địch đầy Nộ không tung chiêu ngay mà **tụ lực** 1-2 lượt (hiện cảnh báo ⚠️). Gây ≥ 20% máu tối đa của nó trong lúc tụ lực, hoặc làm nó choáng, để **ngắt chiêu**.
 
 ### Ngọc và hiệu ứng

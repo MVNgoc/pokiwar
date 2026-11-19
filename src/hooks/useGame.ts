@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { chooseEnemyMove, type Move } from '../game/ai'
-import { applyResolution, areAdjacent, collapse, createBoard, findMatches, hasPossibleMove, resolveMatches, suggestMove, swapTiles } from '../game/board'
+import { applyHazard, applyResolution, areAdjacent, clearObstacles, collapse, createBoard, findMatches, hasObstacles, hasPossibleMove, isMovable, resolveMatches, ruleHazard, suggestMove, swapTiles } from '../game/board'
 import {
   activateMega,
   applyGems,
@@ -8,6 +8,7 @@ import {
   canMega,
   canUseSkill,
   chargeWindup,
+  stageRule,
   chooseRest,
   currentForm,
   createBattle,
@@ -176,6 +177,7 @@ export function useGame(pet: Pet, paused = false) {
         play('match', combo)
         if (res.cleared.some(({ r, c }) => cur[r][c]!.special)) play('boom')
         if (res.spawns.length) play('special')
+        if (res.thawed.length || res.cracked.length || res.cleared.some(({ r, c }) => cur[r][c]!.block)) play('boom')
         // pet lao tới đúng lúc ngọc nổ nếu nước đi gây sát thương
         if (res.gems.kim + res.gems.hoa > 0) flashAttack(side)
         await sleep(260)
@@ -240,6 +242,11 @@ export function useGame(pet: Pet, paused = false) {
       await sleep(FLIGHT_MS)
       if (stale(e)) return
       commit(enemyCastSkill(battleRef.current))
+      const hz = cur.enemy.skill.hazard
+      if (hz) {
+        setBoardSync(applyHazard(boardRef.current, hz))
+        play('boom')
+      }
       await sleep(700)
       if (stale(e)) return
       setBusyBoth(false)
@@ -265,6 +272,10 @@ export function useGame(pet: Pet, paused = false) {
   const trySwap = async (a: Position, b: Position) => {
     const s = battleRef.current
     if (busyRef.current || s.status !== 'playing' || s.turn !== 'player' || !areAdjacent(a, b)) return
+    if (!isMovable(boardRef.current[a.r][a.c]) || !isMovable(boardRef.current[b.r][b.c])) {
+      play('invalid') // đá hoặc ngọc đóng băng: không đổi chỗ được, không mất lượt
+      return
+    }
     const e = epoch.current
     const valid = await runMove('player', a, b, e)
     if (valid && !stale(e) && battleRef.current.status === 'playing') endTurn()
@@ -344,6 +355,17 @@ export function useGame(pet: Pet, paused = false) {
     setClearing(new Set())
     setBusyBoth(false)
   }
+
+  // Sang màn mới: dọn chướng ngại cũ, rồi đặt chướng ngại theo luật của màn (Đống Đổ Nát, Băng Giá)
+  const stage = battle.stage
+  const stageStatus = battle.status
+  useEffect(() => {
+    if (stageStatus !== 'playing') return
+    const cleaned = hasObstacles(boardRef.current) ? clearObstacles(boardRef.current) : boardRef.current
+    const placed = applyHazard(cleaned, ruleHazard(stageRule(battleRef.current)))
+    if (placed !== boardRef.current) setBoardSync(placed)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage, stageStatus === 'playing'])
 
   // Đồng hồ lượt: chạy khi bàn cờ không đang xử lý. Hết giờ ở lượt người chơi → mất lượt.
   const endTurnRef = useRef(endTurn)

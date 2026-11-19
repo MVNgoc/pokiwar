@@ -1,4 +1,4 @@
-import type { Ailment, Element, EnemyTrait } from './types'
+import type { Ailment, Element, EnemyTrait, Hazard } from './types'
 
 export const BOARD_SIZE = 8
 /** Độ dài chuyến đi (số điểm dừng, tính cả điểm nghỉ và Boss): ngẫu nhiên trong khoảng này. */
@@ -64,6 +64,10 @@ export const BALANCE = {
   megaSkill: 1.5, // sát thương kỹ năng x1.5
   megaHeal: 0.2, // hồi 20% máu tối đa khi kích hoạt
   megaShield: 15, // và +15 giáp
+  // Chướng ngại bàn cờ
+  rockHp: 2, // đá chịu 2 lần có match liền kề
+  rubbleCount: 5, // luật Đống Đổ Nát: số đá lúc vào trận
+  frostCount: 5, // luật Băng Giá: số ngọc bị đóng băng lúc vào trận
   eliteHp: 1.4, // Tinh anh máu x1.4
   elitePower: 1.15,
   eliteXp: 1.5, // XP hạ Tinh anh x1.5
@@ -122,6 +126,8 @@ export interface EnemyDef {
   desc: string
   /** các dạng tiến hóa kế tiếp (id kẻ địch có sẵn hình) */
   evo?: string[]
+  /** chiêu làm hỏng bàn cờ */
+  hazard?: Hazard
 }
 
 export const ENEMIES: EnemyDef[] = [
@@ -130,26 +136,26 @@ export const ENEMIES: EnemyDef[] = [
   { id: 'ca-hay', name: 'Magikarp', emoji: '🐟', element: 'thuy', skill: 'Cắn Xé', tier: 1, traits: ['frenzy'], hp: 1.1, power: 0.85, skillMul: 1, windup: 0, desc: 'Cuồng nộ khi còn nửa máu' },
   { id: 'meo-xam', name: 'Magnemite', emoji: '🧲', element: 'kim', skill: 'Vuốt Sắt', tier: 1, traits: ['armor'], hp: 0.9, power: 1, skillMul: 1, windup: 0, desc: 'Tự dựng giáp mỗi lượt' },
   { id: 'combusken', name: 'Combusken', emoji: '🐔', element: 'hoa', skill: 'Tàn Lửa Dữ', tier: 1, traits: [], hp: 1, power: 1.1, skillMul: 1, windup: 0, desc: 'Nạp Nộ nhanh, đòn mạnh', evo: ['blaziken'] },
-  { id: 'grotle', name: 'Grotle', emoji: '🐢', element: 'tho', skill: 'Búa Gỗ Nặng', tier: 1, traits: ['armor'], hp: 1.15, power: 0.9, skillMul: 1.1, windup: 1, desc: 'Trâu bò, tụ lực trước đòn', evo: ['torterra'] },
+  { id: 'grotle', name: 'Grotle', emoji: '🐢', element: 'tho', skill: 'Búa Gỗ Nặng', tier: 1, traits: ['armor'], hp: 1.15, power: 0.9, skillMul: 1.1, windup: 1, desc: 'Trâu bò, tụ lực trước đòn', evo: ['torterra'], hazard: { kind: 'rock', count: 2 } },
   // Tier 2: bắt đầu có báo trước đòn và hiệu ứng xấu
-  { id: 'heo-rung', name: 'Onix', emoji: '🪨', element: 'tho', skill: 'Húc Đất', tier: 2, traits: [], hp: 1.2, power: 0.9, skillMul: 1.6, windup: 2, desc: 'Tụ lực 2 lượt, đòn rất đau' },
+  { id: 'heo-rung', name: 'Onix', emoji: '🪨', element: 'tho', skill: 'Húc Đất', tier: 2, traits: [], hp: 1.2, power: 0.9, skillMul: 1.6, windup: 2, desc: 'Tụ lực 2 lượt, đòn rất đau', hazard: { kind: 'rock', count: 3 } },
   { id: 'servine', name: 'Servine', emoji: '🐍', element: 'moc', skill: 'Lá Phong Ấn', effect: 'seal', tier: 2, traits: [], hp: 1, power: 1, skillMul: 0.9, windup: 1, desc: 'Phong ấn kỹ năng của bạn', evo: ['serperior'] },
   { id: 'monferno', name: 'Monferno', emoji: '🐵', element: 'hoa', skill: 'Lốc Lửa Suy Yếu', effect: 'weaken', tier: 2, traits: [], hp: 1, power: 1, skillMul: 0.9, windup: 1, desc: 'Làm ngọc của bạn yếu đi', evo: ['infernape'] },
-  { id: 'marshtomp', name: 'Marshtomp', emoji: '🐸', element: 'thuy', skill: 'Bùn Lầy', tier: 2, traits: ['regen'], hp: 1.1, power: 0.95, skillMul: 1, windup: 1, desc: 'Tự hồi máu mỗi lượt', evo: ['swampert'] },
-  { id: 'croconaw', name: 'Croconaw', emoji: '🐊', element: 'thuy', skill: 'Nanh Nước Độc', effect: 'poison', tier: 2, traits: ['frenzy'], hp: 1, power: 1.05, skillMul: 1, windup: 1, desc: 'Cuồng nộ khi còn nửa máu', evo: ['feraligatr'] },
+  { id: 'marshtomp', name: 'Marshtomp', emoji: '🐸', element: 'thuy', skill: 'Bùn Lầy', tier: 2, traits: ['regen'], hp: 1.1, power: 0.95, skillMul: 1, windup: 1, desc: 'Tự hồi máu mỗi lượt', evo: ['swampert'], hazard: { kind: 'ice', count: 2 } },
+  { id: 'croconaw', name: 'Croconaw', emoji: '🐊', element: 'thuy', skill: 'Nanh Nước Độc', effect: 'poison', tier: 2, traits: ['frenzy'], hp: 1, power: 1.05, skillMul: 1, windup: 1, desc: 'Cuồng nộ khi còn nửa máu', evo: ['feraligatr'], hazard: { kind: 'ice', count: 2 } },
   // Tier 3: nhiều chiêu trò
-  { id: 'torterra', name: 'Torterra', emoji: '🌳', element: 'tho', skill: 'Địa Chấn', tier: 3, traits: ['armor', 'regen'], hp: 1.15, power: 0.95, skillMul: 1.5, windup: 2, desc: 'Giáp và hồi máu, đòn nặng' },
-  { id: 'empoleon', name: 'Empoleon', emoji: '🐧', element: 'kim', skill: 'Cánh Thép Suy Yếu', effect: 'weaken', tier: 3, traits: ['armor'], hp: 1, power: 1.05, skillMul: 1.1, windup: 1, desc: 'Giáp dày, làm bạn suy yếu' },
+  { id: 'torterra', name: 'Torterra', emoji: '🌳', element: 'tho', skill: 'Địa Chấn', tier: 3, traits: ['armor', 'regen'], hp: 1.15, power: 0.95, skillMul: 1.5, windup: 2, desc: 'Giáp và hồi máu, đòn nặng', hazard: { kind: 'rock', count: 3 } },
+  { id: 'empoleon', name: 'Empoleon', emoji: '🐧', element: 'kim', skill: 'Cánh Thép Suy Yếu', effect: 'weaken', tier: 3, traits: ['armor'], hp: 1, power: 1.05, skillMul: 1.1, windup: 1, desc: 'Giáp dày, làm bạn suy yếu', hazard: { kind: 'ice', count: 3 } },
   { id: 'blaziken', name: 'Blaziken', emoji: '🥊', element: 'hoa', skill: 'Cước Hỏa Diệm', tier: 3, traits: ['frenzy'], hp: 0.95, power: 1.2, skillMul: 1.2, windup: 1, desc: 'Đòn mạnh, cuồng nộ' },
   { id: 'serperior', name: 'Serperior', emoji: '🐍', element: 'moc', skill: 'Bão Lá Độc', effect: 'poison', tier: 3, traits: ['regen'], hp: 1.05, power: 1, skillMul: 1.1, windup: 1, desc: 'Độc và tự hồi máu' },
-  { id: 'feraligatr', name: 'Feraligatr', emoji: '🦖', element: 'thuy', skill: 'Nanh Thủy Vương', tier: 3, traits: ['frenzy'], hp: 1.1, power: 1.1, skillMul: 1.3, windup: 1, desc: 'Hung hãn, cuồng nộ' },
+  { id: 'feraligatr', name: 'Feraligatr', emoji: '🦖', element: 'thuy', skill: 'Nanh Thủy Vương', tier: 3, traits: ['frenzy'], hp: 1.1, power: 1.1, skillMul: 1.3, windup: 1, desc: 'Hung hãn, cuồng nộ', hazard: { kind: 'ice', count: 3 } },
 ]
 
 /** Boss cuối chuyến (vô hệ, bị khắc chế vô hiệu). Mỗi chuyến chọn ngẫu nhiên một. */
 export const BOSSES: EnemyDef[] = [
   { id: 'su-tu-lua', name: 'Charizard', emoji: '🐲', element: 'hoa', skill: 'Gầm Lửa', effect: 'weaken', tier: 3, traits: ['frenzy'], hp: 1, power: 1, skillMul: 1, windup: 1, desc: 'Cuồng nộ ở nửa máu, làm yếu ngọc' },
   { id: 'sceptile', name: 'Sceptile', emoji: '🦎', element: 'moc', skill: 'Mưa Lá Phong Ấn', effect: 'seal', tier: 3, traits: ['regen', 'frenzy'], hp: 1, power: 1, skillMul: 1, windup: 1, desc: 'Hồi máu, phong ấn kỹ năng' },
-  { id: 'swampert', name: 'Swampert', emoji: '🦈', element: 'thuy', skill: 'Địa Chấn Bùn', tier: 3, traits: ['armor', 'frenzy'], hp: 1.05, power: 0.95, skillMul: 1.4, windup: 2, desc: 'Giáp dày, tụ lực 2 lượt' },
+  { id: 'swampert', name: 'Swampert', emoji: '🦈', element: 'thuy', skill: 'Địa Chấn Bùn', tier: 3, traits: ['armor', 'frenzy'], hp: 1.05, power: 0.95, skillMul: 1.4, windup: 2, desc: 'Giáp dày, tụ lực 2 lượt', hazard: { kind: 'rock', count: 3 } },
   { id: 'infernape', name: 'Infernape', emoji: '🙉', element: 'hoa', skill: 'Lốc Lửa Độc', effect: 'poison', tier: 3, traits: ['frenzy'], hp: 0.95, power: 1.1, skillMul: 1.1, windup: 1, desc: 'Nhanh và độc' },
 ]
 

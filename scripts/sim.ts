@@ -7,8 +7,8 @@
  * không được mô phỏng (bot đi ngay), nên số liệu là cận trên cho người chơi chậm.
  */
 import { chooseEnemyMove } from '../src/game/ai'
-import { applyResolution, collapse, createBoard, hasPossibleMove, listMoves, resolveMatches, swapTiles } from '../src/game/board'
-import { applyGems, canEnemyCast, canUseSkill, chargeWindup, chooseRest, createBattle, enemyCastSkill, enemyUpkeep, passTurn, pickReward, toReward, useSkill } from '../src/game/combat'
+import { applyHazard, applyResolution, clearObstacles, collapse, createBoard, hasObstacles, hasPossibleMove, listMoves, resolveMatches, ruleHazard, swapTiles } from '../src/game/board'
+import { applyGems, stageRule, canEnemyCast, canUseSkill, chargeWindup, chooseRest, createBattle, enemyCastSkill, enemyUpkeep, passTurn, pickReward, toReward, useSkill } from '../src/game/combat'
 import { BALANCE } from '../src/game/constants'
 import { PETS } from '../src/game/pets'
 import type { Board, BattleState, Position, Side } from '../src/game/types'
@@ -61,7 +61,12 @@ function runGame(petIndex: number, skill: Skill) {
   let battle = createBattle(PETS[petIndex])
   let turns = 0
   const smart = skill !== 'random'
+  let stageSeen = 0
   while (battle.status !== 'won' && battle.status !== 'lost' && turns < 2500) {
+    if (stageSeen !== battle.stage && battle.status === 'playing') {
+      stageSeen = battle.stage
+      board = applyHazard(hasObstacles(board) ? clearObstacles(board) : board, ruleHazard(stageRule(battle)))
+    }
     if (battle.status === 'stageClear') {
       battle = toReward(battle)
       continue
@@ -82,8 +87,10 @@ function runGame(petIndex: number, skill: Skill) {
       ;({ board, battle } = play(board, battle, 'player', a, b))
     } else {
       battle = enemyUpkeep(battle).state
-      if (canEnemyCast(battle)) battle = enemyCastSkill(battle).state
-      else battle = chargeWindup(battle).state
+      if (canEnemyCast(battle)) {
+        board = applyHazard(board, battle.enemy.skill.hazard)
+        battle = enemyCastSkill(battle).state
+      } else battle = chargeWindup(battle).state
       if (battle.status !== 'playing') continue
       const mv = chooseEnemyMove(board, battle)
       if (mv) ({ board, battle } = play(board, battle, 'enemy', mv[0], mv[1]))

@@ -51,6 +51,13 @@ export default function HelpPanel({ onClose, inBattle = false }: { onClose: () =
           <li>Chiêu có thể gây: <I n="skull" /> Độc (mất máu mỗi lượt), <I n="lock" /> Phong ấn (không dùng được kỹ năng), <I n="down" /> Suy yếu (ngọc yếu đi).</li>
         </Section>
 
+        <Section title="Chướng ngại trên bàn cờ">
+          <li><I n="rock" /> Đá: khối nặng, không đổi chỗ được và không tạo match. Xếp match ngay cạnh để làm nứt, {BALANCE.rockHp} lần thì vỡ. Bom và tia điện phá đá ngay.</li>
+          <li><I n="snow" /> Ngọc đóng băng: không đổi chỗ được. Xếp match có nó để làm tan băng, ngọc ở lại và dùng được bình thường.</li>
+          <li>Một số kẻ địch thả đá hoặc đóng băng ngọc khi tung chiêu. Một số màn có sẵn chướng ngại (<I n="rock" /> Đống đổ nát, <I n="snow" /> Băng giá). Sang màn mới thì bàn cờ được dọn sạch.</li>
+          <li>Bấm vào đá hoặc ngọc đóng băng không tốn lượt.</li>
+        </Section>
+
         <Section title="Ngũ hành tương khắc">
           <li>Kim › Mộc › Thổ › Thủy › Hỏa › Kim</li>
           <li>

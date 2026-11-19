@@ -1,6 +1,6 @@
 import { Suspense, useRef, useState } from 'react'
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
-import { areAdjacent } from '../game/board'
+import { areAdjacent, isMovable } from '../game/board'
 import type { Board, Position } from '../game/types'
 import { ELEMENTS } from '../game/constants'
 import { loadGem } from './gemModels'
@@ -61,6 +61,7 @@ function Scene({ board, clearing, locked, hint, blink, onSwap }: Props) {
   const down = (e: ThreeEvent<PointerEvent>) => {
     if (locked) return
     const pos = cellOf(e)
+    if (pos && !isMovable(board[pos.r][pos.c])) return // đá / ngọc đóng băng: không chọn được
     if (pos) drag.current = { pos, x: e.nativeEvent.clientX, y: e.nativeEvent.clientY }
   }
 

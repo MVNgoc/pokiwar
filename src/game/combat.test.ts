@@ -395,4 +395,23 @@ assert.ok(passTurn({ ...mg.state, mega: 1, turn: 'player' }).events.some((e) => 
 assert.equal(nextStage({ ...mg.state, status: 'stageClear' }).megaUsed, false)
 assert.equal(nextStage({ ...mg.state, status: 'stageClear' }).mega, 0)
 
+// --- chướng ngại bàn cờ do kẻ địch / luật màn ---
+const onix = createEnemy({ kind: 'normal', level: 2, enemy: 'heo-rung' })
+assert.deepEqual(onix.skill.hazard, { kind: 'rock', count: 3 })
+assert.equal(createEnemy({ kind: 'normal', level: 2, enemy: 'empoleon' }).skill.hazard?.kind, 'ice')
+assert.equal(createEnemy({ kind: 'normal', level: 2, enemy: 'combusken' }).skill.hazard, undefined)
+const castHz = enemyCastSkill({ ...base, turn: 'enemy' as const, enemy: { ...onix, rage: 100, windupNeed: 0, element: 'tho' as const } })
+assert.ok(castHz.events.some((e) => e.text === 'Ném đá!'))
+assert.ok(enemyCastSkill({ ...base, turn: 'enemy' as const, enemy: { ...createEnemy({ kind: 'normal', level: 2, enemy: 'empoleon' }), rage: 100, windupNeed: 0 } }).events.some((e) => e.text === 'Đóng băng!'))
+// tiến hóa đổi chiêu: Grotle → Torterra vẫn thả đá (nhiều hơn)
+const grotle = createEnemy({ kind: 'normal', level: 2, enemy: 'grotle' })
+assert.equal(grotle.skill.hazard?.count, 2)
+const torterra = enemyUpkeep({ ...base, turn: 'enemy' as const, enemy: { ...grotle, xp: BALANCE.enemyEvolveXp[0] } }).state.enemy
+assert.equal(torterra.id, 'torterra')
+assert.equal(torterra.skill.hazard?.count, 3)
+// chuyến đi có thể sinh luật Đống Đổ Nát / Băng Giá
+const ruleTypes = new Set<string>()
+for (let i = 0; i < 400; i++) for (const n of buildRun()) if (n.rule) ruleTypes.add(n.rule.type)
+assert.ok(ruleTypes.has('rubble') && ruleTypes.has('frost'))
+
 console.log('combat tests OK')

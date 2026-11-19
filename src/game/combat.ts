@@ -56,7 +56,7 @@ export function createEnemy(def: StageDef): EnemyState {
     maxRage: BALANCE.maxRage,
     shield: 0,
     power: (BALANCE.enemyPower + L * BALANCE.enemyPowerStep) * base.power * bossMul * eliteMul,
-    skill: { name: base.skill, effect: base.effect, damage: Math.round((BALANCE.enemySkillDamage + L * BALANCE.enemySkillStep) * base.skillMul * bossMul * eliteMul) },
+    skill: { name: base.skill, effect: base.effect, hazard: base.hazard, damage: Math.round((BALANCE.enemySkillDamage + L * BALANCE.enemySkillStep) * base.skillMul * bossMul * eliteMul) },
     stunned: false,
     mistake: boss ? BALANCE.enemyMistakeMin : Math.max(BALANCE.enemyMistakeMin, BALANCE.enemyMistake - L * BALANCE.enemyMistakeStep),
     traits,
@@ -265,7 +265,7 @@ function enemyGainXp(e: EnemyState, amount: number): FloatEvent[] {
       e.id = target.id
       e.emoji = target.emoji
       e.name = target.name + (e.boss ? ' (Boss)' : e.elite ? ' Tinh Anh' : '')
-      e.skill = { ...e.skill, name: target.skill, effect: target.effect ?? e.skill.effect }
+      e.skill = { ...e.skill, name: target.skill, effect: target.effect ?? e.skill.effect, hazard: target.hazard ?? e.skill.hazard }
       e.traits = [...new Set([...e.traits, ...target.traits])]
     }
     e.form++
@@ -429,6 +429,8 @@ export function enemyCastSkill(s: BattleState): Result {
   const player = { ...s.player }
   const enemy = { ...s.enemy, rage: 0, winding: 0, windupDmg: 0 }
   const events = [...damageEvents('player', dealDamage(player, Math.round(s.enemy.skill.damage * mu)), 'skill'), ...matchupEvent('player', mu)]
+  const hz = s.enemy.skill.hazard
+  if (hz) events.push({ side: 'enemy', text: hz.kind === 'rock' ? 'Ném đá!' : 'Đóng băng!', kind: 'combo' })
   let ailments = s.ailments
   const fx = s.enemy.skill.effect
   if (fx && player.hp > 0) {

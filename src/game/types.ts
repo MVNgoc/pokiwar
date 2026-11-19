@@ -3,10 +3,23 @@ export type Element = 'kim' | 'moc' | 'thuy' | 'hoa' | 'tho'
 /** bomb: nổ 3x3 (match 4 / chữ L, T) · lightning: quét cả hàng và cột (match 5+) */
 export type Special = 'bomb' | 'lightning'
 
+/** Chướng ngại trên bàn cờ: đá (khối nặng, không đổi chỗ, vỡ khi có match liền kề) · băng (ngọc bị đóng băng, không đổi chỗ, tan khi match cùng nó) */
+export type ObstacleKind = 'rock' | 'ice'
+export interface Hazard {
+  kind: ObstacleKind
+  count: number
+}
+
 export interface Tile {
   id: number
   type: Element
   special?: Special
+  /** khối đá (không phải ngọc): không match, không đổi chỗ được, vẫn rơi theo trọng lực */
+  block?: 'rock'
+  /** độ bền còn lại của khối đá */
+  hp?: number
+  /** đang bị đóng băng: không đổi chỗ được, match với nó sẽ làm tan băng thay vì xoá ngọc */
+  ice?: boolean
   /** Ngọc mới sinh: hàng (âm = phía trên bàn cờ) nơi nó bắt đầu rơi xuống. Chỉ phục vụ hoạt ảnh. */
   spawnRow?: number
 }
@@ -53,6 +66,8 @@ export interface EnemySkill {
   damage: number
   /** hiệu ứng xấu kèm theo khi trúng đòn */
   effect?: Ailment
+  /** làm hỏng bàn cờ khi tung chiêu: thả đá hoặc đóng băng ngọc */
+  hazard?: Hazard
 }
 
 export interface EnemyState extends Combatant {
@@ -85,7 +100,7 @@ export interface EnemyState extends Combatant {
 export type NodeKind = 'normal' | 'elite' | 'rest' | 'boss'
 
 /** Luật riêng của một màn: giới hạn lượt (quá hạn kẻ địch cuồng nộ), ngọc một hệ mạnh lên, đồng hồ lượt ngắn */
-export type RuleType = 'limit' | 'surge' | 'swift'
+export type RuleType = 'limit' | 'surge' | 'swift' | 'rubble' | 'frost'
 export interface StageRule {
   type: RuleType
   /** surge: hệ được tăng sức mạnh */

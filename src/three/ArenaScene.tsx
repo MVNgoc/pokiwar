@@ -79,6 +79,12 @@ function Stage({ battle, hitFlash, attacker, cast, megaFx }: Props) {
   const foeEvo = useEvolveReveal(enemy.form, enemy.id)
   // đang Mega: đổi sang hình Mega nếu có
   const megaId = battle.mega > 0 ? megaSpriteId(battle.pet.forms[battle.form].id) : null
+  // đổi hình Mega (vào hoặc ra) diễn ra tại chỗ, không phát hoạt ảnh rơi xuống
+  const hadMega = useRef(false)
+  const megaToggled = (megaId != null) !== hadMega.current
+  useEffect(() => {
+    hadMega.current = megaId != null
+  }, [megaId])
 
   // tải sẵn model kẻ địch của màn kế tiếp
   useEffect(() => {
@@ -113,7 +119,7 @@ function Stage({ battle, hitFlash, attacker, cast, megaFx }: Props) {
         mega={battle.mega > 0}
         megaSprite={!!megaId}
         charging={(megaFx != null && battle.mega === 0) || petEvo.charging}
-        skipEnter={battle.mega > 0 || petEvo.fx != null}
+        skipEnter={megaToggled || petEvo.fx != null}
       />
       <Creature
         key={`${foeEvo.shown.id}-${stage}-${foeEvo.shown.form}`}

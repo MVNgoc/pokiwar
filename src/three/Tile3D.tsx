@@ -30,6 +30,51 @@ interface Props {
   blink?: boolean
 }
 
+/** Khối đá chắn đường: vỡ dần theo độ bền (nứt có vệt sáng cam). */
+function Rock({ hp }: { hp: number }) {
+  const cracked = hp < 2
+  return (
+    <group>
+      <mesh rotation={[0.4, 0.6, 0.2]} scale={[0.5, 0.44, 0.42]}>
+        <dodecahedronGeometry args={[1, 0]} />
+        <meshStandardMaterial color={cracked ? '#6a625a' : '#857d73'} roughness={0.95} flatShading />
+      </mesh>
+      <mesh rotation={[0.1, -0.5, 0.5]} position={[-0.18, -0.16, 0.12]} scale={[0.2, 0.17, 0.16]}>
+        <dodecahedronGeometry args={[1, 0]} />
+        <meshStandardMaterial color="#9a9187" roughness={0.95} flatShading />
+      </mesh>
+      {cracked && (
+        <>
+          <mesh position={[0.02, 0.04, 0.4]} rotation={[0, 0, 0.7]}>
+            <boxGeometry args={[0.5, 0.035, 0.02]} />
+            <meshBasicMaterial color="#ff9a3d" />
+          </mesh>
+          <mesh position={[0.12, -0.08, 0.4]} rotation={[0, 0, -0.5]}>
+            <boxGeometry args={[0.3, 0.03, 0.02]} />
+            <meshBasicMaterial color="#ff9a3d" />
+          </mesh>
+        </>
+      )}
+    </group>
+  )
+}
+
+/** Lớp băng bọc quanh ngọc đang bị đóng băng. */
+function IceShell() {
+  const edges = useMemo(() => new THREE.EdgesGeometry(new THREE.BoxGeometry(0.9, 0.9, 0.55)), [])
+  return (
+    <group position={[0, 0, 0.05]}>
+      <mesh>
+        <boxGeometry args={[0.9, 0.9, 0.55]} />
+        <meshStandardMaterial color="#aeeaff" transparent opacity={0.42} roughness={0.15} metalness={0.1} emissive="#4fc3f7" emissiveIntensity={0.35} depthWrite={false} />
+      </mesh>
+      <lineSegments geometry={edges}>
+        <lineBasicMaterial color="#eafcff" />
+      </lineSegments>
+    </group>
+  )
+}
+
 /** Tia sáng bắn ra khi ngọc nổ. */
 function GemBurst({ color }: { color: string }) {
   const mesh = useRef<THREE.InstancedMesh>(null)
@@ -188,11 +233,12 @@ function TileView({ tile, row, col, selected, clearing, blink }: Props) {
   return (
     <group ref={group} position={[cellX(col), cellY(tile.spawnRow ?? row), 0.35]}>
       <group ref={inner}>
-        <primitive object={gem.root} />
-        {icon && !clearing && <GemAura type={tile.type} />}
+        {tile.block ? <Rock hp={tile.hp ?? 2} /> : <primitive object={gem.root} />}
+        {tile.ice && !clearing && <IceShell />}
+        {icon && !clearing && !tile.block && <GemAura type={tile.type} />}
         {tile.special && !clearing && <SpecialFx kind={tile.special} />}
       </group>
-      {clearing && <GemBurst color={GEM_COLOR[tile.type]} />}
+      {clearing && <GemBurst color={tile.block ? '#b8afa3' : GEM_COLOR[tile.type]} />}
     </group>
   )
 }
