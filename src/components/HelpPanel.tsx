@@ -8,7 +8,7 @@ export function HelpButton({ onClick, className = '' }: { onClick: () => void; c
     <button
       onClick={onClick}
       aria-label="Hướng dẫn"
-      className={`flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-sm font-black text-amber-200 ring-1 ring-amber-200/40 active:scale-95 ${className}`}
+      className={`flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-sm font-black text-amber-200 ring-1 ring-amber-200/40 active:scale-95 ${className}`}
     >
       ?
     </button>

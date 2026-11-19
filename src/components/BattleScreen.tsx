@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { canMega, canUseSkill, currentForm, nextEvolveXp, stageRule, turnTime } from '../game/combat'
 import { BALANCE, ELEMENT_INFO } from '../game/constants'
 import { relicOf } from '../game/relics'
@@ -101,6 +102,7 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
   const rule = stageRule(battle)
   const rest = status === 'rest'
   const { ailments } = battle
+  const [relicInfo, setRelicInfo] = useState<string | null>(null)
   const relicCounts = [...new Set(battle.relics)].map((id) => ({ id, n: battle.relics.filter((r) => r === id).length }))
   const playing = status === 'playing'
   const theme = themeOf(stage)
@@ -228,13 +230,26 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
       </div>
 
       {relicCounts.length > 0 && (
-        <div className="relative z-10 mb-1 flex flex-wrap justify-center gap-1">
-          {relicCounts.map(({ id, n }) => (
-            <span key={id} title={`${relicOf(id)?.name}: ${relicOf(id)?.desc}`} className="rounded-full bg-black/50 px-1.5 text-xs">
-              <Icon name={relicOf(id)?.icon ?? 'star'} size={13} className="text-yellow-200" />
-              {n > 1 && <b className="ml-0.5 text-[10px] text-yellow-300">x{n}</b>}
-            </span>
-          ))}
+        <div className="relative z-10 mb-1 flex flex-col items-center gap-1">
+          <div className="flex flex-wrap justify-center gap-1">
+            {relicCounts.map(({ id, n }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setRelicInfo(relicInfo === id ? null : id)}
+                title={`${relicOf(id)?.name}: ${relicOf(id)?.desc}`}
+                className={`rounded-full px-2 py-1 text-xs ${relicInfo === id ? 'bg-amber-500/40 ring-1 ring-amber-300' : 'bg-black/50'}`}
+              >
+                <Icon name={relicOf(id)?.icon ?? 'star'} size={13} className="text-yellow-200" />
+                {n > 1 && <b className="ml-0.5 text-[10px] text-yellow-300">x{n}</b>}
+              </button>
+            ))}
+          </div>
+          {relicInfo && relicOf(relicInfo) && (
+            <div className="rounded-lg bg-black/70 px-2 py-1 text-center text-[11px] text-amber-100">
+              <b className="text-yellow-300">{relicOf(relicInfo)?.name}</b>: {relicOf(relicInfo)?.desc}
+            </div>
+          )}
         </div>
       )}
 
@@ -268,11 +283,11 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
         )}
       </div>
 
-      <HelpButton onClick={onHelp} className="absolute bottom-2 left-3 z-20" />
+      <HelpButton onClick={onHelp} className="absolute bottom-[max(0.5rem,env(safe-area-inset-bottom))] left-[max(0.75rem,env(safe-area-inset-left))] z-20" />
       <button
         onClick={onHome}
         aria-label="Về trang chủ"
-        className="absolute bottom-2 left-12 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-amber-200 ring-1 ring-amber-200/40 active:scale-95"
+        className="absolute bottom-[max(0.5rem,env(safe-area-inset-bottom))] left-[max(3.25rem,calc(env(safe-area-inset-left)+2.5rem))] z-20 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-amber-200 ring-1 ring-amber-200/40 active:scale-95"
       >
         <Icon name="home" size={16} />
       </button>
@@ -280,7 +295,7 @@ export default function BattleScreen({ battle, floats, hitFlash, shaking, attack
       <button
         onClick={onToggleMute}
         aria-label={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}
-        className="absolute bottom-2 right-3 z-20 rounded-full bg-black/40 px-2 py-1 text-lg"
+        className="absolute bottom-[max(0.5rem,env(safe-area-inset-bottom))] right-[max(0.75rem,env(safe-area-inset-right))] z-20 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-lg"
       >
         <Icon name={muted ? 'mute' : 'volume'} size={20} className="text-amber-100" />
       </button>
