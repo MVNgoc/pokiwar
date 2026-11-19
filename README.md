@@ -24,7 +24,12 @@ Yêu cầu Node.js 18+.
 - **Đánh theo lượt:** hai bên thay nhau, mỗi lượt đi **1 nước** trên cùng một bàn cờ. Mỗi lượt có đồng hồ đếm ngược 12 giây (thanh xanh dưới thanh Nộ của bên đang có lượt); **hết giờ mà chưa xếp ngọc thì mất lượt**. Đồng hồ tạm dừng khi bàn cờ đang xử lý combo. Nước đi không tạo được match sẽ được trả lại và bạn đi lại, không mất lượt.
 - **Kẻ địch tự xếp ngọc:** tới lượt, AI của kẻ địch tự chọn nước đi trên bàn cờ (bạn thấy nó nhá hai viên định đổi). Sát thương, hồi máu, Nộ và giáp của nó đều đến từ ngọc nó xếp được, theo cùng công thức với pet. Màn đầu AI hay đi sai, về sau ít sai dần; Boss gần như không sai.
 - **Kỹ năng:** khi thanh Nộ đầy, bấm nút kỹ năng **trong lượt của mình** (không tốn lượt đi). Kẻ địch đầy Nộ cũng tung kỹ năng riêng ở đầu lượt của nó. Giáp hấp thụ sát thương trước. Boss vô hệ, không bị ảnh hưởng bởi tương khắc.
-- **5 màn**, màn cuối là Boss. Hạ Boss để thắng. Điểm cao nhất và số lần thắng được lưu theo từng pet (`localStorage`).
+- **Chuyến đi ngẫu nhiên:** mỗi ván là **8-10 điểm dừng** do game sinh ra: ⚔️ trận thường, 💀 Tinh anh (mạnh hơn, được chọn 2 phần thưởng), 🏕️ điểm nghỉ (hồi 50% máu hoặc nhận 60 XP), cuối chuyến là 👑 Boss (chọn ngẫu nhiên trong 4 con). Hạ Boss để thắng. Điểm cao nhất và số lần thắng được lưu theo từng pet (`localStorage`).
+- **Phần thưởng:** thắng trận được chọn 1 trong 3 **vật phẩm** ngẫu nhiên (hoặc nghỉ ngơi hồi 25% máu). Có 13 vật phẩm (Hỏa Tâm, Thủy Tinh, Nộ Tâm, Hút Máu, Đồng Hồ Cát, Bùa Hộ Mệnh…), cộng dồn tối đa 3 lần mỗi loại. Xem `src/game/relics.ts`.
+- **Luật riêng của màn:** một số trận có luật: ⏱️ *Giới hạn lượt* (quá hạn kẻ địch cuồng nộ), 🌀 *Cộng hưởng* (một hệ ngọc mạnh x1.5, hệ khác yếu đi), ⚡ *Chớp nhoáng* (đồng hồ lượt rút còn 7 giây).
+- **Kẻ địch có chiêu trò riêng:** 15 loài thường chia 3 tầng (xuất hiện sớm đến muộn) và 4 Boss. Mỗi con có đặc tính 🛡️ Giáp / 🌱 Hồi phục / 🔥 Cuồng nộ (ở nửa máu) và chiêu có thể gây ☠️ Độc / 🔒 Phong ấn / 📉 Suy yếu.
+- **Mega:** pet ở dạng cuối có thêm nút **MEGA** cạnh nút kỹ năng. Bấm khi đầy Nộ (tốn hết Nộ, không tốn lượt đi) để mạnh hẳn lên **4 lượt**: ngọc x1.35, nạp Nộ x1.25, kỹ năng x1.5, kèm hồi 20% máu và +15 giáp; mỗi trận dùng một lần. Pet toả sáng hồng tím và phình to khi Mega. Thông số trong `BALANCE` (`mega*`).
+- **Báo trước đòn:** kẻ địch đầy Nộ không tung chiêu ngay mà **tụ lực** 1-2 lượt (hiện cảnh báo ⚠️). Gây ≥ 20% máu tối đa của nó trong lúc tụ lực, hoặc làm nó choáng, để **ngắt chiêu**.
 
 ### Ngọc và hiệu ứng
 
@@ -54,7 +59,7 @@ Chỉ có 3 pet khởi đầu mỗi thế hệ (Mộc, Hỏa, Thủy), 5 thế h
 | 🔥 Hỏa | 150 | Hỏa Cầu Thiêu Đốt: 85 sát thương |
 | 💧 Thủy | 150 | Suối Nguồn Sinh Mệnh: 30 sát thương, hồi 35% HP, +15 giáp |
 
-Kim và Thổ chỉ có ở ngọc và kẻ địch. Kẻ địch theo thứ tự các màn: 🌿 Oddish (Mộc), 🧲 Magnemite (Kim), 🐟 Magikarp (Thủy), 🪨 Onix (Thổ), 🐲 Charizard (Hỏa, Boss).
+Kim và Thổ chỉ có ở ngọc và kẻ địch. Danh sách kẻ địch (tầng, đặc tính, chiêu) nằm trong `ENEMIES` và `BOSSES` ở `src/game/constants.ts`; chuyến đi do `buildRun` trong `src/game/run.ts` sinh ra.
 
 ### Tương khắc ngũ hành
 
@@ -103,7 +108,7 @@ Mô phỏng chạy theo lượt: bot đóng vai người chơi, kẻ địch dù
 
 - **Cân bằng:** sửa `BALANCE` trong `src/game/constants.ts` (sát thương, hồi máu, Nộ, hệ số khắc chế, độ mạnh Boss).
 - **Thêm pet:** thêm một mục vào `PETS` trong `src/game/pets.ts`. Kỹ năng gồm `damage`, `hits`, `healPct`, `shield`, `stunMs`, kết hợp tùy ý.
-- **Thêm kẻ địch:** sửa `ENEMIES` trong `constants.ts`. Số màn đặt bằng `TOTAL_STAGES`.
+- **Thêm kẻ địch / vật phẩm / luật màn:** thêm vào `ENEMIES`, `BOSSES` (`constants.ts`), `RELICS` (`relics.ts`), hoặc `makeRule` (`run.ts`). Độ dài chuyến đi đặt bằng `RUN_LENGTH`.
 - **Nhân vật 3D:** nằm trong `public/models/` (`<id>.glb`). Thêm nhân vật mới: bỏ file `.glb` vào đó (tùy chỉnh độ cao, hướng trong `MODEL_OPTIONS` ở `loadCharacter.ts`) và thêm mục tương ứng trong `pets.ts` / `ENEMIES`, rồi khai báo kịch bản hiệu ứng trong `src/three/fxPlans.ts`.
 - **Âm thanh:** có nút 🔊/🔇 trong trận. Hiệu ứng âm thanh được tổng hợp trực tiếp (sửa ở `src/game/sfx.ts`), nhạc nền là file OGG trong `src/assets/music/` và được điều khiển bởi `src/game/music.ts`.
 

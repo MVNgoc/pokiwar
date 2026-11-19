@@ -2,15 +2,21 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { chooseEnemyMove, type Move } from '../game/ai'
 import { applyResolution, areAdjacent, collapse, createBoard, findMatches, hasPossibleMove, resolveMatches, suggestMove, swapTiles } from '../game/board'
 import {
+  activateMega,
   applyGems,
   canEnemyCast,
+  canMega,
   canUseSkill,
+  chargeWindup,
+  chooseRest,
   currentForm,
   createBattle,
   enemyCastSkill,
-  nextStage,
+  enemyUpkeep,
   passTurn,
+  pickReward,
   tickTurn,
+  toReward,
   useSkill as castSkill,
   type Result,
 } from '../game/combat'
@@ -53,6 +59,7 @@ export function useGame(pet: Pet, paused = false) {
   const [shaking, setShaking] = useState(false)
   const [attacker, setAttacker] = useState<Side | null>(null)
   const [cast, setCast] = useState<Cast | null>(null)
+  const [megaFx, setMegaFx] = useState<number | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [enemyPick, setEnemyPick] = useState<Move | null>(null)
   /** gợi ý nước đi cho người chơi khi sắp hết giờ (hai ô chớp tắt) */
@@ -135,7 +142,7 @@ export function useGame(pet: Pet, paused = false) {
       const e = epoch.current
       setTimeout(() => {
         if (stale(e)) return
-        const n = nextStage(battleRef.current)
+        const n = toReward(battleRef.current)
         battleRef.current = n
         setBattle(n)
       }, 1400)
@@ -205,11 +212,27 @@ export function useGame(pet: Pet, paused = false) {
     await sleep(900) // chờ biểu ngữ "Lượt kẻ địch"
     if (!alright()) return
 
+    // đặc tính đầu lượt (dựng giáp, hồi máu), rồi tung chiêu hoặc bắt đầu tụ lực
+    const upkeep = enemyUpkeep(battleRef.current)
+    if (upkeep.events.length) {
+      commit(upkeep)
+      await sleep(500)
+      if (!alright()) return
+    }
+    if (!canEnemyCast(battleRef.current)) {
+      const charge = chargeWindup(battleRef.current)
+      if (charge.events.length) {
+        commit(charge)
+        await sleep(500)
+        if (!alright()) return
+      }
+    }
+
     if (canEnemyCast(battleRef.current)) {
       const cur = battleRef.current
       setBusyBoth(true)
       const id = floatId.current++
-      setCast({ id, fxId: cur.enemy.id, side: 'enemy', offensive: true })
+      setCast({ id, fxId: cur.enemy.id, side: 'enemy', offensive: true, tier: cur.enemy.form })
       play('skill')
       flashAttack('enemy')
       pushFloats([{ side: 'enemy', text: cur.enemy.skill.name, kind: 'combo' }])
@@ -255,7 +278,7 @@ export function useGame(pet: Pet, paused = false) {
     setBusyBoth(true)
     const offensive = !!cur.pet.skill.damage
     const id = floatId.current++
-    setCast({ id, fxId: [currentForm(cur).id, cur.pet.id].find((k) => FX_PLANS[k]) ?? `pet-${cur.pet.element}`, side: 'player', offensive, tier: cur.form })
+    setCast({ id, fxId: [currentForm(cur).id, cur.pet.id].find((k) => FX_PLANS[k]) ?? `pet-${cur.pet.element}`, side: 'player', offensive, tier: cur.form + (cur.mega > 0 ? 1 : 0) })
     play('skill')
     if (offensive) flashAttack('player')
     setTimeout(() => setCast((c) => (c?.id === id ? null : c)), 1500)
@@ -264,6 +287,47 @@ export function useGame(pet: Pet, paused = false) {
     commit(castSkill(battleRef.current))
     await sleep(600)
     if (!stale(e)) setBusyBoth(false)
+  }
+
+  /**
+   * Mega: hành động tự do trong lượt của mình (như kỹ năng), không tốn lượt đi.
+   * Phát hoạt ảnh tiến hóa; đến đỉnh (trắng xóa) mới áp dụng trạng thái Mega để hình đổi đúng lúc.
+   */
+  const doMega = async () => {
+    const cur = battleRef.current
+    if (busyRef.current || !canMega(cur)) return
+    const e = epoch.current
+    setBusyBoth(true)
+    setMegaFx(floatId.current++)
+    play('special')
+    await sleep(1250)
+    if (stale(e)) return
+    play('skill')
+    commit(activateMega(battleRef.current))
+    await sleep(1050)
+    if (stale(e)) return
+    setMegaFx(null)
+    setBusyBoth(false)
+  }
+
+  /** Chọn phần thưởng sau trận (vật phẩm hoặc nghỉ ngơi). */
+  const chooseReward = (id: string) => {
+    if (battleRef.current.status !== 'reward') return
+    play('special')
+    const n = pickReward(battleRef.current, id)
+    battleRef.current = n
+    setBattle(n)
+  }
+
+  /** Chọn ở điểm nghỉ: hồi máu hoặc nhận XP. */
+  const chooseRestOption = (choice: 'heal' | 'xp') => {
+    if (battleRef.current.status !== 'rest') return
+    play('heal')
+    const res = chooseRest(battleRef.current, choice)
+    battleRef.current = res.state
+    setBattle(res.state)
+    pushFloats(res.events)
+    if (res.events.some((e) => e.text.startsWith('Tiến hóa'))) play('special')
   }
 
   const restart = () => {
@@ -276,6 +340,7 @@ export function useGame(pet: Pet, paused = false) {
     setNewBest(false)
     setEnemyPick(null)
     setHintMove(null)
+    setMegaFx(null)
     setClearing(new Set())
     setBusyBoth(false)
   }
@@ -307,5 +372,5 @@ export function useGame(pet: Pet, paused = false) {
     return () => clearInterval(t)
   }, [pushFloats])
 
-  return { board, battle, clearing, busy, floats, hitFlash, shaking, attacker, cast, notice, enemyPick, hintMove, best, newBest, trySwap, useSkill, restart }
+  return { board, battle, clearing, busy, floats, hitFlash, shaking, attacker, cast, megaFx, notice, enemyPick, hintMove, best, newBest, trySwap, useSkill, doMega, chooseReward, chooseRest: chooseRestOption, restart }
 }

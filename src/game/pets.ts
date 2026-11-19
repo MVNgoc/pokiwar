@@ -100,3 +100,10 @@ export const PETS: Pet[] = STARTERS.flatMap((gen, gi) =>
       return { id, name, emoji: EMOJI[el], element: el as Element, gen: gi + 1, desc: KIT[el].desc, maxHp, power, rageMul, forms, skill: base.skill }
     }),
 )
+
+/**
+ * Dạng cuối của những pokemon có hình Mega (file public/local-assets/<id>-mega.gif và -mega.back.gif).
+ * Pet khác vẫn Mega được nhưng giữ hình dạng cuối, chỉ đổi màu và toả sáng.
+ */
+export const MEGA_SPRITES = new Set(['venusaur', 'charizard', 'blastoise', 'sceptile', 'blaziken', 'swampert', 'meganium', 'feraligatr', 'emboar'])
+export const megaSpriteId = (formId: string): string | null => (MEGA_SPRITES.has(formId) ? `${formId}-mega` : null)

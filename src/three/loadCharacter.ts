@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { PETS } from '../game/pets'
+import { MEGA_SPRITES, PETS } from '../game/pets'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 /** Kích thước chuẩn hóa: cao tối đa / dài tối đa (đơn vị thế giới). Thú đứng nghiêng nên chiều dài là kích thước chính. */
@@ -32,6 +32,8 @@ const TOON_RAMP = (() => {
 /** Tùy chỉnh theo từng model: `lift` nâng lên khỏi bục, `length` giới hạn chiều dài, `scale` phóng to thêm (Boss), `flip` quay 180°. */
 const MODEL_OPTIONS: Record<string, { lift?: number; length?: number; scale?: number; flip?: boolean }> = {
   'su-tu-lua': { scale: 1.15 },
+  // dạng Mega to hơn dạng thường
+  ...Object.fromEntries([...MEGA_SPRITES].map((id) => [`${id}-mega`, { scale: 1.15 }])),
 }
 
 const cache = new Map<string, Promise<CharacterModel>>()

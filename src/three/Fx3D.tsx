@@ -496,3 +496,83 @@ export default function FxLayer({ cast, playerX, enemyX }: { cast: Cast; playerX
     </group>
   )
 }
+
+/**
+ * Hoạt ảnh tiến hóa Mega (như trong game): năng lượng cầu vồng xoáy tụ vào pet, quầng sáng trắng phình lớn
+ * tới đỉnh ở ~1.25 giây (lúc đó hình đổi), rồi tia sáng nổ tung ra mọi hướng.
+ */
+/** Thời điểm đỉnh (trắng xóa, lúc hình đổi) và kết thúc của từng kiểu, tính bằng giây. */
+export const EVOLVE_TIMING = { mega: { peak: 1.25, end: 2.3 }, evo: { peak: 1.0, end: 1.8 } } as const
+export function MegaEvolveFx({ x, variant = 'mega' }: { x: number; variant?: 'mega' | 'evo' }) {
+  const t0 = useMemo(() => performance.now(), [])
+  const tex = getFx('shine')
+  const halo = useRef<THREE.Sprite>(null)
+  const swirl = useRef<(THREE.Sprite | null)[]>([])
+  const rays = useRef<(THREE.Sprite | null)[]>([])
+  const mega = variant === 'mega'
+  const { peak: MEGA_PEAK, end: MEGA_END } = EVOLVE_TIMING[variant]
+  const N = mega ? 18 : 12
+  const R = mega ? 12 : 9
+  // mega: màu cầu vồng; tiến hóa thường: trắng vàng
+  const hue = (i: number, k: number) => (mega ? (i + k) % 1 : 0.12 + 0.04 * Math.sin((i + k) * 6.28))
+  const sat = mega ? 1 : 0.9
+  useFrame(() => {
+    const t = (performance.now() - t0) / 1000
+    const c = new THREE.Color()
+    if (halo.current) {
+      const grow = t < MEGA_PEAK ? Math.pow(t / MEGA_PEAK, 1.6) : 1 - clamp01((t - MEGA_PEAK) / 0.8)
+      const sc = (0.4 + grow * (t < MEGA_PEAK ? 2.6 : 3.4)) * (mega ? 1 : 0.85)
+      halo.current.scale.set(sc, sc, 1)
+      halo.current.material.rotation = t * 2.2
+      halo.current.material.opacity = Math.min(1, grow * 1.1)
+      c.setHSL(hue(0, t * 0.8), sat, t < MEGA_PEAK * 0.8 ? 0.7 : 0.95)
+      halo.current.material.color.copy(c)
+    }
+    swirl.current.forEach((sp, i) => {
+      if (!sp) return
+      const delay = (i / N) * 0.3
+      const k = clamp01((t - delay) / (MEGA_PEAK - delay))
+      sp.visible = t > delay && t < MEGA_PEAK + 0.08
+      if (!sp.visible) return
+      const e = k * k
+      const r = 1.9 * (1 - e) + 0.12
+      const a = (i / N) * Math.PI * 2 + k * 11
+      sp.position.set(Math.cos(a) * r, 0.95 + Math.sin(a * 0.5) * 0.35 * (1 - k) + (k - 0.5) * 0.3, Math.sin(a) * r * 0.5 + 0.4)
+      sp.scale.setScalar((0.42 * (1 - 0.5 * k) + 0.1) * (mega ? 1 : 0.8))
+      sp.material.opacity = 0.95
+      sp.material.color.setHSL(hue(i / N, t * 0.9), mega ? 1 : 0.85, mega ? 0.65 : 0.8)
+    })
+    rays.current.forEach((sp, i) => {
+      if (!sp) return
+      const k = clamp01((t - MEGA_PEAK) / (MEGA_END - MEGA_PEAK - 0.1))
+      sp.visible = t > MEGA_PEAK && k < 1
+      if (!sp.visible) return
+      const a = (i / R) * Math.PI * 2 + 0.2
+      const r = (mega ? 3.0 : 2.4) * (1 - Math.pow(1 - k, 2.2))
+      sp.position.set(Math.cos(a) * r, 0.95 + Math.sin(a) * r * 0.8, 0.6)
+      sp.scale.setScalar((mega ? 0.7 : 0.55) * (1 - k * 0.6))
+      sp.material.rotation = k * 4
+      sp.material.opacity = 1 - k
+      sp.material.color.setHSL(hue(i / R, k * 0.3), sat, 0.8)
+    })
+  })
+  if (!tex) return null
+  const mat = { map: tex, transparent: true, depthWrite: false, blending: ADD } as const
+  return (
+    <group position={[x, 0, 0]}>
+      <sprite ref={halo} position={[0, 0.95, 0.5]}>
+        <spriteMaterial {...mat} />
+      </sprite>
+      {Array.from({ length: N }, (_, i) => (
+        <sprite key={`s${i}`} ref={(el) => void (swirl.current[i] = el)} visible={false}>
+          <spriteMaterial {...mat} />
+        </sprite>
+      ))}
+      {Array.from({ length: R }, (_, i) => (
+        <sprite key={`r${i}`} ref={(el) => void (rays.current[i] = el)} visible={false}>
+          <spriteMaterial {...mat} />
+        </sprite>
+      ))}
+    </group>
+  )
+}

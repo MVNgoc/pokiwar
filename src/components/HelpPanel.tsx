@@ -1,3 +1,4 @@
+import Icon, { type IconName } from './Icon'
 import ElementDot from './ElementDot'
 import { BALANCE, ELEMENTS, ELEMENT_INFO } from '../game/constants'
 
@@ -13,6 +14,8 @@ export function HelpButton({ onClick, className = '' }: { onClick: () => void; c
     </button>
   )
 }
+
+const I = ({ n }: { n: IconName }) => <Icon name={n} size={13} className="mx-0.5 text-yellow-300" />
 
 /** Bảng hướng dẫn và lưu ý: gom ở một chỗ để màn chơi gọn. */
 export default function HelpPanel({ onClose, inBattle = false }: { onClose: () => void; inBattle?: boolean }) {
@@ -33,6 +36,19 @@ export default function HelpPanel({ onClose, inBattle = false }: { onClose: () =
           </li>
           <li>Kẻ địch cũng xếp ngọc ở lượt của nó để tấn công.</li>
           {inBattle && <li>Mở bảng này sẽ tạm dừng đồng hồ lượt của bạn.</li>}
+        </Section>
+
+        <Section title="Chuyến đi">
+          <li>Mỗi ván là một chuyến 8-10 điểm dừng, mỗi ván một khác. Thanh ô tròn phía trên cho biết bạn đang ở đâu.</li>
+          <li><I n="sword" /> trận thường · <I n="skull" /> Tinh anh (mạnh hơn, được chọn 2 phần thưởng) · <I n="camp" /> điểm nghỉ (hồi máu hoặc nhận XP) · <I n="crown" /> Boss cuối.</li>
+          <li>Thắng trận được chọn 1 trong 3 vật phẩm (hoặc nghỉ ngơi). Vật phẩm cộng dồn, mỗi loại tối đa 3 lần.</li>
+          <li>Một số trận có luật riêng: <I n="timer" /> giới hạn lượt (quá hạn kẻ địch cuồng nộ), <I n="swirl" /> một hệ ngọc mạnh lên, <I n="bolt" /> đồng hồ lượt rút ngắn.</li>
+        </Section>
+
+        <Section title="Kẻ địch">
+          <li><I n="warn" /> Tụ lực: kẻ địch đầy Nộ sẽ báo trước đòn và tung sau vài lượt. Gây đủ 20% máu tối đa của nó trong lúc tụ lực, hoặc làm nó choáng, để ngắt chiêu.</li>
+          <li>Đặc tính: <I n="shield" /> Giáp (tự dựng giáp), <I n="regen" /> Hồi phục (tự hồi máu), <I n="flame" /> Cuồng nộ (mạnh hẳn lên khi còn nửa máu).</li>
+          <li>Chiêu có thể gây: <I n="skull" /> Độc (mất máu mỗi lượt), <I n="lock" /> Phong ấn (không dùng được kỹ năng), <I n="down" /> Suy yếu (ngọc yếu đi).</li>
         </Section>
 
         <Section title="Ngũ hành tương khắc">
@@ -57,6 +73,12 @@ export default function HelpPanel({ onClose, inBattle = false }: { onClose: () =
           </li>
           <li>Dùng kỹ năng trong lượt của mình và không tốn lượt đi.</li>
           <li>Combo liên tiếp tăng hiệu quả thêm {Math.round(BALANCE.comboStep * 100)}% mỗi bậc.</li>
+        </Section>
+
+        <Section title="Mega">
+          <li>Khi pet đạt dạng cuối, nút MEGA xuất hiện cạnh nút kỹ năng. Bấm khi đầy Nộ (tốn hết Nộ, không tốn lượt đi).</li>
+          <li>Trong {BALANCE.megaTurns} lượt: ngọc mạnh x{BALANCE.megaPower}, nạp Nộ x{BALANCE.megaRage}, kỹ năng mạnh x{BALANCE.megaSkill}. Hồi {Math.round(BALANCE.megaHeal * 100)}% máu và +{BALANCE.megaShield} giáp ngay khi kích hoạt.</li>
+          <li>Mỗi trận chỉ Mega được một lần. Cân nhắc dùng Nộ cho Mega hay cho kỹ năng.</li>
         </Section>
 
         <Section title="Ngọc đặc biệt">

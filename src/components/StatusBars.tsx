@@ -34,7 +34,7 @@ interface FighterBarsProps {
   /** đồng hồ lượt: chỉ hiện cho bên đang có lượt */
   turn?: { pct: number; secs: number } | null
   /** kinh nghiệm (chỉ pet của người chơi): giá trị hiện tại, mốc tiến hóa kế tiếp (null = dạng cuối) */
-  xp?: { value: number; next: number | null; prev: number } | null
+  xp?: { value: number; next: number | null; prev: number; label?: string; tone?: string } | null
 }
 
 export default function StatusBars({ hp, maxHp, rage, maxRage, shield, turn, xp }: FighterBarsProps) {
@@ -44,9 +44,9 @@ export default function StatusBars({ hp, maxHp, rage, maxRage, shield, turn, xp 
       <Bar value={rage} max={maxRage} color={`bg-gradient-to-r from-orange-500 to-yellow-300 ${rage >= maxRage ? 'animate-pulse' : ''}`} label="Nộ" />
       {xp && (
         <div className="relative h-3 overflow-hidden rounded-full border border-black/60 bg-black/50">
-          <div className="h-full bg-gradient-to-r from-sky-500 to-cyan-300 [transition:width_300ms_ease-out]" style={{ width: `${xp.next === null ? 100 : Math.min(100, ((xp.value - xp.prev) / (xp.next - xp.prev)) * 100)}%` }} />
+          <div className={`h-full bg-gradient-to-r ${xp.tone ?? 'from-sky-500 to-cyan-300'} [transition:width_300ms_ease-out]`} style={{ width: `${xp.next === null ? 100 : Math.min(100, ((xp.value - xp.prev) / (xp.next - xp.prev)) * 100)}%` }} />
           <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white [text-shadow:0_1px_1px_#000]">
-            {xp.next === null ? 'XP MAX' : `XP ${Math.floor(xp.value - xp.prev)}/${xp.next - xp.prev}`}
+            {xp.next === null ? `${xp.label ?? 'XP'} MAX` : `${xp.label ?? 'XP'} ${Math.floor(xp.value - xp.prev)}/${xp.next - xp.prev}`}
           </span>
         </div>
       )}

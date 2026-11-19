@@ -21,6 +21,14 @@ export interface CreatureProps {
   spin?: boolean
   /** vừa tiến hóa: nháy trắng khi hình mới xuất hiện (đổi enterKey để phát lại) */
   evolved?: boolean
+  /** đang ở dạng Mega: toả sáng, phình to, có quầng sáng quanh người */
+  mega?: boolean
+  /** Mega đã đổi sang hình Mega riêng; không có thì chỉ đổi màu rực hơn và to hơn */
+  megaSprite?: boolean
+  /** đang gồng năng lượng trước khi Mega: rung nhẹ và trắng dần */
+  charging?: boolean
+  /** bỏ hoạt ảnh rơi xuống khi xuất hiện (đổi hình Mega ngay tại chỗ) */
+  skipEnter?: boolean
   /** nhìn từ sau lưng (pet của người chơi trong trận; chỉ áp dụng cho ảnh 2D có bản sau lưng) */
   back?: boolean
 }
@@ -84,7 +92,44 @@ function EvolveFx() {
   )
 }
 
-export default function Creature({ id, position, dir, hurt, attacking, defeated, enterKey, spin, back, evolved }: CreatureProps) {
+/** Quầng sáng và tia lấp lánh quay quanh pet khi ở dạng Mega. */
+function MegaAura() {
+  const halo = useRef<THREE.Sprite>(null)
+  const sparks = useRef<(THREE.Sprite | null)[]>([])
+  const tex = getFx('shine')
+  useFrame((state) => {
+    const t = state.clock.elapsedTime
+    if (halo.current) {
+      const sc = 2.1 + Math.sin(t * 3) * 0.2
+      halo.current.scale.set(sc, sc, 1)
+      halo.current.material.rotation = t * 0.6
+      halo.current.material.opacity = 0.5 + Math.sin(t * 3) * 0.12
+    }
+    sparks.current.forEach((sp, i) => {
+      if (!sp) return
+      const a = t * 1.6 + (i / 6) * Math.PI * 2
+      const k = (t * 0.7 + i / 6) % 1
+      sp.position.set(Math.cos(a) * 0.9, 0.2 + k * 1.5, Math.sin(a) * 0.4 + 0.3)
+      sp.scale.setScalar(0.28 * (1 - k * 0.6))
+      sp.material.opacity = 0.9 * (1 - k)
+    })
+  })
+  if (!tex) return null
+  return (
+    <group>
+      <sprite ref={halo} position={[0, 0.85, -0.2]}>
+        <spriteMaterial map={tex} color="#ff7ad9" transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+      </sprite>
+      {Array.from({ length: 6 }, (_, i) => (
+        <sprite key={i} ref={(el) => void (sparks.current[i] = el)}>
+          <spriteMaterial map={tex} color="#ffe27a" transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+        </sprite>
+      ))}
+    </group>
+  )
+}
+
+export default function Creature({ id, position, dir, hurt, attacking, defeated, enterKey, spin, back, evolved, mega, megaSprite, charging, skipEnter }: CreatureProps) {
   const model = use(loadCharacter(id, back))
 
   const inst = useMemo(() => {
@@ -157,7 +202,7 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
 
   const rig = useRef<THREE.Group>(null)
   const shadow = useRef<THREE.Mesh>(null)
-  const t = useRef({ atk: -1, hurt: -1, enter: 0, evo: -1, def: -1, phase: Math.random() * 6 })
+  const t = useRef({ atk: -1, hurt: -1, enter: skipEnter ? ENTER_S : 0, charge: 0, evo: -1, def: -1, phase: Math.random() * 6 })
 
   // Hoạt ảnh xương một lần rồi quay lại Idle
   useEffect(() => {
@@ -201,7 +246,10 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
     }
   }, [defeated]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
-    t.current.enter = 0
+    if (mega) t.current.evo = 0 // vừa Mega: nháy trắng
+  }, [mega]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    t.current.enter = skipEnter ? ENTER_S : 0
     if (evolved) t.current.evo = 0
   }, [enterKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -275,12 +323,29 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
       flash = Math.max(flash, 1 - k * 3)
     }
 
+    // gồng năng lượng trước khi Mega: rung và trắng dần
+    if (charging) {
+      s.charge += dt
+      const k = clamp01(s.charge / 1.2)
+      flash = Math.max(flash, k * k * 1.1)
+      ox += Math.sin(s.charge * 48) * 0.03 * k
+      const pulse = 1 + Math.sin(s.charge * 14) * 0.03 * k
+      sx *= pulse
+      sy *= pulse
+    } else s.charge = 0
+    // Mega: to hơn, tỏa sáng nhịp thở màu hồng tím
+    const glow = mega ? (0.16 + 0.1 * Math.sin(time * 4)) * (megaSprite ? 1 : 2.4) : 0
+    if (mega) {
+      const big = megaSprite ? 1 : 1.24 // không có hình Mega riêng: phình to hơn để thấy khác biệt
+      sx *= big
+      sy *= big
+    }
     g.position.set(ox, oy, 0)
     g.scale.set(sx, sy, sx)
     g.rotation.z = rz
     if (spin && !model.sprite) g.rotation.y = Math.sin(time * 0.9) * 0.75 // lắc qua lại, luôn thấy mặt
     for (const { mat, base } of inst.materials) {
-      mat.emissive.setRGB(base.r + flash, base.g + flash * 0.1, base.b + flash * 0.1)
+      mat.emissive.setRGB(base.r + flash + glow * 0.9, base.g + flash * 0.1 + glow * 0.3, base.b + flash * 0.1 + glow * 0.8)
       mat.transparent = alpha < 1
       mat.opacity = alpha
     }
@@ -302,6 +367,7 @@ export default function Creature({ id, position, dir, hurt, attacking, defeated,
         <meshBasicMaterial color="#000" transparent opacity={0.42} depthWrite={false} />
       </mesh>
       {evolved && <EvolveFx />}
+      {mega && <MegaAura />}
       <group ref={rig}>
         {/* ảnh 2D vốn nhìn về bên trái: bên trái màn hình (dir = 1) lật lại để hai bên quay mặt vào nhau */}
         <group rotation={[0, model.sprite && dir === 1 ? Math.PI : 0, 0]}>

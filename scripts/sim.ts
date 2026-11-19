@@ -8,8 +8,8 @@
  */
 import { chooseEnemyMove } from '../src/game/ai'
 import { applyResolution, collapse, createBoard, hasPossibleMove, listMoves, resolveMatches, swapTiles } from '../src/game/board'
-import { applyGems, canEnemyCast, canUseSkill, createBattle, enemyCastSkill, nextStage, passTurn, useSkill } from '../src/game/combat'
-import { BALANCE, TOTAL_STAGES } from '../src/game/constants'
+import { applyGems, canEnemyCast, canUseSkill, chargeWindup, chooseRest, createBattle, enemyCastSkill, enemyUpkeep, passTurn, pickReward, toReward, useSkill } from '../src/game/combat'
+import { BALANCE } from '../src/game/constants'
 import { PETS } from '../src/game/pets'
 import type { Board, BattleState, Position, Side } from '../src/game/types'
 
@@ -48,13 +48,30 @@ function pickPlayerMove(board: Board, battle: BattleState, skill: Skill): [Posit
   return best
 }
 
+/** Bot chọn thưởng: ưu tiên vật phẩm theo danh sách (giống người chơi biết chọn), thiếu máu thì nghỉ ngơi. */
+const PREFER = ['ember', 'vitality', 'focus', 'might', 'vampire', 'tide', 'chain', 'bulwark', 'sage', 'ward', 'spark', 'recover', 'clock']
+function chooseOffer(battle: BattleState, smart: boolean): string {
+  if (!smart) return battle.offer[Math.floor(Math.random() * battle.offer.length)]
+  if (battle.player.hp < battle.player.maxHp * 0.4 && battle.offer.includes('heal')) return 'heal'
+  return [...battle.offer].sort((x, y) => (PREFER.indexOf(x) + 99) % 99 - (PREFER.indexOf(y) + 99) % 99)[0]
+}
+
 function runGame(petIndex: number, skill: Skill) {
   let board = createBoard()
   let battle = createBattle(PETS[petIndex])
   let turns = 0
-  while ((battle.status === 'playing' || battle.status === 'stageClear') && turns < 1500) {
+  const smart = skill !== 'random'
+  while (battle.status !== 'won' && battle.status !== 'lost' && turns < 2500) {
     if (battle.status === 'stageClear') {
-      battle = nextStage(battle)
+      battle = toReward(battle)
+      continue
+    }
+    if (battle.status === 'reward') {
+      battle = pickReward(battle, chooseOffer(battle, smart))
+      continue
+    }
+    if (battle.status === 'rest') {
+      battle = chooseRest(battle, battle.player.hp < battle.player.maxHp * 0.7 ? 'heal' : 'xp').state
       continue
     }
     turns++
@@ -64,20 +81,22 @@ function runGame(petIndex: number, skill: Skill) {
       const [a, b] = pickPlayerMove(board, battle, skill)
       ;({ board, battle } = play(board, battle, 'player', a, b))
     } else {
+      battle = enemyUpkeep(battle).state
       if (canEnemyCast(battle)) battle = enemyCastSkill(battle).state
+      else battle = chargeWindup(battle).state
       if (battle.status !== 'playing') continue
       const mv = chooseEnemyMove(board, battle)
       if (mv) ({ board, battle } = play(board, battle, 'enemy', mv[0], mv[1]))
     }
     if (battle.status === 'playing') battle = passTurn(battle).state
   }
-  return { won: battle.status === 'won', stage: battle.stage, turns }
+  return { won: battle.status === 'won', stage: battle.stage, turns, total: battle.run.length }
 }
 
 if (process.env.BAL) Object.assign(BALANCE, JSON.parse(process.env.BAL))
 const SKILLS = (process.env.SKILLS ?? 'smart,greedy,random').split(',') as Skill[]
 const N = Number(process.argv[2] ?? 200)
-console.log(`Mô phỏng ${N} ván/pet, ${TOTAL_STAGES} màn, theo lượt\n`)
+console.log(`Mô phỏng ${N} ván/pet, chuyến đi ngẫu nhiên 8-10 điểm dừng, theo lượt\n`)
 for (const skill of SKILLS) {
   console.log(`== Bot ${{ smart: 'thông minh (chấm điểm theo hiệu ứng, như người chơi giỏi)', greedy: 'khá (chọn nước ăn nhiều ngọc nhất)', random: 'ngẫu nhiên (nước hợp lệ bất kỳ)' }[skill]} ==`)
   let totalWin = 0
