@@ -105,11 +105,16 @@ function runGame(petIndex: number, skill: Skill) {
 if (process.env.BAL) Object.assign(BALANCE, JSON.parse(process.env.BAL))
 const SKILLS = (process.env.SKILLS ?? 'smart,greedy,random').split(',') as Skill[]
 const N = Number(process.argv[2] ?? 200)
+/** Chỉ mô phỏng pet một hệ: ONLY=thuy npx tsx scripts/sim.ts 30 */
+const ONLY = process.env.ONLY
+
 console.log(`Mô phỏng ${N} ván/pet, chuyến đi ngẫu nhiên 8-10 điểm dừng, theo lượt\n`)
 for (const skill of SKILLS) {
   console.log(`== Bot ${{ smart: 'thông minh (chấm điểm theo hiệu ứng, như người chơi giỏi)', greedy: 'khá (chọn nước ăn nhiều ngọc nhất)', random: 'ngẫu nhiên (nước hợp lệ bất kỳ)' }[skill]} ==`)
   let totalWin = 0
+  let counted = 0
   for (let i = 0; i < PETS.length; i++) {
+    if (ONLY && PETS[i].element !== ONLY) continue
     let wins = 0
     let stageSum = 0
     let turnSum = 0
@@ -120,9 +125,10 @@ for (const skill of SKILLS) {
       turnSum += r.turns
     }
     totalWin += wins
+    counted++
     console.log(
       `${PETS[i].emoji} ${PETS[i].name.padEnd(9)} thắng ${((wins / N) * 100).toFixed(0).padStart(3)}%  màn TB ${(stageSum / N).toFixed(2)}  lượt TB ${(turnSum / N).toFixed(0)}`,
     )
   }
-  console.log(`   → trung bình ${((totalWin / (N * PETS.length)) * 100).toFixed(0)}%\n`)
+  console.log(`   → trung bình ${((totalWin / (N * counted)) * 100).toFixed(0)}%\n`)
 }

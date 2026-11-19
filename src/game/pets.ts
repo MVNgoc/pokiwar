@@ -18,7 +18,7 @@ const KIT: Record<'moc' | 'hoa' | 'thuy', { maxHp: number; desc: string; skill: 
   thuy: {
     maxHp: 150,
     desc: 'Khởi đầu hệ nước, trụ vững nhờ hồi máu.',
-    skill: { name: 'Suối Nguồn Sinh Mệnh', emoji: '💧', desc: 'Gây 30 sát thương, hồi 35% HP và +15 giáp', damage: 30, healPct: 0.35, shield: 15 },
+    skill: { name: 'Suối Nguồn Sinh Mệnh', emoji: '💧', desc: 'Gây 55 sát thương, hồi 35% HP và +15 giáp', damage: 55, healPct: 0.35, shield: 15 },
   },
 }
 const EMOJI: Record<'moc' | 'hoa' | 'thuy', string> = { moc: '🌱', hoa: '🔥', thuy: '💧' }
@@ -47,7 +47,7 @@ const STATS: Record<string, [number, number, number, number]> = {
   tepig: [170, 1.0, 0.95, 1.0],
   squirtle: [155, 1.0, 1.0, 1.0],
   totodile: [145, 1.05, 1.0, 1.05],
-  mudkip: [160, 0.95, 1.05, 1.0],
+  mudkip: [160, 1.05, 1.05, 1.0],
   piplup: [140, 1.0, 1.15, 0.95],
   oshawott: [150, 1.1, 1.0, 0.95],
 }

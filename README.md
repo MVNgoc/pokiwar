@@ -58,7 +58,7 @@ Chỉ có 3 pet khởi đầu mỗi thế hệ (Mộc, Hỏa, Thủy), 5 thế h
 |---|---|---|
 | 🌱 Mộc | 130 | Dây Leo Trói Buộc: 25 sát thương, kẻ địch mất 1 lượt |
 | 🔥 Hỏa | 150 | Hỏa Cầu Thiêu Đốt: 85 sát thương |
-| 💧 Thủy | 150 | Suối Nguồn Sinh Mệnh: 30 sát thương, hồi 35% HP, +15 giáp |
+| 💧 Thủy | 150 | Suối Nguồn Sinh Mệnh: 55 sát thương, hồi 35% HP, +15 giáp |
 
 Kim và Thổ chỉ có ở ngọc và kẻ địch. Danh sách kẻ địch (tầng, đặc tính, chiêu) nằm trong `ENEMIES` và `BOSSES` ở `src/game/constants.ts`; chuyến đi do `buildRun` trong `src/game/run.ts` sinh ra.
 
