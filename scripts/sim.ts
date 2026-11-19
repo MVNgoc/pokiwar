@@ -8,7 +8,7 @@
  */
 import { chooseEnemyMove } from '../src/game/ai'
 import { applyHazard, applyResolution, clearObstacles, collapse, createBoard, hasObstacles, hasPossibleMove, listMoves, resolveMatches, ruleHazard, swapTiles } from '../src/game/board'
-import { applyGems, stageRule, canEnemyCast, canUseSkill, chargeWindup, chooseRest, createBattle, enemyCastSkill, enemyUpkeep, passTurn, pickReward, toReward, useSkill } from '../src/game/combat'
+import { activateMega, applyGems, canMega, stageRule, canEnemyCast, canUseSkill, chargeWindup, chooseRest, createBattle, enemyCastSkill, enemyUpkeep, passTurn, pickReward, toReward, useSkill } from '../src/game/combat'
 import { BALANCE } from '../src/game/constants'
 import { PETS } from '../src/game/pets'
 import type { Board, BattleState, Position, Side } from '../src/game/types'
@@ -81,7 +81,9 @@ function runGame(petIndex: number, skill: Skill) {
     }
     turns++
     if (battle.turn === 'player') {
-      if (canUseSkill(battle)) battle = useSkill(battle).state
+      // bot khá/thông minh dùng Mega ngay khi được (ưu tiên hơn kỹ năng); bot ngẫu nhiên thì không
+      if (smart && canMega(battle)) battle = activateMega(battle).state
+      else if (canUseSkill(battle)) battle = useSkill(battle).state
       if (battle.status !== 'playing') continue
       const [a, b] = pickPlayerMove(board, battle, skill)
       ;({ board, battle } = play(board, battle, 'player', a, b))
